@@ -1,5 +1,6 @@
 const Discord = module.require('discord.js');
 const fs = require('fs');
+let cost = 100;
 
 module.exports.run = async (client, message) => {
 	const attachmentsNum = message.attachments.size;
@@ -13,7 +14,7 @@ module.exports.run = async (client, message) => {
 			resentDaily: Date.now() - 1000 * 60 * 60 * (24 + 1),
 		}
 	}
-	profile.coins += attachmentsNum * 180;
+	profile.coins += attachmentsNum * cost;
 	fs.writeFile(__dirname.replace(/cmds$/, '') + `profiles/${message.author.id}.json`, JSON.stringify(profile), err => err ? console.log(err) : null);
 };
 
