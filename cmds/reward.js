@@ -23,6 +23,7 @@ module.exports.run = async (client, message, args) => {
 		profileTill.coins += transaction;
 
 		fs.writeFile(__dirname.replace(/cmds$/, '') + `profiles/${tillId}.json`, JSON.stringify(profileTill), err => err ? console.log(err) : null);
+		fs.appendFile(__dirname.replace(/cmds$/, '') + `transactionLogs.log`, `REWARD from ${message.author.id}(${message.author.name}) till ${tillID} - ${transaction} coins\n`, err => err ? console.log(err) : null);
 
 		message.reply(`Было успешно переведено ${transaction} монет`)
 	} catch (err) {

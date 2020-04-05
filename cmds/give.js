@@ -27,6 +27,7 @@ module.exports.run = async (client, message, args) => {
 
 		fs.writeFile(__dirname.replace(/cmds$/, '') + `profiles/${fromId}.json`, JSON.stringify(profileFrom), err => err ? console.log(err) : null);
 		fs.writeFile(__dirname.replace(/cmds$/, '') + `profiles/${tillId}.json`, JSON.stringify(profileTill), err => err ? console.log(err) : null);
+		fs.appendFile(__dirname.replace(/cmds$/, '') + `transactionLogs.log`, `GIVE from ${fromId}(${message.author.name}) till ${tillID} - ${transaction} coins\n`, err => err ? console.log(err) : null);
 
 		message.reply(`Было успешно переведено ${transaction} монет`)
 	} catch (err) {

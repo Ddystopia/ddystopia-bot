@@ -6,7 +6,7 @@ const fs = require('fs');
 module.exports.run = async (client, message, args) => {
 	let userId;
 	try {
-		userId = args[0] ? args[0].match(/(\d{15,})/)[1] : message.author.id;
+		userId = args[0] ? message.mentions.users.first().id : message.author.id;
 	}catch(err){
 		return message.reply('I don\'t know who is it');
 	}
