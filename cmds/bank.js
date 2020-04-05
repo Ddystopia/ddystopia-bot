@@ -18,7 +18,7 @@ class User {
 
 		const profile = require(__dirname.replace(/cmds$/, '') + `profiles/${this.id}.json`);
 		if (sum < 1000) 'Invalid argument sum(so few)';
-		if (profile.coins < 1000 || sum / profile.coins > 15) return `On this sum you must have more then ${sum / 15} coins`;
+		if (sum / profile.coins > 15 && profile.coins > 200) return `On this sum you must have more then ${sum / 15} coins`;
 
 		latesCredites.set(this.id, Date.now() + 3 * 3600 * 1000);
 		const parcent = Math.max(-((Math.E * 6) ** (sum / 1e+4) - 55), -((sum / 1e+4) - 1) * 5 + 25, 15);
