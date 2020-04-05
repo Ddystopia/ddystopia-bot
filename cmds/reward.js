@@ -13,7 +13,7 @@ module.exports.run = async (client, message, args) => {
 	if (isNaN(+args[0]) && args[0] !== '-all') return;
 	if (!args[1]) return;
 
-	const tillId = args[1].match(/(\d{15,})/)[1];
+	const tillId = message.mentions.users.first().id;
 	if (!tillId) return;
 	try {
 		const profileTill = require(__dirname.replace(/cmds$/, '') + `profiles/${tillId}.json`);
@@ -23,10 +23,11 @@ module.exports.run = async (client, message, args) => {
 		profileTill.coins += transaction;
 
 		fs.writeFile(__dirname.replace(/cmds$/, '') + `profiles/${tillId}.json`, JSON.stringify(profileTill), err => err ? console.log(err) : null);
+		fs.appendFile(__dirname.replace(/cmds$/, '') + `transactionLogs.log`, `REWARD from${message.author.username} till ${message.mentions.users.first().username} - ${transaction} coins\n`, err => err ? console.log(err) : null);
 
 		message.reply(`Было успешно переведено ${transaction} монет`)
 	} catch (err) {
-		console.error(new Error('Я не знаю кому давать, пускай он использует любую комманду, чтобы я могла создать профиль'))
+		console.error(err)
 	};
 };
 
