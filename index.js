@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 const fs = require('fs');
 
-const nonGrata = ['464804290876145665'];
+const nonGrata = ['464804290876145665', '499989404543352832', '469488553118793757'];
 const imageChannels = ['402109720833425408', '402114219438374913', '693879596625690685'];
 const bannedChannels = ['649336430350303243', '501430596971790346', '402105109653487629'];
 
