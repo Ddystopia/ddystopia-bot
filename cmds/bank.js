@@ -33,7 +33,7 @@ class User {
 		if (+days < 5) return 'Too few days';
 		if (+days > 100) return 'Too many days';
 
-		const parcent = Math.min((Math.E * 6) ** ((days / 10) / 3), ((days / 10) - 1) * 6.5 + 15, 20);
+		const parcent = Math.min((Math.E ** 6) ** (days / 10) / 3, ((days / 10) - 1) * 6.5 + 15, 20);
 		this.deposit = new Deposit(sum, days, parcent, this.id);
 		return `Success, you have ${parcent}% on one day`;
 	}
@@ -139,48 +139,80 @@ class Credit extends Deal {
 	}
 }
 
-function setBancrots(client) {
-	for (const userId in profiles) {
-		if (!profiles.hasOwnProperty(userId)) continue;
-		const element = profiles[userId];
-		Object.setPrototypeOf(element.credit || {}, Credit.prototype);
-		Object.setPrototypeOf(element.deposit || {}, Deposit.prototype);
-		if (element.credit)
-			if (element.credit.deadline <= Date.now()) element.credit.badUser(element.id, client);
+class ModerationCommands {
+	static setBancrots(client) {
+		for (const userId in profiles) {
+			if (!profiles.hasOwnProperty(userId)) continue;
+			const element = profiles[userId];
+			Object.setPrototypeOf(element.credit || {}, Credit.prototype);
+			Object.setPrototypeOf(element.deposit || {}, Deposit.prototype);
+			if (element.credit)
+				if (element.credit.deadline <= Date.now()) element.credit.badUser(element.id, client);
 
-		if (element.deposit)
-			if (element.deposit.deadline <= Date.now()) element.deposit.payDeposites(element.id);
+			if (element.deposit)
+				if (element.deposit.deadline <= Date.now()) element.deposit.payDeposites(element.id);
 
-		if (element.bancrot < Date.now()) {
-			element.bancrot = null;
-			const member = client.guilds.cache.get('402105109653487627').members.cache.get(`${userId}`);
-			const role = member.guild.roles.cache.find(r => r.name === 'Банкрот');
-			member.roles.remove(role);
-		} else if (element.bancrot) {
-			Credit.prototype.badUser(userId, client, true);
+			if (element.bancrot < Date.now()) {
+				element.bancrot = null;
+				const member = client.guilds.cache.get('402105109653487627').members.cache.get(`${userId}`);
+				const role = member.guild.roles.cache.find(r => r.name === 'Банкрот');
+				member.roles.remove(role);
+			} else if (element.bancrot) {
+				Credit.prototype.badUser(userId, client, true);
+			}
+			fs.writeFile(__dirname.replace(/cmds$/, '') + 'bank_profiles.json', JSON.stringify(profiles), err => err ? console.error(err) : null);
+		}
+	}
+
+	static calcParcents(client) {
+		for (const userId in profiles) {
+			if (!profiles.hasOwnProperty(userId)) continue;
+			const element = profiles[userId];
+			if (element.credit)
+				element.credit.sum += element.credit.sum * element.credit.parcent / 100;
+			if (element.deposit)
+				element.deposit.sum += element.deposit.sum * element.deposit.parcent / 100;
 		}
 		fs.writeFile(__dirname.replace(/cmds$/, '') + 'bank_profiles.json', JSON.stringify(profiles), err => err ? console.error(err) : null);
+		// channel.send('!напомни через 1 минуту calcParcents ');
+	}
+
+	static remove(message, args) {
+		if (
+			!message.member.roles.cache.has('691736168693497877') && //Модератор
+			!message.member.roles.cache.has('606932311606296624') && //Администратор
+			!message.member.roles.cache.has('657964826852589609') //Главный администратор
+		) return;
+		let user;
+		switch (args[0]) {
+			case 'credit':
+				user = message.mentions.users.first();
+				if (!user) return 'I don\'t know who is it';
+				profiles[user.id].credit = null;
+				break;
+			case 'deposit':
+				user = message.mentions.users.first();
+				if (!user) return 'I don\'t know who is it';
+				profiles[user.id].deposit = null;
+				break;
+			case 'bancrot':
+				user = message.mentions.users.first();
+				if (!user) return 'I don\'t know who is it';
+				profiles[user.id].bancrot = null;
+				const role = message.guild.roles.cache.find(r => r.name === 'Банкрот');
+				message.guild.members.cache.get(user.id).roles.remove(role);
+				break;
+			default:
+				return 'I don\'t know this property'
+		}
+		return 'Success';
 	}
 }
-
-function calcParcents(client) {
-	for (const userId in profiles) {
-		if (!profiles.hasOwnProperty(userId)) continue;
-		const element = profiles[userId];
-		if (element.credit)
-			element.credit.sum += element.credit.sum * element.credit.parcent / 100;
-		if (element.deposit)
-			element.deposit.sum += element.deposit.sum * element.deposit.parcent / 100;
-	}
-	fs.writeFile(__dirname.replace(/cmds$/, '') + 'bank_profiles.json', JSON.stringify(profiles), err => err ? console.error(err) : null);
-	// channel.send('!напомни через 1 минуту calcParcents ');
-}
-
 
 
 module.exports.run = async (client, message, cmd) => {
-	if (cmd === 'calcParcents') return calcParcents(client); //inclusion
-	if (cmd === 'setBancrots') return setBancrots(client); //inclusion
+	if (cmd === 'calcParcents') return ModerationCommands.calcParcents(client); //inclusion
+	if (cmd === 'setBancrots') return ModerationCommands.setBancrots(client); //inclusion
 	fs.access(`profiles/${message.author.id}.json`, fs.constants.F_OK, (err) => {
 		if (!err) return;
 		const profile = {
@@ -226,6 +258,13 @@ module.exports.run = async (client, message, cmd) => {
 				.setTimestamp();
 			if (user.bancrot) embed.addField('Банкрот', `Банкрот снимется ${new Date(user.bancrot)}`);
 			message.reply(embed)
+			break;
+		case 'remove':
+			try {
+				message.reply(ModerationCommands.remove(message, args))
+			} catch (err) {
+				message.reply('I don\'t know who is it')
+			}
 			break;
 		default:
 			message.reply(`Command ${cmd} not found`)
