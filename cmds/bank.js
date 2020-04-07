@@ -153,12 +153,14 @@ class ModerationCommands {
 				if (element.deposit.deadline <= Date.now()) element.deposit.payDeposites(element.id);
 
 			const member = client.guilds.cache.get('402105109653487627').members.cache.get(`${userId}`);
-			const role = member.guild.roles.cache.find(r => r.name === 'Банкрот');
-			if (element.bancrot < Date.now()) {
-				element.bancrot = null;
-				member.roles.remove(role);
-			} else if (element.bancrot && !member.roles.cache.has(role.id)) {
-				Credit.prototype.badUser(userId, client, true);
+			if (member) {
+				const role = member.guild.roles.cache.find(r => r.name === 'Банкрот');
+				if (element.bancrot < Date.now()) {
+					element.bancrot = null;
+					member.roles.remove(role);
+				} else if (element.bancrot && !member.roles.cache.has(role.id)) {
+					Credit.prototype.badUser(userId, client, true);
+				}
 			}
 			fs.writeFile(__dirname.replace(/cmds$/, '') + 'bank_profiles.json', JSON.stringify(profiles), err => err ? console.error(err) : null);
 		}
