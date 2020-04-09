@@ -127,6 +127,7 @@ class Credit extends Deal {
 			profiles[userId].bancrot = Date.now() + 7 * 12 * 3600 * 1000;
 			//402105109653487627 - server id
 			const member = client.guilds.cache.get('402105109653487627').members.cache.get(userId);
+			if(!member) return;
 			const role = member.guild.roles.cache.find(r => r.name === 'Банкрот');
 			member.roles.add(role);
 			const roles = require(__dirname.replace(/cmds$/, '') + `roles.json`);
