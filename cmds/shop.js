@@ -97,6 +97,20 @@ class RolesBoard {
 		message.reply('Succcess')
 		fs.writeFile(__dirname.replace(/cmds$/, '') + `profiles/${fromId}.json`, JSON.stringify(profileFrom), err => err ? console.log(err) : null);
 	}
+	static sell(message, args) {
+		if (isNaN(args[1])) return;
+		const roleId = Object.keys(roles)[+args[1] - 1];
+		const role = message.member.guild.roles.cache.get(roleId);
+		const cost = roles[role.id];
+		if (!cost) return message.reply(roleName + ' : Такая роль не продаётся');
+		const fromId = message.author.id;
+		const profileFrom = require(__dirname.replace(/cmds$/, '') + `profiles/${fromId}.json`);
+		if (!message.member.roles.cache.has(role.id)) return message.reply('У вас нет этой роли');
+		profileFrom.coins += cost * 0.9;
+		message.member.roles.remove(role);
+		message.reply(`Succcess, you get ${cost * 0.9} coins`)
+		fs.writeFile(__dirname.replace(/cmds$/, '') + `profiles/${fromId}.json`, JSON.stringify(profileFrom), err => err ? console.log(err) : null);
+	}
 }
 
 
@@ -116,6 +130,9 @@ module.exports.run = async (client, message, args) => {
 			break;
 		case 'buy':
 			RolesBoard.buy(message, args);
+			break;
+		case 'sell':
+			RolesBoard.sell(message, args);
 			break;
 		default:
 			message.reply('Я не знаю, что вы от меня хотите');
