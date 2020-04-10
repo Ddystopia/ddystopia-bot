@@ -5,19 +5,18 @@ const Discord = module.require('discord.js');
 const colorSize = 60;
 const rainbow = new Array(colorSize);
 const helloGifs = [
-	'https://i.ibb.co/jV0BDbB/orig-1.gif',
-	'https://i.ibb.co/zh4SSww/giphy.gif',
-	'https://i.ibb.co/b7c6xMT/ezgif-4-95469e1722e5.gif',
-	'https://i.ibb.co/HBKRR9F/e4d09b2f8273494a10e003bee7951b82.gif',
-	'https://i.ibb.co/jGyV708/e03d7b19e67292f6e95e71d6e46161464b1a6f2er1-560-533-hq.gif',
-	'https://i.ibb.co/Smm1YRZ/da23ej0-286f5140-5b9e-4b90-bf9e-65e15e4c95fe.gif',
-	'https://i.ibb.co/FmTxw6M/Anime-Kantai-Collection-Shimakaze-Anime-1375941.gif',
-	'https://i.ibb.co/2d8CQjz/191685417001202.gif',
-	'https://i.ibb.co/fvGXC1q/178892703000202.gif',
-	'https://i.ibb.co/R6Kfs8R/209127.gif',
-	'https://i.ibb.co/wQZQsVm/80cfc6f923d78b92b7672b010d5473c8b7e6b1a6-hq.gif',
-	'https://i.ibb.co/JHz9fvq/9V6v.gif',
-	'https://i.ibb.co/M9RkLf5/20c2c7bc21fbfa535f09356c954b03cf.gif',
+	'https://i.ibb.co/mCsGdhF/209127.gif',
+	'https://i.ibb.co/10Pz7tt/178892703000202.gif',
+	'https://i.ibb.co/hCxfr5y/191685417001202.gif',
+	'https://i.ibb.co/CWQb0kr/e03d7b19e67292f6e95e71d6e46161464b1a6f2er1-560-533-hq.gif',
+	'https://i.ibb.co/x2bt1nj/e4d09b2f8273494a10e003bee7951b82.gif',
+	'https://i.ibb.co/K7s860v/ezgif-4-95469e1722e5.gif',
+	'https://i.ibb.co/YD8NGBC/giphy.gif',
+	'https://i.ibb.co/JnpVcDr/rgdthb.gif',
+	'https://i.ibb.co/tP98WJy/Silent-Energetic-Conure-small.gif',
+	'https://i.ibb.co/0DB5M6R/tenor.gif',
+	'https://i.ibb.co/s1dvfx0/9V6v.gif',
+	'https://i.ibb.co/dP53hy4/20c2c7bc21fbfa535f09356c954b03cf.gif',
 ];
 
 let colorСounter = randomInteger(3, 10);
