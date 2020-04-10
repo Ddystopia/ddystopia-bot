@@ -86,6 +86,7 @@ class RolesBoard {
 		if (isNaN(args[1])) return;
 		const roleId = Object.keys(roles)[+args[1] - 1];
 		const role = message.member.guild.roles.cache.get(roleId);
+		if(!role)  return message.reply(roleName + ' : Такая роль не существует');
 		const cost = roles[role.id];
 		if (!cost) return message.reply(roleName + ' : Такая роль не продаётся');
 		const fromId = message.author.id;
@@ -101,6 +102,7 @@ class RolesBoard {
 		if (isNaN(args[1])) return;
 		const roleId = Object.keys(roles)[+args[1] - 1];
 		const role = message.member.guild.roles.cache.get(roleId);
+		if(!role)  return message.reply(roleName + ' : Такая роль не существует');
 		const cost = roles[role.id];
 		if (!cost) return message.reply(roleName + ' : Такая роль не продаётся');
 		const fromId = message.author.id;
