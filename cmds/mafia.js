@@ -2,6 +2,7 @@ const Discord = module.require("discord.js");
 const fs = require('fs');
 let game = null;
 let tmpCounter = 0;
+let everyone;
 
 class Game {
 	constructor(number, client) {
@@ -53,7 +54,7 @@ class Game {
 			}
 		});
 		if (donsId) permissionsNight.push({ id: donsId, allow: ["VIEW_CHANNEL", "SEND_MESSAGES"] })
-		permissionsNight.push({ id: '698582490318766231', deny: ["VIEW_CHANNEL", "SEND_MESSAGES"] })
+		permissionsNight.push({ id: everyone, deny: ["VIEW_CHANNEL", "SEND_MESSAGES"] })
 		this.mafiasChannel.overwritePermissions(permissionsNight).catch(err => console.error(err))
 
 		await timeout(60 * 1000);
@@ -75,7 +76,7 @@ class Game {
 			}
 		});
 		if (donsId) permissionsNight.push({ id: donsId, deny: ["SEND_MESSAGES"], allow: ["VIEW_CHANNEL"], })
-		permissionsDay.push({ id: '698582490318766231', deny: ["VIEW_CHANNEL", "SEND_MESSAGES"] })
+		permissionsDay.push({ id: everyone, deny: ["VIEW_CHANNEL", "SEND_MESSAGES"] })
 		this.mafiasChannel.overwritePermissions(permissionsDay).catch(err => console.error(err))
 
 		mafias.map((item) => ({
@@ -268,12 +269,12 @@ class Commands {
 		if (!game) return;
 		await game.voiceChannel.members.forEach(item => item.voice.setMute(false));
 		game.channel.overwritePermissions([{
-				id: '698582490318766231',
+				id: everyone,
 				allow: ["VIEW_CHANNEL", "SEND_MESSAGES"]
 			}])
 			.catch(err => console.error(err))
 		game.mafiasChannel.overwritePermissions([{
-				id: '698582490318766231',
+				id: everyone,
 				deny: ["VIEW_CHANNEL", "SEND_MESSAGES"]
 			}])
 			.catch(err => console.error(err))
@@ -286,6 +287,7 @@ class Commands {
 }
 
 module.exports.run = async (client, message, args) => {
+	everyone = message.guild.roles.everyone;
 	switch (args[0]) {
 		case 'start':
 			Commands.start(message, client);
