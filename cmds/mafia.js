@@ -167,7 +167,7 @@ class Game {
 			.setThumbnail('https://cdn.discordapp.com/attachments/402109825896415232/692820764478668850/yummylogo.jpg')
 			.setTimestamp();
 		this.channel.send(embed);
-		await this.voiceChannel.members.forEach(item => !this.corpses.includes(item) ? item.voice.setMute(false) : null);
+		await this.voiceChannel.members.forEach(item => item.voice.setMute(false));
 
 		this.players.get(winner).forEach(item => {
 			let profile;
@@ -263,6 +263,26 @@ class Commands {
 		game.votedPlayers.add(message.author.id);
 		message.react('✔');
 	}
+
+	static async end() {
+		if (!game) return;
+		await game.voiceChannel.members.forEach(item => item.voice.setMute(false));
+		game.channel.overwritePermissions([{
+				id: '698582490318766231',
+				allow: ["VIEW_CHANNEL", "SEND_MESSAGES"]
+			}])
+			.catch(err => console.error(err))
+		game.mafiasChannel.overwritePermissions([{
+				id: '698582490318766231',
+				deny: ["VIEW_CHANNEL", "SEND_MESSAGES"]
+			}])
+			.catch(err => console.error(err))
+		game = null;
+		tmpCounter = 0;
+		this.votedPlayers = new Set();
+		this.votes = {};
+		this.vote = false;
+	}
 }
 
 module.exports.run = async (client, message, args) => {
@@ -272,6 +292,9 @@ module.exports.run = async (client, message, args) => {
 			break;
 		case 'vote':
 			Commands.vote(message, args)
+			break;
+		case 'end':
+			Commands.end(message, args)
 			break;
 		default:
 			message.reply('I don\'t know this command');
