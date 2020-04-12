@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 const fs = require('fs');
 
-const nonGrata = ['464804290876145665', '499989404543352832', '469488553118793757'];
+const nonGrata = ['464804290876145665'];
 const imageChannels = ['402109720833425408', '402114219438374913'];
 const bannedChannels = ['649336430350303243', '501430596971790346', '402105109653487629'];
 
@@ -55,7 +55,6 @@ client.on('message', async message => {
 
 	if (nonGrata.includes(message.author.id)) return;
 	if (message.author.bot) return;
-	if (message.channel.type == 'dm') return;
 
 	fs.access(`profiles/${message.author.id}.json`, fs.constants.F_OK, (err) => {
 		if (!err) return;
@@ -83,9 +82,8 @@ client.on('message', async message => {
 
 client.on('guildMemberAdd', member => {
 	const role = member.guild.roles.cache.find(r => r.name === 'Яммик');
-	//Двухсекундный тайм-аут, если пользователь выйдей из серва, а то может быть ошибка, 2 секнды чисто на абум, можно и нулевую поставить
-	setTimeout(() => member ? member.roles.add(role) : null, 2000);
-	// Отправить сообщение с упоминанием участника
+	if(!member || !role) return;
+	member.roles.add(role);
 	client.commands.get('greeting').run(client, member);
 });
 client.login(token);
