@@ -25,7 +25,7 @@ module.exports.run = async (client, message, args) => {
 			if(!lb[+`${args[0]}${i}`]) break;
 			const member = message.guild.members.cache.get(lb[+`${args[0]}${i}`][0]);
 			if (!member) continue;
-			const username = member.user.username;
+			const username = member.nickname || member.user.username;
 			embed.addField(++index, `${username} - ${lb[+`${args[0]}${i}`][1]}`)
 		}
 		lb = [];

@@ -72,7 +72,7 @@ class Deposit extends Deal {
 		this.sum += +sum;
 
 		fs.writeFile(__dirname.replace(/cmds$/, '') + `profiles/${userId}.json`, JSON.stringify(profile), err => err ? console.log(err) : null);
-		return 'Succses';
+		return 'Succsess';
 	}
 	payDeposites(userId) {
 		const profile = require(__dirname.replace(/cmds$/, '') + `profiles/${userId}.json`);
@@ -104,7 +104,7 @@ class Credit extends Deal {
 		this.sum -= +sum;
 		if (this.sum <= 0) profiles[userId].credit = null
 		fs.writeFile(__dirname.replace(/cmds$/, '') + `profiles/${userId}.json`, JSON.stringify(profile), err => err ? console.error(err) : null);
-		return 'Succses';
+		return 'Succsess';
 	}
 	badUser(userId, client, rec) {
 		const profile = require(__dirname.replace(/cmds$/, '') + `profiles/${userId}.json`);
