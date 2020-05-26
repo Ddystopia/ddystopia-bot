@@ -47,7 +47,7 @@ client.on('ready', () => {
 client.on('message', async message => {
 	if (bannedChannels.includes(message.channel.id)) return;
 	if (imageChannels.includes(message.channel.id)) 
-		return client.commands.get('increaseMoneyForImage').run(client, message);
+		client.commands.get('increaseMoneyForImage').run(client, message);
 	if (wordsGameChannels.includes(message.channel.id) && !message.content.startsWith(prefix)) 
 		return client.commands.get('cities').run(client, message, null);
 	if (!message.content.startsWith(prefix)) return;
