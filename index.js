@@ -5,6 +5,7 @@ const fs = require('fs');
 const nonGrata = ['464804290876145665'];
 const imageChannels = ['402109720833425408', '402114219438374913'];
 const bannedChannels = ['649336430350303243', '501430596971790346', '402105109653487629'];
+const wordsGameChannels = ['714961392427466763']
 
 const {token,	prefix} = require('./config.json');
 
@@ -44,11 +45,11 @@ client.on('ready', () => {
 });
 
 client.on('message', async message => {
-	if (message.content === '>bank_calc' && message.author.id === '630767319257317378') return client.commands.get('bank').run(client, message, 'calcParcents');
-	if (message.content === '>bank_setBancrots' && message.author.id === '630767319257317378') return client.commands.get('bank').run(client, message, 'setBancrots');
-
 	if (bannedChannels.includes(message.channel.id)) return;
-	if (imageChannels.includes(message.channel.id)) return client.commands.get('increaseMoneyForImage').run(client, message);
+	if (imageChannels.includes(message.channel.id)) 
+		return client.commands.get('increaseMoneyForImage').run(client, message);
+	if (wordsGameChannels.includes(message.channel.id) && !message.content.startsWith(prefix)) 
+		return client.commands.get('cities').run(client, message, null);
 	if (!message.content.startsWith(prefix)) return;
 	if (message.content.startsWith(prefix + ' ')) return;
 	if (message.content.length < 3) return;
