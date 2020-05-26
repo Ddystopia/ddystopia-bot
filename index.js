@@ -71,11 +71,12 @@ client.on('message', async message => {
 	const cmd = client.commands.get(command);
 	if (command === 'help') return message.reply('Закреп')
 	//'694199268847648813' - bank channel id
-	if (command.startsWith('bank_') && message.channel.id === '694199268847648813') return client.commands.get('bank').run(client, message, command, args);
+	if (command.startsWith('bank_') && message.channel.id === '694199268847648813') 
+		return client.commands.get('bank').run(client, message, command, args);
 
 	setTimeout(() => {
 		if (cmd) cmd.run(client, message, args);
-		else client.commands.get('music').run(client, message, args, command)
+		else message.reply("You need to enter a valid command!");
 	}, 350)
 });
 
