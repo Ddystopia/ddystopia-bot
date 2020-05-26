@@ -33,7 +33,7 @@ class User {
 		if (+days < 5) return 'Too few days';
 		if (+days > 100) return 'Too many days';
 
-		const parcent = Math.min((Math.E ** 6) ** (days / 10) / 3, ((days / 10) - 1) * 6.5 + 15, 20);
+		const parcent = Math.min((Math.E ** 6) ** (days / 10) / 3, ((days / 10) - 1) * 6.5 + 15, 20) / 2.35;
 		this.deposit = new Deposit(sum, days, parcent, this.id);
 		return `Success, you have ${parcent}% on one day`;
 	}
