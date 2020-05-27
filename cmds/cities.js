@@ -11,6 +11,9 @@ module.exports.run = async (client, message, propArgs) => {
 			words = [];
 			message.react("✅");
 			break;
+		case "symbol":
+			message.reply(words.length > 0 ? words[words.length - 1].split("").pop() : 'any');
+			break;
 		default:
 			if (!word) return;
 			if (isCorrect(word, words)) {
