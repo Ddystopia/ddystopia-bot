@@ -1,5 +1,6 @@
 const Discord = module.require("discord.js");
 const fs = require('fs');
+const randomInteger = require('../utils/randomInteger.js')
 let game = null;
 let tmpCounter = 0;
 let everyone;
@@ -306,11 +307,6 @@ module.exports.run = async (client, message, args) => {
 module.exports.help = {
 	name: "mafia",
 };
-
-function randomInteger(min, max) {
-	const rand = min + Math.random() * (max + 1 - min);
-	return Math.floor(rand);
-}
 
 function timeout(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));

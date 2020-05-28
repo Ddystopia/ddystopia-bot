@@ -2,8 +2,8 @@ const Discord = module.require('discord.js');
 // const fs = require('fs');
 // const client = new Discord.Client();
 
-const colorSize = 60;
-const rainbow = new Array(colorSize);
+const rainbow = require('../utils/rainbow.js')
+const randomInteger = require('../utils/randomInteger.js')
 const helloGifs = [
 	'https://i.ibb.co/mCsGdhF/209127.gif',
 	'https://i.ibb.co/10Pz7tt/178892703000202.gif',
@@ -22,16 +22,8 @@ const helloGifs = [
 let colorСounter = randomInteger(3, 10);
 let gifsСounter = randomInteger(1, 5);
 
-for (let i = 0, sinI = 0; i < colorSize; i++, sinI += 4) {
-	const red = sin_to_hex(sinI, 0 * Math.PI * 2 / 3); // 0 deg
-	const blue = sin_to_hex(sinI, 1 * Math.PI * 2 / 3); // 120 deg
-	const green = sin_to_hex(sinI, 2 * Math.PI * 2 / 3); // 240 deg
-
-	rainbow[i] = '#' + red + green + blue;
-}
-
 module.exports.run = async (client, member) => {
-	if (colorСounter >= colorSize) colorСounter = 0;
+	if (colorСounter >= 60) colorСounter = 0;
 	if (gifsСounter >= helloGifs.length) gifsСounter = 0;
 
 	const channel = member.guild.channels.cache.find(ch => ch.id == '692796617656369292');
@@ -58,16 +50,3 @@ module.exports.run = async (client, member) => {
 module.exports.help = {
 	name: 'greeting',
 };
-
-function sin_to_hex(i, phase) {
-	const sin = Math.sin(Math.PI / colorSize * 2 * i + phase);
-	const int = Math.floor(sin * 127) + 128;
-	const hex = int.toString(16);
-
-	return hex.length === 1 ? '0' + hex : hex;
-}
-
-function randomInteger(min, max) {
-	const rand = min + Math.random() * (max + 1 - min);
-	return Math.floor(rand);
-}

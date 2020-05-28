@@ -1,5 +1,6 @@
 const Discord = module.require('discord.js');
 const fs = require('fs');
+const randomInteger = require('../utils/randomInteger.js')
 // const client = new Discord.Client();
 
 const sides = ['h', 't'];
@@ -68,8 +69,3 @@ module.exports.run = async (client, message, args) => {
 module.exports.help = {
 	name: 'cf',
 };
-
-function randomInteger(min, max) {
-	const rand = min + Math.random() * (max + 1 - min);
-	return Math.floor(rand);
-}

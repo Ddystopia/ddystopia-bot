@@ -2,7 +2,7 @@ const Discord = module.require('discord.js');
 const fs = require('fs');
 const games = new Map();
 const lastGames = new Map();
-
+const randomInteger = require('../utils/randomInteger')
 
 module.exports.run = async (client, message, args) => {
 	if(message.channel.id !== '693487254911582259') return;
@@ -69,8 +69,3 @@ module.exports.run = async (client, message, args) => {
 module.exports.help = {
 	name: 'br',
 };
-
-function randomInteger(min, max) {
-	const rand = min + Math.random() * (max + 1 - min);
-	return Math.floor(rand);
-}
