@@ -9,12 +9,12 @@ const rainbow = require("../utils/rainbow");
 const randomInteger = require("../utils/randomInteger");
 
 module.exports.run = async (client, message, args) => {
-  if (message.channel.id !== "402114219438374913") return;
+  if (!message.channel.nsfw) return;
   let number = +args[1] || +args[0] || 1;
   if (number > 10) number = 10;
-  const genre = generes.includes(args[0])
-    ? args[0]
-    : generes[randomInteger(0, generes.length - 1)];
+  const genre =
+          generes.find(el => el.toLowerCase() === args[0].toLowerCase()) ||
+          generes[randomInteger(0, generes.length - 1)]
   for (let i = number; i >= 1; i--) {
     const urlObj = await nsfw[genre]();
     const embed = new Discord.MessageEmbed()
