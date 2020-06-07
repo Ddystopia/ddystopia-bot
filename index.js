@@ -34,7 +34,7 @@ client.on('ready', () => {
   function checkTrigger() {
     const info = require('./workingInfo.json')
     if (Date.now() - info.lastCalcDate > 24 * 3600 * 1000) {
-      client.commands.get('bank').run(client, true, 'calcParcents')
+      client.commands.get('bank').run(client, true, 'calcPercents')
       info.lastCalcDate = Date.now()
       fs.writeFile(
         `${__dirname}/workingInfo.json`,
@@ -86,11 +86,6 @@ client.on('message', async (message) => {
   const cmd = client.commands.get(command)
   if (command === 'help') return message.reply('Закреп')
   //'694199268847648813' - bank channel id
-  if (
-    command.startsWith('bank_') &&
-    message.channel.id === '694199268847648813'
-  )
-    return client.commands.get('bank').run(client, message, command, args)
 
   setTimeout(() => {
     if (cmd) cmd.run(client, message, args)

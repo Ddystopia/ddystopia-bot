@@ -22,36 +22,36 @@ class User {
       return `On this sum you must have more then ${sum / 15} coins`
 
     latesCredites.set(this.id, Date.now() + 3 * 3600 * 1000)
-    const parcent = Math.max(-((Math.E * 6) ** (sum / 1e4) - 55), -(sum / 1e4 - 1) * 5 + 25, 15)
-    this.credit = new Credit(sum, days, parcent, this.id)
-    return `Success, you have ${parcent}% on one day`
+    const percent = Math.max(-((Math.E * 6) ** (sum / 1e4) - 55), -(sum / 1e4 - 1) * 5 + 25, 15)
+    this.credit = new Credit(sum, days, percent, this.id)
+    return true
   }
   createDeposit(sum, days) {
     if (this.deposit) return 'You already have deposit.'
     if (this.credit) return "You have some credit, I can't make deposit."
-    if (isNaN(+sum) || isNaN(+days)) return
+    if (isNaN(+sum) || isNaN(+days)) return 'Invalid arguments'
     if (+sum < 500) return 'Too small sum'
     if (+days < 5) return 'Too few days'
     if (+days > 100) return 'Too many days'
 
-    const parcent =
+    const percent =
       Math.min((Math.E ** 6) ** (days / 10) / 3, (days / 10 - 1) * 6.5 + 15, 20) / 2.35
-    this.deposit = new Deposit(sum, days, parcent, this.id)
-    return `Success, you have ${parcent}% on one day`
+    this.deposit = new Deposit(sum, days, percent, this.id)
+    return true
   }
 }
 
 class Deal {
-  constructor(sum, days, parcent) {
-    this.sum = (+sum * parcent) / 100 + +sum
+  constructor(sum, days, percent) {
+    this.sum = (+sum * percent) / 100 + +sum
     this.deadline = Date.now() + days * 24 * 3600 * 1000
-    this.parcent = parcent
+    this.percent = percent
   }
 }
 
 class Deposit extends Deal {
-  constructor(sum, days, parcent, userId) {
-    super(sum, days, parcent)
+  constructor(sum, days, percent, userId) {
+    super(sum, days, percent)
     const profile = require(__dirname.replace(/cmds$/, '') + `profiles/${userId}.json`)
 
     if (this.sum > profile.coins) {
@@ -82,7 +82,7 @@ class Deposit extends Deal {
       JSON.stringify(profile),
       err => (err ? console.log(err) : null)
     )
-    return 'Succsess'
+    return true
   }
   payDeposites(userId) {
     const profile = require(__dirname.replace(/cmds$/, '') + `profiles/${userId}.json`)
@@ -97,8 +97,8 @@ class Deposit extends Deal {
 }
 
 class Credit extends Deal {
-  constructor(sum, days, parcent, userId) {
-    super(sum, days, parcent)
+  constructor(sum, days, percent, userId) {
+    super(sum, days, percent)
     const profile = require(__dirname.replace(/cmds$/, '') + `profiles/${userId}.json`)
     profile.coins += +sum
     fs.writeFile(
@@ -201,20 +201,19 @@ class ModerationCommands {
     }
   }
 
-  static calcParcents(client) {
+  static calcPercents(client) {
     for (const userId in profiles) {
       if (!profiles.hasOwnProperty(userId)) continue
       const element = profiles[userId]
-      if (element.credit) element.credit.sum += (element.credit.sum * element.credit.parcent) / 100
+      if (element.credit) element.credit.sum += (element.credit.sum * element.credit.percent) / 100
       if (element.deposit)
-        element.deposit.sum += (element.deposit.sum * element.deposit.parcent) / 100
+        element.deposit.sum += (element.deposit.sum * element.deposit.percent) / 100
     }
     fs.writeFile(
       __dirname.replace(/cmds$/, '') + 'bank_profiles.json',
       JSON.stringify(profiles),
       err => (err ? console.error(err) : null)
     )
-    // channel.send('!напомни через 1 минуту calcParcents ');
   }
 
   static remove(message, args) {
@@ -224,21 +223,16 @@ class ModerationCommands {
       !message.member.roles.cache.has('657964826852589609') //Главный администратор
     )
       return
-    let user
-    switch (args[0]) {
+    const user = message.mentions.users.first()
+    if (!user) return "I don't know who is it"
+    switch (args[1]) {
       case 'credit':
-        user = message.mentions.users.first()
-        if (!user) return "I don't know who is it"
         profiles[user.id].credit = null
         break
       case 'deposit':
-        user = message.mentions.users.first()
-        if (!user) return "I don't know who is it"
         profiles[user.id].deposit = null
         break
       case 'bancrot':
-        user = message.mentions.users.first()
-        if (!user) return "I don't know who is it"
         profiles[user.id].bancrot = null
         const role = message.guild.roles.cache.find(r => r.name === 'Банкрот')
         message.guild.members.cache.get(user.id).roles.remove(role)
@@ -246,13 +240,14 @@ class ModerationCommands {
       default:
         return "I don't know this property"
     }
-    return 'Success'
+    return true
   }
 }
 
-module.exports.run = async (client, message, cmd) => {
-  if (cmd === 'calcParcents') return ModerationCommands.calcParcents(client) //inclusion
-  if (cmd === 'setBancrots') return ModerationCommands.setBancrots(client) //inclusion
+module.exports.run = async (client, message, args) => {
+  if (args === 'calcPercents') return ModerationCommands.calcPercents(client) //inclusion
+  if (args === 'setBancrots') return ModerationCommands.setBancrots(client) //inclusion
+  if (message.channel.id !== '694199268847648813') return
   fs.access(`profiles/${message.author.id}.json`, fs.constants.F_OK, err => {
     if (!err) return
     const profile = {
@@ -264,34 +259,39 @@ module.exports.run = async (client, message, cmd) => {
     )
   })
 
-  const args = message.content.split(/\s+/).slice(1)
-  // args[0] = sum; args[1] = days
   const userId = message.author.id
-  cmd = cmd.slice(5) //cut bank_
+
   if (!profiles[userId]) profiles[userId] = new User(userId)
   //set prototypes after JSON
   Object.setPrototypeOf(profiles[userId], User.prototype)
   Object.setPrototypeOf(profiles[userId].credit || {}, Credit.prototype)
   Object.setPrototypeOf(profiles[userId].deposit || {}, Deposit.prototype)
 
-  switch (cmd) {
-    case 'createcredit':
-      message.reply(profiles[userId].createCredit(args[0], args[1], userId))
+  let response
+  switch (args[0]) {
+    case 'create':
+      if (args[1] === 'credit')
+        //prettier ignore
+        response = profiles[userId].createCredit(args[2], args[3], userId)
+      else if (args[1] === 'deposit')
+        response = profiles[userId].createDeposit(args[2], args[3], userId)
+      if (typeof response === 'string') message.reply(response)
+      else message.react('✅')
       break
-    case 'createdeposit':
-      message.reply(profiles[userId].createDeposit(args[0], args[1], userId))
-      break
-    case 'repaycredit':
-      if (!profiles[userId].credit) return message.reply("You don't have a credit")
-      message.reply(profiles[userId].credit.repay(args[0], userId))
-      break
-    case 'repaydeposit':
-      if (!profiles[userId].deposit) return message.reply("You don't have a deposit")
-      message.reply(profiles[userId].deposit.repay(args[0], userId))
+    case 'repay':
+      if (args[1] === 'credit') {
+        if (!profiles[userId].credit) return message.reply("You don't have a credit")
+        response = profiles[userId].credit.repay(args[2], userId)
+      } else if (args[1] === 'deposit') {
+        if (!profiles[userId].deposit) return message.reply("You don't have a deposit")
+        response = profiles[userId].deposit.repay(args[2], userId)
+      }
+      if (typeof response === 'string') message.reply(response)
+      else message.react('✅')
       break
     case 'info':
-      const user = args[0]
-        ? profiles[args[0].match(/(\d{15,})/)[1]] || profiles[userId]
+      const user = args[1]
+        ? profiles[args[1].match(/(\d{15,})/)[1]] || profiles[userId]
         : profiles[userId]
       const embed = new Discord.MessageEmbed()
         .setColor('#84ed39')
@@ -303,7 +303,7 @@ module.exports.run = async (client, message, cmd) => {
           'Кредит',
           `${
             user.credit
-              ? `Сумма: ${user.credit.sum}\nПроцент: ${user.credit.parcent}\nДедлайн: ${new Date(
+              ? `Сумма: ${user.credit.sum}\nПроцент: ${user.credit.percent}\nДедлайн: ${new Date(
                   user.credit.deadline
                 )}`
               : 'У вас нет кредита'
@@ -313,7 +313,7 @@ module.exports.run = async (client, message, cmd) => {
           'Депозит',
           `${
             user.deposit
-              ? `Сумма: ${user.deposit.sum}\nПроцент: ${user.deposit.parcent}\nДедлайн: ${new Date(
+              ? `Сумма: ${user.deposit.sum}\nПроцент: ${user.deposit.percent}\nДедлайн: ${new Date(
                   user.deposit.deadline
                 )}`
               : 'У вас нет депозита'
@@ -324,14 +324,11 @@ module.exports.run = async (client, message, cmd) => {
       message.reply(embed)
       break
     case 'remove':
-      try {
-        message.reply(ModerationCommands.remove(message, args))
-      } catch (err) {
-        message.reply("I don't know who is it")
-      }
-      break
+      response = ModerationCommands.remove(message, args)
+      if (typeof response === 'string') message.reply(response)
+      else message.react('✅')
     default:
-      message.reply(`Command ${cmd} not found`)
+      message.reply(`Command ${args[0]} not found`)
   }
 
   fs.writeFile(

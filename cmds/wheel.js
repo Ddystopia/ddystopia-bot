@@ -42,12 +42,12 @@ module.exports.run = async (bot, message, args) => {
   }
   const bet = args[0] == 'all' ? profile.coins : +args[0]
 
-  let parcent = 50 - (userGames * 1.2 - 12)
-  if (parcent < 10) parcent = 10
+  let percent = 50 - (userGames * 1.2 - 12)
+  if (percent < 10) percent = 10
   const rand =
     userGames < 15
       ? randomInteger(0, 7)
-      : randomInteger(0, 99) <= parcent
+      : randomInteger(0, 99) <= percent
       ? randomInteger(4, 7)
       : randomInteger(0, 3)
 

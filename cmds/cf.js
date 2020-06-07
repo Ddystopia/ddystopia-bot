@@ -5,8 +5,8 @@ const randomInteger = require('../utils/randomInteger.js')
 
 const sides = ['h', 't']
 const sidesImages = {
-  h: 'https://cdn1.savepice.ru/uploads/2020/3/27/f94b85bebd58457203f02d0dab5a50d9-full.png',
-  t: 'https://cdn1.savepice.ru/uploads/2020/3/27/38af340185dcdf87d2a08723719b1193-full.png',
+  h: 'https://i.ibb.co/ryYH1hf/headers.png',
+  t: 'https://i.ibb.co/72v7MVs/tails.png',
 }
 const games = new Map()
 const lastGames = new Map()
@@ -41,13 +41,13 @@ module.exports.run = async (client, message, args) => {
   }
   const bet = args[0] == 'all' ? profile.coins : +args[0]
   const betedSide = args[1]
-  let parcent = 50 - (userGames * 1.2 - 12)
-  if (parcent < 10) parcent = 10
+  let percent = 50 - (userGames * 1.2 - 12)
+  if (percent < 10) percent = 10
   const loseSide = sides.join('').replace(args[0], '')
   const side =
     userGames < 11
       ? sides[randomInteger(0, 1)]
-      : randomInteger(0, 99) <= parcent
+      : randomInteger(0, 99) <= percent
       ? betedSide
       : loseSide
   if (profile.coins < bet) return message.reply('Не хватает монет')

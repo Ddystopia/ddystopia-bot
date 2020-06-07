@@ -33,12 +33,12 @@ module.exports.run = async (client, message, args) => {
   }
   const bet = args[0] == 'all' ? profile.coins : +args[0]
   const betNum = randomInteger(-30, 70) + 30
-  let parcent = 50 - (userGames * 1.2 - 12)
-  if (parcent < 10) parcent = 10
+  let percent = 50 - (userGames * 1.2 - 12)
+  if (percent < 10) percent = 10
   const realNum =
     userGames < 15
       ? randomInteger(0, 100)
-      : randomInteger(0, 99) <= parcent
+      : randomInteger(0, 99) <= percent
       ? randomInteger(65, 99)
       : randomInteger(0, 64)
   let jackpot = ''
