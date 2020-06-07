@@ -19,7 +19,7 @@ class User {
     const profile = require(__dirname.replace(/cmds$/, '') + `profiles/${this.id}.json`)
     if (sum < 1000) 'Invalid argument sum(so few)'
     if (sum / profile.coins > 15 && profile.coins > 200)
-      return `On this sum you must have more then ${sum / 15} coins`
+      return `On this sum you must have more then ${+(sum / 15).toFixed(3)} coins`
 
     latesCredites.set(this.id, Date.now() + 3 * 3600 * 1000)
     const percent = Math.max(-((Math.E * 6) ** (sum / 1e4) - 55), -(sum / 1e4 - 1) * 5 + 25, 15)
@@ -126,7 +126,7 @@ class Credit extends Deal {
       JSON.stringify(profile),
       err => (err ? console.error(err) : null)
     )
-    return 'Succsess'
+    return true
   }
   badUser(userId, client, rec) {
     const profile = require(__dirname.replace(/cmds$/, '') + `profiles/${userId}.json`)
@@ -303,7 +303,7 @@ module.exports.run = async (client, message, args) => {
           'Кредит',
           `${
             user.credit
-              ? `Сумма: ${user.credit.sum}\nПроцент: ${user.credit.percent}\nДедлайн: ${new Date(
+              ? `Сумма: ${+user.credit.sum.toFixed(3)}\nПроцент: ${+user.credit.percent.toFixed(3)}\nДедлайн: ${new Date(
                   user.credit.deadline
                 )}`
               : 'У вас нет кредита'
@@ -313,7 +313,7 @@ module.exports.run = async (client, message, args) => {
           'Депозит',
           `${
             user.deposit
-              ? `Сумма: ${user.deposit.sum}\nПроцент: ${user.deposit.percent}\nДедлайн: ${new Date(
+              ? `Сумма: ${+user.deposit.sum.toFixed(3)}\nПроцент: ${+user.deposit.percent.toFixed(3)}\nДедлайн: ${new Date(
                   user.deposit.deadline
                 )}`
               : 'У вас нет депозита'
