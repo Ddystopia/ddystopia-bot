@@ -326,7 +326,8 @@ module.exports.run = async (client, message, args) => {
     case 'remove':
       response = ModerationCommands.remove(message, args)
       if (typeof response === 'string') message.reply(response)
-      else message.react('✅')
+			else message.react('✅')
+		break
     default:
       message.reply(`Command ${args[0]} not found`)
   }
