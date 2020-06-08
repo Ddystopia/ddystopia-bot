@@ -25,19 +25,19 @@ module.exports.run = async (client, message, args) => {
     fs.writeFile(
       __dirname.replace(/cmds$/, '') + `profiles/${tillId}.json`,
       JSON.stringify(profileTill),
-      err => (err ? console.log(err) : null)
+      err => {}
     )
     fs.appendFile(
       __dirname.replace(/cmds$/, '') + `transactionLogs.log`,
       `REWARD from${message.author.username} till ${
         message.mentions.users.first().username
       } - ${transaction} coins\n`,
-      err => (err ? console.log(err) : null)
+      err => {}
     )
 
     message.reply(`Было успешно переведено ${transaction} монет`)
   } catch (err) {
-    console.error(err)
+    message.reply('I don\'t know hwo is this')
   }
 }
 
