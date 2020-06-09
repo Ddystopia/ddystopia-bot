@@ -1,8 +1,9 @@
-const Discord = module.require('discord.js')
-const fs = require('fs')
+const { MessageEmbed } = require('discord.js')
+const randomInteger = require('../utils/randomInteger.js')
+const useUserGames = require('../utils/useUserGames')
+const readWrite = require('../utils/readWriteFile')
 const games = new Map()
 const lastGames = new Map()
-const randomInteger = require('../utils/randomInteger.js')
 
 const factorsTable = {
   0.1: '↖',
@@ -21,27 +22,10 @@ module.exports.run = async (bot, message, args) => {
   if (isNaN(+args[0]) && args[0] != 'all') return
   if (+args[0] <= 0) return
 
-  if (games.has(message.author.id))
-    games.set(message.author.id, games.get(message.author.id) + 1)
-  else games.set(message.author.id, 0)
+  const userGames = useUserGames(message.author.id, games, lastGames)
 
-  if (lastGames.has(message.author.id)) {
-    if (Date.now() - lastGames.get(message.author.id) > 7 * 60 * 1000) {
-      lastGames.set(message.author.id, Date.now())
-      games.set(message.author.id, 0)
-    } else lastGames.set(message.author.id, Date.now())
-  } else lastGames.set(message.author.id, Date.now())
+  const profile = readWrite.profile(message.author.id)
 
-  const userGames = games.get(message.author.id)
-  try {
-    profile = require(__dirname.replace(/cmds$/, '') +
-      `profiles/${message.author.id}.json`)
-  } catch (err) {
-    profile = {
-      coins: 0,
-      resentDaily: Date.now() - 1000 * 60 * 60 * (24 + 1),
-    }
-  }
   const bet = args[0] == 'all' ? profile.coins : +args[0]
 
   let percent = 50 - (userGames * 1.2 - 12)
@@ -60,7 +44,7 @@ module.exports.run = async (bot, message, args) => {
   if (profile.coins < bet) return message.reply('Не хватает монет')
   profile.coins -= bet
 
-  const exampleEmbed = new Discord.MessageEmbed().setColor('#0099ff')
+  const embed = new MessageEmbed().setColor('#0099ff')
 
   factors.splice(4, 0, arrow)
 
@@ -70,22 +54,15 @@ module.exports.run = async (bot, message, args) => {
     .trim()
 
   profile.coins += Math.floor(bet * factor)
-  exampleEmbed.addField(
+  embed.addField(
     'Расчёт',
     `Вы выиграли ${Math.floor(bet * factor)} монет\nНа вашем счету теперь ${
       profile.coins
     } монет\n`
   )
-  fs.writeFile(
-    __dirname.replace(/cmds$/, '') + `profiles/${message.author.id}.json`,
-    JSON.stringify(profile),
-    err => (err ? console.log(err) : null)
-  )
+  readWrite.profile(message.author.id, profile)
 
-  setTimeout(() => {
-    message.reply('\n' + response)
-    message.channel.send(exampleEmbed)
-  }, 50)
+  message.reply('\n' + response, embed)
 }
 
 module.exports.help = {

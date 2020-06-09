@@ -1,10 +1,10 @@
-const Discord = module.require('discord.js')
+const { MessageEmbed } = require('discord.js')
 const fs = require('fs')
 let lb = []
 let profiles = []
 
 module.exports.run = async (client, message, args) => {
-  const embed = new Discord.MessageEmbed()
+  const embed = new MessageEmbed()
     .setColor('#0099ff')
     .setTitle('Leader board')
     .setThumbnail(

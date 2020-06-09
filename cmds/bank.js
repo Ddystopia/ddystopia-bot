@@ -1,5 +1,6 @@
-const Discord = module.require('discord.js')
+const Discord = require('discord.js')
 const fs = require('fs')
+const readWrite = require('../utils/readWriteFile')
 const profiles = require(__dirname.replace(/cmds$/, '') + 'bank_profiles.json')
 const latesCredites = new Map()
 
@@ -56,21 +57,18 @@ class Deal {
 class Deposit extends Deal {
   constructor(sum, days, percent, userId) {
     super(sum, days, percent)
-    const profile = require(__dirname.replace(/cmds$/, '') + `profiles/${userId}.json`)
+    const profile = readWrite.profile(userId)
 
+    if (profile.coins <= 0) return
     if (this.sum > profile.coins) {
       this.sum = profile.coins
       profile.coins = 0
     } else profile.coins -= +sum
 
-    fs.writeFile(
-      __dirname.replace(/cmds$/, '') + `profiles/${userId}.json`,
-      JSON.stringify(profile),
-      err => (err ? console.log(err) : null)
-    )
+    readWrite.profile(userId, profile)
   }
   repay(sum, userId) {
-    const profile = require(__dirname.replace(/cmds$/, '') + `profiles/${userId}.json`)
+    const profile = readWrite.profile(userId)
     if (profiles[userId].credit) return 'You already have a credit.'
     if (isNaN(+sum)) return
 
@@ -81,38 +79,26 @@ class Deposit extends Deal {
 
     this.sum += +sum
 
-    fs.writeFile(
-      __dirname.replace(/cmds$/, '') + `profiles/${userId}.json`,
-      JSON.stringify(profile),
-      err => (err ? console.log(err) : null)
-    )
+    readWrite.profile(userId, profile)
     return true
   }
   payDeposites(userId) {
-    const profile = require(__dirname.replace(/cmds$/, '') + `profiles/${userId}.json`)
+    const profile = readWrite.profile(userId)
     profile.coins += Math.floor(+this.sum)
     profiles[userId].deposit = null
-    fs.writeFile(
-      __dirname.replace(/cmds$/, '') + `profiles/${userId}.json`,
-      JSON.stringify(profile),
-      err => (err ? console.log(err) : null)
-    )
+    readWrite.profile(userId, profile)
   }
 }
 
 class Credit extends Deal {
   constructor(sum, days, percent, userId) {
     super(sum, days, percent)
-    const profile = require(__dirname.replace(/cmds$/, '') + `profiles/${userId}.json`)
+    const profile = readWrite.profile(userId)
     profile.coins += +sum
-    fs.writeFile(
-      __dirname.replace(/cmds$/, '') + `profiles/${userId}.json`,
-      JSON.stringify(profile),
-      err => (err ? console.log(err) : null)
-    )
+    readWrite.profile(userId, profile)
   }
   repay(sum, userId) {
-    const profile = require(__dirname.replace(/cmds$/, '') + `profiles/${userId}.json`)
+    const profile = readWrite.profile(userId)
     if (isNaN(+sum)) return
     if (latesCredites.has(userId)) {
       if (latesCredites.get(userId) < Date.now()) latesCredites.delete(userId)
@@ -125,15 +111,11 @@ class Credit extends Deal {
 
     this.sum -= +sum
     if (this.sum <= 0) profiles[userId].credit = null
-    fs.writeFile(
-      __dirname.replace(/cmds$/, '') + `profiles/${userId}.json`,
-      JSON.stringify(profile),
-      err => (err ? console.error(err) : null)
-    )
+    readWrite.profile(userId, profile)
     return true
   }
   badUser(userId, client, rec) {
-    const profile = require(__dirname.replace(/cmds$/, '') + `profiles/${userId}.json`)
+    const profile = readWrite.profile(userId)
     if (rec) makeBancrot()
     else {
       this.sum *= 1.5
@@ -146,16 +128,8 @@ class Credit extends Deal {
       profiles[userId].deposit = null
       console.log('New Bancrot: ' + userId)
     }
-    fs.writeFile(
-      __dirname.replace(/cmds$/, '') + 'bank_profiles.json',
-      JSON.stringify(profiles),
-      err => (err ? console.error(err) : null)
-    )
-    fs.writeFile(
-      __dirname.replace(/cmds$/, '') + `profiles/${userId}.json`,
-      JSON.stringify(profile),
-      err => (err ? console.error(err) : null)
-    )
+    readWrite.file('bank_profiles.json', profiles)
+    readWrite.profile(userId, profile)
 
     function makeBancrot() {
       profile.coins = 0
@@ -204,11 +178,7 @@ class ModerationCommands {
           Credit.prototype.badUser(userId, client, true)
         }
       }
-      fs.writeFile(
-        __dirname.replace(/cmds$/, '') + 'bank_profiles.json',
-        JSON.stringify(profiles),
-        err => (err ? console.error(err) : null)
-      )
+      readWrite.file('bank_profiles.json', profiles)
     }
   }
 
@@ -221,11 +191,7 @@ class ModerationCommands {
       if (element.deposit)
         element.deposit.sum += (element.deposit.sum * element.deposit.percent) / 100
     }
-    fs.writeFile(
-      __dirname.replace(/cmds$/, '') + 'bank_profiles.json',
-      JSON.stringify(profiles),
-      err => (err ? console.error(err) : null)
-    )
+    readWrite.file('bank_profiles.json', profiles)
   }
 
   static remove(message, args) {
@@ -260,20 +226,8 @@ module.exports.run = async (client, message, args) => {
   if (args === 'calcPercents') return ModerationCommands.calcPercents(client) //inclusion
   if (args === 'setBancrots') return ModerationCommands.setBancrots(client) //inclusion
   if (message.channel.id !== '694199268847648813') return
-  fs.access(`profiles/${message.author.id}.json`, fs.constants.F_OK, err => {
-    if (!err) return
-    const profile = {
-      coins: 0,
-      resentDaily: Date.now() - 1000 * 60 * 60 * (24 + 1),
-    }
-    fs.writeFile(
-      `${__dirname}/profiles/${message.author.id}.json`,
-      JSON.stringify(profile),
-      err => (err ? console.log(err) : null)
-    )
-  })
-
   const userId = message.author.id
+  readWrite.profile(userId)
 
   if (!profiles[userId]) profiles[userId] = new User(userId)
   //set prototypes after JSON
@@ -351,11 +305,7 @@ module.exports.run = async (client, message, args) => {
       message.reply(`Command ${args[0]} not found`)
   }
 
-  fs.writeFile(
-    __dirname.replace(/cmds$/, '') + 'bank_profiles.json',
-    JSON.stringify(profiles),
-    err => (err ? console.error(err) : null)
-  )
+  readWrite.file('bank_profiles.json', profiles)
 }
 
 module.exports.help = {

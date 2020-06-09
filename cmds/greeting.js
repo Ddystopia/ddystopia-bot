@@ -1,9 +1,7 @@
-const Discord = module.require('discord.js')
-// const fs = require('fs');
-// const client = new Discord.Client();
-
+const { MessageEmbed } = require('discord.js')
 const rainbow = require('../utils/rainbow.js')
 const randomInteger = require('../utils/randomInteger.js')
+
 const helloGifs = [
   'https://i.ibb.co/mCsGdhF/209127.gif',
   'https://i.ibb.co/10Pz7tt/178892703000202.gif',
@@ -19,17 +17,17 @@ const helloGifs = [
   'https://i.ibb.co/dP53hy4/20c2c7bc21fbfa535f09356c954b03cf.gif',
 ]
 
-let colorСounter = randomInteger(3, 10)
-let gifsСounter = randomInteger(1, 5)
+let colorCounter = randomInteger(3, 10)
+let gifsCounter = randomInteger(1, 5)
 
 module.exports.run = async (client, member) => {
-  if (colorСounter >= 60) colorСounter = 0
-  if (gifsСounter >= helloGifs.length) gifsСounter = 0
+  if (colorCounter >= 60) colorCounter = 0
+  if (gifsCounter >= helloGifs.length) gifsCounter = 0
 
   const channel = member.guild.channels.cache.find(ch => ch.id == '692796617656369292')
 
-  const embed = new Discord.MessageEmbed()
-    .setColor(rainbow[colorСounter++])
+  const embed = new MessageEmbed()
+    .setColor(rainbow[colorCounter++])
     .setTitle('Приветствие')
     .setDescription('')
     .setThumbnail(
@@ -51,11 +49,10 @@ module.exports.run = async (client, member) => {
 		Для тех, кто любит игры, создан отдельный раздел "игровая", в котором вы найдете голосовые каналы с ограниченным числом вступающих, чтобы вас не отвлекали посторонние.
 		Надеемся, что вы хорошо проведёте время!`
     )
-    .setImage(helloGifs[gifsСounter++])
+    .setImage(helloGifs[gifsCounter++])
     .setTimestamp()
 
-  channel.send(`${member}`)
-  channel.send(embed)
+  channel.send(`${member}`, embed)
 }
 
 module.exports.help = {

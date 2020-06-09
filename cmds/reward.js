@@ -1,6 +1,5 @@
-const Discord = module.require('discord.js')
 const fs = require('fs')
-// const client = new Discord.Client();
+const readWrite = require('../utils/readWriteFile')
 
 module.exports.run = async (client, message, args) => {
   if (
@@ -15,31 +14,22 @@ module.exports.run = async (client, message, args) => {
 
   const tillId = message.mentions.users.first().id
   if (!tillId) return
-  try {
-    const profileTill = require(__dirname.replace(/cmds$/, '') +
-      `profiles/${tillId}.json`)
+  const profileTill = readWrite.profile(tillId)
 
-    const transaction = args[0] === '-all' ? -profileTill.coins : +args[0]
+  const transaction = args[0] === '-all' ? -profileTill.coins : +args[0]
+  profileTill.coins += transaction
 
-    profileTill.coins += transaction
+  readWrite.profile(tillId, profileTill)
 
-    fs.writeFile(
-      __dirname.replace(/cmds$/, '') + `profiles/${tillId}.json`,
-      JSON.stringify(profileTill),
-      err => {}
-    )
-    fs.appendFile(
-      __dirname.replace(/cmds$/, '') + `transactionLogs.log`,
-      `REWARD from${message.author.username} till ${
-        message.mentions.users.first().username
-      } - ${transaction} coins\n`,
-      err => {}
-    )
+  fs.appendFile(
+    __dirname.replace(/cmds$/, '') + `transactionLogs.log`,
+    `REWARD from${message.author.username} till ${
+      message.mentions.users.first().username
+    } - ${transaction} coins\n`,
+    err => err && console.error(err)
+  )
 
-    message.reply(`Было успешно переведено ${transaction} монет`)
-  } catch (err) {
-    message.reply("I don't know hwo is this")
-  }
+  message.reply(`Было успешно переведено ${transaction} монет`)
 }
 
 module.exports.help = {

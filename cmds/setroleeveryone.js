@@ -1,7 +1,3 @@
-const Discord = module.require('discord.js')
-// const fs = require('fs');
-// const client = new Discord.Client();
-
 module.exports.run = async (client, message, args) => {
   if (
     !message.member.roles.cache.has('691736168693497877') && //Модератор
@@ -14,7 +10,7 @@ module.exports.run = async (client, message, args) => {
 
   const nameFromArgs = args[0]
 
-  args[1] = 'basic' //==============================================
+  args[1] = 'basic'
 
   const isBasic = args[1] === 'basic' ? true : false
   const delIfAnother = args[2] === 'delIfAnother' ? true : false
@@ -48,8 +44,6 @@ module.exports.run = async (client, message, args) => {
         i++
       })
 
-  console.log(i)
-  console.log(new Date())
   message.reply(`${i} людям была выдана роль Яммик`)
   return i
 }

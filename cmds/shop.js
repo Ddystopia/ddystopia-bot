@@ -1,26 +1,18 @@
-const Discord = module.require('discord.js')
-const fs = require('fs')
+const { MessageEmbed } = require('discord.js')
+const readWrite = require('../utils/readWriteFile')
 
 let roles = require(__dirname.replace(/cmds$/, '') + `roles.json`)
 
 class RolesBoard {
   static shopList(message) {
-    const shopList = new Discord.MessageEmbed()
+    const shopList = new MessageEmbed()
       .setColor('#0099ff')
       .setTitle('Роли')
       .setThumbnail(
         'https://cdn.discordapp.com/attachments/402109825896415232/692820764478668850/yummylogo.jpg'
       )
       .setTimestamp()
-    let rolesClone = {}
-    Object.entries(roles)
-      .sort((a, b) => +b[1] - +a[1])
-      .forEach(e => {
-        if (!message.member.guild.roles.cache.has(e[0]) || !e[1]) return
-        rolesClone[e[0]] = e[1]
-      })
-    roles = rolesClone
-    rolesClone = null
+    roles = sortAndCleanRoles(roles, message)
     let i = 0
     for (const roleId in roles) {
       if (!roles.hasOwnProperty(roleId)) continue
@@ -29,11 +21,7 @@ class RolesBoard {
       const cost = roles[roleId]
       shopList.addField(++i, `${role.name} - ${cost} монет`)
     }
-    fs.writeFile(
-      __dirname.replace(/cmds$/, '') + `roles.json`,
-      JSON.stringify(roles),
-      err => (err ? console.log(err) : null)
-    )
+    readWrite.file('roles.json', roles)
     return message.reply(shopList)
   }
   static addRole(message, args) {
@@ -52,27 +40,11 @@ class RolesBoard {
     } catch (err) {
       return message.reply("I don't know what is it")
     }
+
     const role = message.member.guild.roles.cache.get(roleId)
     roles[role.id] = +args[args.length - 1]
-    fs.writeFile(
-      __dirname.replace(/cmds$/, '') + `roles.json`,
-      JSON.stringify(roles),
-      err => (err ? console.log(err) : null)
-    )
-    let rolesClone = {}
-    Object.entries(roles)
-      .sort((a, b) => +b[1] - +a[1])
-      .forEach(e => {
-        if (!message.member.guild.roles.cache.has(e[0]) || !e[1]) return
-        rolesClone[e[0]] = e[1]
-      })
-    roles = rolesClone
-    rolesClone = null
-    fs.writeFile(
-      __dirname.replace(/cmds$/, '') + `roles.json`,
-      JSON.stringify(roles),
-      err => (err ? console.log(err) : null)
-    )
+    roles = sortAndCleanRoles(roles, message)
+    readWrite.file('roles.json', roles)
 
     RolesBoard.shopList(message)
   }
@@ -92,68 +64,52 @@ class RolesBoard {
       return message.reply("I don't know what is it")
     }
     const role = message.member.guild.roles.cache.get(roleId)
+
     roles[role.id] = null
-    fs.writeFile(
-      __dirname.replace(/cmds$/, '') + `roles.json`,
-      JSON.stringify(roles),
-      err => (err ? console.log(err) : null)
-    )
-    let rolesClone = {}
-    Object.entries(roles)
-      .sort((a, b) => +b[1] - +a[1])
-      .forEach(e => (rolesClone[e[0]] = e[1]))
-    roles = rolesClone
-    rolesClone = null
-    fs.writeFile(
-      __dirname.replace(/cmds$/, '') + `roles.json`,
-      JSON.stringify(roles),
-      err => (err ? console.log(err) : null)
-    )
+    roles = sortAndCleanRoles(roles, message)
+    readWrite.file('roles.json', roles)
 
     RolesBoard.shopList(message)
   }
   static buy(message, args) {
-    if (isNaN(args[1])) return
+    if (isNaN(+args[1])) return
     const roleId = Object.keys(roles)[+args[1] - 1]
     const role = message.member.guild.roles.cache.get(roleId)
     if (!role) return message.reply(roleName + ' : Такая роль не существует')
+
     const cost = roles[role.id]
     if (!cost) return message.reply(roleName + ' : Такая роль не продаётся')
-    const fromId = message.author.id
-    const profileFrom = require(__dirname.replace(/cmds$/, '') +
-      `profiles/${fromId}.json`)
-    if (profileFrom.coins < cost) return message.reply('Не хватает монет')
+
+    const id = message.author.id
+    const profile = readWrite.profile(id)
+
+    if (profile.coins < cost) return message.reply('Не хватает монет')
     if (message.member.roles.cache.has(role.id))
       return message.reply('У вас уже есть эта роль')
-    profileFrom.coins -= cost
+    profile.coins -= cost
     message.member.roles.add(role)
-    message.reply('Succcess')
-    fs.writeFile(
-      __dirname.replace(/cmds$/, '') + `profiles/${fromId}.json`,
-      JSON.stringify(profileFrom),
-      err => (err ? console.log(err) : null)
-    )
+    message.react('✅')
+    readWrite.profile(id, profile)
   }
   static sell(message, args) {
-    if (isNaN(args[1])) return
+    if (isNaN(+args[1])) return
     const roleId = Object.keys(roles)[+args[1] - 1]
     const role = message.member.guild.roles.cache.get(roleId)
     if (!role) return message.reply(roleName + ' : Такая роль не существует')
+
     const cost = roles[role.id]
     if (!cost) return message.reply(roleName + ' : Такая роль не продаётся')
-    const fromId = message.author.id
-    const profileFrom = require(__dirname.replace(/cmds$/, '') +
-      `profiles/${fromId}.json`)
+
+    const id = message.author.id
+    const profile = readWrite.profile(id)
+
     if (!message.member.roles.cache.has(role.id))
       return message.reply('У вас нет этой роли')
-    profileFrom.coins += cost * 0.9
+
+    profile.coins += cost * 0.9
     message.member.roles.remove(role)
-    message.reply(`Succcess, you get ${cost * 0.9} coins`)
-    fs.writeFile(
-      __dirname.replace(/cmds$/, '') + `profiles/${fromId}.json`,
-      JSON.stringify(profileFrom),
-      err => (err ? console.log(err) : null)
-    )
+    message.reply(`Success, you get ${cost * 0.9} coins`)
+    readWrite.profile(id, profile)
   }
 }
 
@@ -181,6 +137,18 @@ module.exports.run = async (client, message, args) => {
       message.reply('Я не знаю, что вы от меня хотите')
   }
 }
+
+function sortAndCleanRoles(roles, message) {
+  const rolesClone = {}
+  Object.entries(roles)
+    .sort((a, b) => +b[1] - +a[1])
+    .forEach(e => {
+      if (!message.member.guild.roles.cache.has(e[0]) || !e[1]) return
+      rolesClone[e[0]] = e[1]
+    })
+  return rolesClone
+}
+
 module.exports.help = {
   name: 'shop',
 }

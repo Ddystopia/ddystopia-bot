@@ -1,4 +1,3 @@
-const Discord = module.require('discord.js')
 let words = []
 
 module.exports.run = async (client, message, propArgs) => {
@@ -19,7 +18,7 @@ module.exports.run = async (client, message, propArgs) => {
         let newWords = JSON.parse(args.join(' '))
         words = newWords
       } catch (e) {
-        return message.react('✅')
+        return message.react('❌')
       }
       message.react('✅')
       break

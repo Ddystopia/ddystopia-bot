@@ -1,4 +1,4 @@
-const Discord = module.require('discord.js')
+const { MessageEmbed } = require('discord.js')
 const client = require('nekos.life')
 const { nsfw } = new client()
 const { reddit } = require('../utils/redditHentai')
@@ -32,7 +32,7 @@ module.exports.run = async (client, message, args) => {
   if (number > MAX_IMAGES_COUNT) number = MAX_IMAGES_COUNT
   for (let i = number; i >= 1; i--) {
     const urlObj = await getImageURL(args[0])
-    const embed = new Discord.MessageEmbed()
+    const embed = new MessageEmbed()
       .setColor(rainbow[counter])
       .setImage(urlObj.url)
       .setFooter(urlObj.url)
