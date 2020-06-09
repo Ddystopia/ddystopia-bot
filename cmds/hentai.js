@@ -22,7 +22,7 @@ const getImageURL = async genreProps => {
     const url = await reddit.getImage(genre)
     return { url }
   } catch (e) {
-		return randImage()
+    return randImage()
   }
 }
 
@@ -32,7 +32,10 @@ module.exports.run = async (client, message, args) => {
   if (number > MAX_IMAGES_COUNT) number = MAX_IMAGES_COUNT
   for (let i = number; i >= 1; i--) {
     const urlObj = await getImageURL(args[0])
-    const embed = new Discord.MessageEmbed().setColor(rainbow[counter]).setImage(urlObj.url)
+    const embed = new Discord.MessageEmbed()
+      .setColor(rainbow[counter])
+      .setImage(urlObj.url)
+      .setFooter(urlObj.url)
     message.channel.send(embed)
     counter = counter < 60 - 1 ? ++counter : 0
   }
