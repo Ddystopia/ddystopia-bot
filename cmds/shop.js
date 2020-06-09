@@ -29,8 +29,10 @@ class RolesBoard {
       const cost = roles[roleId]
       shopList.addField(++i, `${role.name} - ${cost} монет`)
     }
-    fs.writeFile(__dirname.replace(/cmds$/, '') + `roles.json`, JSON.stringify(roles), err =>
-      err ? console.log(err) : null
+    fs.writeFile(
+      __dirname.replace(/cmds$/, '') + `roles.json`,
+      JSON.stringify(roles),
+      err => (err ? console.log(err) : null)
     )
     return message.reply(shopList)
   }
@@ -52,8 +54,10 @@ class RolesBoard {
     }
     const role = message.member.guild.roles.cache.get(roleId)
     roles[role.id] = +args[args.length - 1]
-    fs.writeFile(__dirname.replace(/cmds$/, '') + `roles.json`, JSON.stringify(roles), err =>
-      err ? console.log(err) : null
+    fs.writeFile(
+      __dirname.replace(/cmds$/, '') + `roles.json`,
+      JSON.stringify(roles),
+      err => (err ? console.log(err) : null)
     )
     let rolesClone = {}
     Object.entries(roles)
@@ -64,8 +68,10 @@ class RolesBoard {
       })
     roles = rolesClone
     rolesClone = null
-    fs.writeFile(__dirname.replace(/cmds$/, '') + `roles.json`, JSON.stringify(roles), err =>
-      err ? console.log(err) : null
+    fs.writeFile(
+      __dirname.replace(/cmds$/, '') + `roles.json`,
+      JSON.stringify(roles),
+      err => (err ? console.log(err) : null)
     )
 
     RolesBoard.shopList(message)
@@ -87,8 +93,10 @@ class RolesBoard {
     }
     const role = message.member.guild.roles.cache.get(roleId)
     roles[role.id] = null
-    fs.writeFile(__dirname.replace(/cmds$/, '') + `roles.json`, JSON.stringify(roles), err =>
-      err ? console.log(err) : null
+    fs.writeFile(
+      __dirname.replace(/cmds$/, '') + `roles.json`,
+      JSON.stringify(roles),
+      err => (err ? console.log(err) : null)
     )
     let rolesClone = {}
     Object.entries(roles)
@@ -96,8 +104,10 @@ class RolesBoard {
       .forEach(e => (rolesClone[e[0]] = e[1]))
     roles = rolesClone
     rolesClone = null
-    fs.writeFile(__dirname.replace(/cmds$/, '') + `roles.json`, JSON.stringify(roles), err =>
-      err ? console.log(err) : null
+    fs.writeFile(
+      __dirname.replace(/cmds$/, '') + `roles.json`,
+      JSON.stringify(roles),
+      err => (err ? console.log(err) : null)
     )
 
     RolesBoard.shopList(message)
@@ -110,9 +120,11 @@ class RolesBoard {
     const cost = roles[role.id]
     if (!cost) return message.reply(roleName + ' : Такая роль не продаётся')
     const fromId = message.author.id
-    const profileFrom = require(__dirname.replace(/cmds$/, '') + `profiles/${fromId}.json`)
+    const profileFrom = require(__dirname.replace(/cmds$/, '') +
+      `profiles/${fromId}.json`)
     if (profileFrom.coins < cost) return message.reply('Не хватает монет')
-    if (message.member.roles.cache.has(role.id)) return message.reply('У вас уже есть эта роль')
+    if (message.member.roles.cache.has(role.id))
+      return message.reply('У вас уже есть эта роль')
     profileFrom.coins -= cost
     message.member.roles.add(role)
     message.reply('Succcess')
@@ -130,8 +142,10 @@ class RolesBoard {
     const cost = roles[role.id]
     if (!cost) return message.reply(roleName + ' : Такая роль не продаётся')
     const fromId = message.author.id
-    const profileFrom = require(__dirname.replace(/cmds$/, '') + `profiles/${fromId}.json`)
-    if (!message.member.roles.cache.has(role.id)) return message.reply('У вас нет этой роли')
+    const profileFrom = require(__dirname.replace(/cmds$/, '') +
+      `profiles/${fromId}.json`)
+    if (!message.member.roles.cache.has(role.id))
+      return message.reply('У вас нет этой роли')
     profileFrom.coins += cost * 0.9
     message.member.roles.remove(role)
     message.reply(`Succcess, you get ${cost * 0.9} coins`)

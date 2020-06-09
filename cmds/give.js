@@ -14,8 +14,10 @@ module.exports.run = async (client, message, args) => {
   const tillId = message.mentions.users.first().id
   if (!tillId) return
   try {
-    const profileFrom = require(__dirname.replace(/cmds$/, '') + `profiles/${fromId}.json`)
-    const profileTill = require(__dirname.replace(/cmds$/, '') + `profiles/${tillId}.json`)
+    const profileFrom = require(__dirname.replace(/cmds$/, '') +
+      `profiles/${fromId}.json`)
+    const profileTill = require(__dirname.replace(/cmds$/, '') +
+      `profiles/${tillId}.json`)
 
     const transaction = args[0] == 'all' ? profileFrom.coins : +args[0]
 

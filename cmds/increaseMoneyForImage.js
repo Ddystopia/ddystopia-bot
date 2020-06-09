@@ -5,7 +5,8 @@ const games = new Map()
 const lastGames = new Map()
 
 module.exports.run = async (client, message) => {
-  if (games.has(message.author.id)) games.set(message.author.id, games.get(message.author.id) + 1)
+  if (games.has(message.author.id))
+    games.set(message.author.id, games.get(message.author.id) + 1)
   else games.set(message.author.id, 0)
 
   if (lastGames.has(message.author.id)) {
@@ -23,7 +24,8 @@ module.exports.run = async (client, message) => {
   if (!attachmentsNum) return
   let profile
   try {
-    profile = require(__dirname.replace(/cmds$/, '') + `profiles/${message.author.id}.json`)
+    profile = require(__dirname.replace(/cmds$/, '') +
+      `profiles/${message.author.id}.json`)
   } catch (err) {
     profile = {
       coins: 0,

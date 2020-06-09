@@ -65,6 +65,6 @@ const generesControl = {
 const reddit = new RandomReddit(redditConfig)
 
 module.exports.reddit = {
-	getImage: reddit.getImage.bind(reddit),
-	getGenre: generesControl.getGenre
+  getImage: reddit.getImage.bind(reddit),
+  getGenre: generesControl.getGenre,
 }

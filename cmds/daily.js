@@ -7,7 +7,8 @@ module.exports.run = async (client, message, args) => {
   if (message.channel.id !== '693487254911582259') return
   let profile
   try {
-    profile = require(__dirname.replace(/cmds$/, '') + `profiles/${message.author.id}.json`)
+    profile = require(__dirname.replace(/cmds$/, '') +
+      `profiles/${message.author.id}.json`)
   } catch (err) {
     profile = {
       coins: 0,

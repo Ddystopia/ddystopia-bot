@@ -46,7 +46,8 @@ function toFormat(word) {
 }
 
 function isCorrect(word, words) {
-  const correctLastSymbol = !words.length || word[0] === words[words.length - 1].split('').pop()
+  const correctLastSymbol =
+    !words.length || word[0] === words[words.length - 1].split('').pop()
   const simpleLanguage = /^[a-z]+$/.test(word) || /^[а-я]+$/.test(word)
   return !words.includes(word) && correctLastSymbol && word.length > 1 && simpleLanguage
 }

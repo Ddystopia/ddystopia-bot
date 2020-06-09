@@ -33,7 +33,10 @@ module.exports.run = async (client, message, args) => {
       .filter(m => !m.user.bot)
       .forEach(async member => {
         if (member.roles.cache.size < 2) member.roles.add(role)
-        if (member.roles.cache.size > 2 && member.roles.cache.find(r => r.name === nameFromArgs))
+        if (
+          member.roles.cache.size > 2 &&
+          member.roles.cache.find(r => r.name === nameFromArgs)
+        )
           member.roles.remove(role)
         i++
       })

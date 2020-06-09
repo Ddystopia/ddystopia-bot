@@ -13,7 +13,11 @@ class Game {
     this.roles.dons = number >= 10 ? 1 : 0
     this.roles.sherifs = number >= 16 ? 2 : 1
     this.roles.peaceful =
-      number - this.roles.mafias - this.roles.doctors - this.roles.dons - this.roles.sherifs
+      number -
+      this.roles.mafias -
+      this.roles.doctors -
+      this.roles.dons -
+      this.roles.sherifs
     this.aliveNumber = number
     this.corpses = []
     this.players = new Map()
@@ -43,7 +47,8 @@ class Game {
     this.channel.send(embed)
     const list = this.createList()
     let donsId
-    if (this.players.dons) donsId = this.players.dons[0] ? this.players.dons[0].user.id : null
+    if (this.players.dons)
+      donsId = this.players.dons[0] ? this.players.dons[0].user.id : null
     const mafias = this.players.get('mafias')
     const permissionsNight = mafias.map(item => {
       return {
@@ -60,7 +65,9 @@ class Game {
       id: everyone,
       deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
     })
-    this.mafiasChannel.overwritePermissions(permissionsNight).catch(err => console.error(err))
+    this.mafiasChannel
+      .overwritePermissions(permissionsNight)
+      .catch(err => console.error(err))
 
     await timeout(60 * 1000)
     //========================================================================================================
@@ -92,7 +99,9 @@ class Game {
       id: everyone,
       deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
     })
-    this.mafiasChannel.overwritePermissions(permissionsDay).catch(err => console.error(err))
+    this.mafiasChannel
+      .overwritePermissions(permissionsDay)
+      .catch(err => console.error(err))
 
     mafias.map(item => ({
       id: item.user.id,
@@ -106,7 +115,9 @@ class Game {
       //========================================================================================================
       await timeout(15 * 1000)
       const toHeal = Object.entries(this.votes).map(item => item[1])
-      Object.entries(this.votes).forEach(item => (item[0] ? item[0].send('Vote is end') : null))
+      Object.entries(this.votes).forEach(item =>
+        item[0] ? item[0].send('Vote is end') : null
+      )
       tmpCounter = 0
       this.votedPlayers = new Set()
       this.votes = {}
@@ -124,8 +135,12 @@ class Game {
     await timeout(20 * 1000)
 
     const toCheck = Object.entries(this.votes)
-    toCheck.forEach(item => (item[0] ? item[0].send(this.alivePlayers[item[1] + 1].role) : null))
-    Object.entries(this.votes).forEach(item => (item[0] ? item[0].send('Vote is end') : null))
+    toCheck.forEach(item =>
+      item[0] ? item[0].send(this.alivePlayers[item[1] + 1].role) : null
+    )
+    Object.entries(this.votes).forEach(item =>
+      item[0] ? item[0].send('Vote is end') : null
+    )
     tmpCounter = 0
     this.votedPlayers = new Set()
     this.votes = {}
@@ -141,7 +156,9 @@ class Game {
       toDonCheck.forEach(item =>
         item[0] ? item[0].send(this.alivePlayers[item[1] + 1].role) : null
       )
-      Object.entries(this.votes).forEach(item => (item[0] ? item[0].send('Vote is end') : null))
+      Object.entries(this.votes).forEach(item =>
+        item[0] ? item[0].send('Vote is end') : null
+      )
       tmpCounter = 0
       this.votedPlayers = new Set()
       this.votes = {}
@@ -178,7 +195,8 @@ class Game {
     this.votes = {}
     this.vote = false
     const username =
-      this.alivePlayers[toKill].member.nickname || this.alivePlayers[toKill].member.user.username
+      this.alivePlayers[toKill].member.nickname ||
+      this.alivePlayers[toKill].member.user.username
     this.channel.send(`${username} has been killed`)
     winner = this.checkWinner()
     if (winner) return this.win(winner)
@@ -198,7 +216,8 @@ class Game {
     this.players.get(winner).forEach(item => {
       let profile
       try {
-        profile = require(__dirname.replace(/cmds$/, '') + `profiles/${item.user.id}.json`)
+        profile = require(__dirname.replace(/cmds$/, '') +
+          `profiles/${item.user.id}.json`)
       } catch (err) {
         profile = {
           coins: 0,
@@ -216,7 +235,8 @@ class Game {
   }
 
   checkWinner() {
-    if (this.players.get('mafias').length >= Math.round(this.aliveNumber / 2)) return 'mafias'
+    if (this.players.get('mafias').length >= Math.round(this.aliveNumber / 2))
+      return 'mafias'
     else if (this.players.get('mafias').length <= 0) return 'peaceful'
     else return false
   }

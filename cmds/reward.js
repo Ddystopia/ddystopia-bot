@@ -16,7 +16,8 @@ module.exports.run = async (client, message, args) => {
   const tillId = message.mentions.users.first().id
   if (!tillId) return
   try {
-    const profileTill = require(__dirname.replace(/cmds$/, '') + `profiles/${tillId}.json`)
+    const profileTill = require(__dirname.replace(/cmds$/, '') +
+      `profiles/${tillId}.json`)
 
     const transaction = args[0] === '-all' ? -profileTill.coins : +args[0]
 
@@ -37,7 +38,7 @@ module.exports.run = async (client, message, args) => {
 
     message.reply(`Было успешно переведено ${transaction} монет`)
   } catch (err) {
-    message.reply('I don\'t know hwo is this')
+    message.reply("I don't know hwo is this")
   }
 }
 

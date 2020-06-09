@@ -21,7 +21,8 @@ module.exports.run = async (bot, message, args) => {
   if (isNaN(+args[0]) && args[0] != 'all') return
   if (+args[0] <= 0) return
 
-  if (games.has(message.author.id)) games.set(message.author.id, games.get(message.author.id) + 1)
+  if (games.has(message.author.id))
+    games.set(message.author.id, games.get(message.author.id) + 1)
   else games.set(message.author.id, 0)
 
   if (lastGames.has(message.author.id)) {
@@ -33,7 +34,8 @@ module.exports.run = async (bot, message, args) => {
 
   const userGames = games.get(message.author.id)
   try {
-    profile = require(__dirname.replace(/cmds$/, '') + `profiles/${message.author.id}.json`)
+    profile = require(__dirname.replace(/cmds$/, '') +
+      `profiles/${message.author.id}.json`)
   } catch (err) {
     profile = {
       coins: 0,
@@ -70,7 +72,9 @@ module.exports.run = async (bot, message, args) => {
   profile.coins += Math.floor(bet * factor)
   exampleEmbed.addField(
     'Расчёт',
-    `Вы выиграли ${Math.floor(bet * factor)} монет\nНа вашем счету теперь ${profile.coins} монет\n`
+    `Вы выиграли ${Math.floor(bet * factor)} монет\nНа вашем счету теперь ${
+      profile.coins
+    } монет\n`
   )
   fs.writeFile(
     __dirname.replace(/cmds$/, '') + `profiles/${message.author.id}.json`,

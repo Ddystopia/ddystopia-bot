@@ -22,7 +22,11 @@ class User {
       return `On this sum you must have more then ${+(sum / 15).toFixed(3)} coins`
 
     latesCredites.set(this.id, Date.now() + 3 * 3600 * 1000)
-    const percent = Math.max(-((Math.E * 6) ** (sum / 1e4) - 55), -(sum / 1e4 - 1) * 5 + 25, 15)
+    const percent = Math.max(
+      -((Math.E * 6) ** (sum / 1e4) - 55),
+      -(sum / 1e4 - 1) * 5 + 25,
+      15
+    )
     this.credit = new Credit(sum, days, percent, this.id)
     return true
   }
@@ -133,7 +137,8 @@ class Credit extends Deal {
     if (rec) makeBancrot()
     else {
       this.sum *= 1.5
-      this.sum -= profile.coins + (profiles[userId].deposit ? profiles[userId].deposit.sum : 0)
+      this.sum -=
+        profile.coins + (profiles[userId].deposit ? profiles[userId].deposit.sum : 0)
       profile.coins = 0
       if (this.sum > 0) makeBancrot()
 
@@ -156,7 +161,9 @@ class Credit extends Deal {
       profile.coins = 0
       profiles[userId].bancrot = Date.now() + 7 * 12 * 3600 * 1000
       //402105109653487627 - server id
-      const member = client.guilds.cache.get('402105109653487627').members.cache.get(userId)
+      const member = client.guilds.cache
+        .get('402105109653487627')
+        .members.cache.get(userId)
       if (!member) return
       const role = member.guild.roles.cache.find(r => r.name === 'Банкрот')
       member.roles.add(role)
@@ -178,12 +185,16 @@ class ModerationCommands {
       Object.setPrototypeOf(element.credit || {}, Credit.prototype)
       Object.setPrototypeOf(element.deposit || {}, Deposit.prototype)
       if (element.credit)
-        if (element.credit.deadline <= Date.now()) element.credit.badUser(element.id, client)
+        if (element.credit.deadline <= Date.now())
+          element.credit.badUser(element.id, client)
 
       if (element.deposit)
-        if (element.deposit.deadline <= Date.now()) element.deposit.payDeposites(element.id)
+        if (element.deposit.deadline <= Date.now())
+          element.deposit.payDeposites(element.id)
 
-      const member = client.guilds.cache.get('402105109653487627').members.cache.get(`${userId}`)
+      const member = client.guilds.cache
+        .get('402105109653487627')
+        .members.cache.get(`${userId}`)
       if (member) {
         const role = member.guild.roles.cache.find(r => r.name === 'Банкрот')
         if (element.bancrot < Date.now()) {
@@ -205,7 +216,8 @@ class ModerationCommands {
     for (const userId in profiles) {
       if (!profiles.hasOwnProperty(userId)) continue
       const element = profiles[userId]
-      if (element.credit) element.credit.sum += (element.credit.sum * element.credit.percent) / 100
+      if (element.credit)
+        element.credit.sum += (element.credit.sum * element.credit.percent) / 100
       if (element.deposit)
         element.deposit.sum += (element.deposit.sum * element.deposit.percent) / 100
     }
@@ -254,8 +266,10 @@ module.exports.run = async (client, message, args) => {
       coins: 0,
       resentDaily: Date.now() - 1000 * 60 * 60 * (24 + 1),
     }
-    fs.writeFile(`${__dirname}/profiles/${message.author.id}.json`, JSON.stringify(profile), err =>
-      err ? console.log(err) : null
+    fs.writeFile(
+      `${__dirname}/profiles/${message.author.id}.json`,
+      JSON.stringify(profile),
+      err => (err ? console.log(err) : null)
     )
   })
 
@@ -303,7 +317,9 @@ module.exports.run = async (client, message, args) => {
           'Кредит',
           `${
             user.credit
-              ? `Сумма: ${+user.credit.sum.toFixed(3)}\nПроцент: ${+user.credit.percent.toFixed(3)}\nДедлайн: ${new Date(
+              ? `Сумма: ${+user.credit.sum.toFixed(
+                  3
+                )}\nПроцент: ${+user.credit.percent.toFixed(3)}\nДедлайн: ${new Date(
                   user.credit.deadline
                 )}`
               : 'У вас нет кредита'
@@ -313,21 +329,24 @@ module.exports.run = async (client, message, args) => {
           'Депозит',
           `${
             user.deposit
-              ? `Сумма: ${+user.deposit.sum.toFixed(3)}\nПроцент: ${+user.deposit.percent.toFixed(3)}\nДедлайн: ${new Date(
+              ? `Сумма: ${+user.deposit.sum.toFixed(
+                  3
+                )}\nПроцент: ${+user.deposit.percent.toFixed(3)}\nДедлайн: ${new Date(
                   user.deposit.deadline
                 )}`
               : 'У вас нет депозита'
           }`
         )
         .setTimestamp()
-      if (user.bancrot) embed.addField('Банкрот', `Банкрот снимется ${new Date(user.bancrot)}`)
+      if (user.bancrot)
+        embed.addField('Банкрот', `Банкрот снимется ${new Date(user.bancrot)}`)
       message.reply(embed)
       break
     case 'remove':
       response = ModerationCommands.remove(message, args)
       if (typeof response === 'string') message.reply(response)
-			else message.react('✅')
-		break
+      else message.react('✅')
+      break
     default:
       message.reply(`Command ${args[0]} not found`)
   }
