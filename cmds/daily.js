@@ -48,10 +48,10 @@ function formatDuration(seconds) {
   const result =
     res.length > 1 ? res.join(', ').replace(/,([^,]*)$/, ' and' + '$1') : res[0]
   return result
-    .replace('hour', 'час')
     .replace('hours', 'часов')
-    .replace('minute', 'минута')
+    .replace('hour', 'час')
     .replace('minutes', 'минут')
-    .replace('second', 'секунда')
+    .replace('minute', 'минута')
     .replace('seconds', 'секунд')
+    .replace('second', 'секунда')
 }
