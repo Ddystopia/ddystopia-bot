@@ -8,7 +8,7 @@ const write = (path, file) =>
   fs.writeFileSync(path, JSON.stringify(file), err => err && console.error(err))
 
 module.exports.file = (filePathProp, file) => {
-  let response
+  let response = null
   const filePath = `${__dirname.replace(/utils$/, '')}profiles/${filePathProp}`
   try {
     response = require(filePath)
