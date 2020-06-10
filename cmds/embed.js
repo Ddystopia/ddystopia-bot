@@ -10,7 +10,7 @@ module.exports.run = async (client, message, args) => {
   const channel = message.guild.channels.cache.get(args[0].match(/(\d{15,})/)[1])
   if (!channel) return
   try {
-    const messageData = message.content.replace(`>embed ${args[0]}`, '').trim()
+    const messageData = message.content.match(/{.+}/)[0]
     const embedObj = JSON.parse(messageData)
 
     embedObj.author = {

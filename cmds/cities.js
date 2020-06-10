@@ -3,9 +3,8 @@ let words = []
 module.exports.run = async (client, message, propArgs) => {
   if (message.author.bot) return
   const args = propArgs || message.content.split(/\s+/g)
-  if (args.length !== 1) return
   const word = toFormat(args[0])
-  switch (word) {
+  switch (args[0]) {
     case 'clear':
       words = []
       message.react('✅')
@@ -15,7 +14,8 @@ module.exports.run = async (client, message, propArgs) => {
       break
     case 'setWords':
       try {
-        let newWords = JSON.parse(args.join(' '))
+				const json = message.content.match(/\[.+]/)[0]
+        const newWords = JSON.parse(json)
         words = newWords
       } catch (e) {
         return message.react('❌')
@@ -27,6 +27,7 @@ module.exports.run = async (client, message, propArgs) => {
       break
     default:
       if (!word) return
+			if (args.length !== 1) return
       if (isCorrect(word, words)) {
         words.push(word)
         message.react('✅')
