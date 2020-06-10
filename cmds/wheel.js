@@ -41,7 +41,7 @@ module.exports.run = async (bot, message, args) => {
   const factor = factors[rand]
   const arrow = factorsTable[factor.toString()]
 
-  if (profile.coins < bet) return message.reply('Не хватает монет')
+  if (profile.coins < bet) return message.reply(`Не хватает монет`)
   profile.coins -= bet
 
   const embed = new MessageEmbed().setColor('#0099ff')

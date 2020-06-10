@@ -28,7 +28,7 @@ module.exports.run = async (client, message, args) => {
 			
   let jackpot = ''
 
-  if (profile.coins < bet || bet <= 0) return message.reply('Не хватает монет')
+  if (profile.coins < bet || bet <= 0) return message.reply(`Не хватает монет`)
 
   if (betNum == realNum && randomInteger(0, 1) && games.get(message.author.id) < 20)
     jackpot =

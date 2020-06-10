@@ -83,7 +83,7 @@ class RolesBoard {
     const id = message.author.id
     const profile = readWrite.profile(id)
 
-    if (profile.coins < cost) return message.reply('Не хватает монет')
+    if (profile.coins < cost) return message.reply(`Не хватает монет`)
     if (message.member.roles.cache.has(role.id))
       return message.reply('У вас уже есть эта роль')
     profile.coins -= cost

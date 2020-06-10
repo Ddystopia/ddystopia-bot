@@ -15,7 +15,7 @@ module.exports.file = (filePathProp, file) => {
     if (file) write(filePath, file)
   } catch (err) {
     write(filePath, {})
-    response = require(filePath)
+    response = {}
   }
   return response
 }
@@ -28,7 +28,7 @@ module.exports.profile = (id, file) => {
     if (file) write(filePath, file)
   } catch (err) {
     write(filePath, initial)
-    response = require(filePath)
+    response = initial
   }
   return response
 }

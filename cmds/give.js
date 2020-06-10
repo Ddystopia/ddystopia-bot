@@ -17,7 +17,7 @@ module.exports.run = async (client, message, args) => {
 
   const transaction = args[0] == 'all' ? profileFrom.coins : +args[0]
 
-  if (profileFrom.coins < transaction) return message.reply('Не хватает монет')
+  if (profileFrom.coins < transaction) return message.reply(`Не хватает монет`)
 
   profileFrom.coins -= transaction
   profileTill.coins += transaction

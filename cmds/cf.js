@@ -33,7 +33,7 @@ module.exports.run = async (client, message, args) => {
       : randomInteger(0, 99) <= percent
       ? bettedSide
       : loseSide
-  if (profile.coins < bet) return message.reply('Не хватает монет')
+  if (profile.coins < bet) return message.reply(`Не хватает монет`)
 
   const embed = new MessageEmbed().setColor('#0099ff').setImage(sidesImages[side])
 
