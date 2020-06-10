@@ -54,4 +54,5 @@ function formatDuration(seconds) {
     .replace('minute', 'минута')
     .replace('seconds', 'секунд')
     .replace('second', 'секунда')
+    .replace('and', 'и')
 }

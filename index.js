@@ -32,7 +32,7 @@ client.on('ready', () => {
     if (Date.now() - info.lastCalcDate > 24 * 3600 * 1000) {
       client.commands.get('bank').run(client, true, 'calcPercents')
       info.lastCalcDate = Date.now()
-      readWrite('workingInfo.json', info)
+      readWrite.file('workingInfo.json', info)
 
       console.log('Percents have been calked')
       console.log(new Date())
