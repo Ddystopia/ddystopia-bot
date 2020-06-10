@@ -9,7 +9,7 @@ const write = (path, file) =>
 
 module.exports.file = (filePathProp, file) => {
   let response = null
-  const filePath = `${__dirname.replace(/utils$/, '')}profiles/${filePathProp}`
+  const filePath = `${__dirname.replace(/utils$/, '')}${filePathProp}`
   try {
     response = require(filePath)
     if (file) write(filePath, file)
