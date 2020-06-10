@@ -143,7 +143,7 @@ function sortAndCleanRoles(roles, message) {
   Object.entries(roles)
     .sort((a, b) => +b[1] - +a[1])
     .forEach(e => {
-      if (!message.member.guild.roles.cache.has(e[0]) || !e[1]) return
+      if (!message.member.guild.roles.cache.has(e[0]) || e[1] == null) return
       rolesClone[e[0]] = e[1]
     })
   return rolesClone
