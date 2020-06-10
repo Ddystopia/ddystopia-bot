@@ -1,6 +1,6 @@
-Yarn / npm i to install modules
+`Yarn / npm i to install modules`
 
-You must create these files:
+### `You must create these files:`
 
 - bank_profiles.json content: {}
 - config.json content: {
