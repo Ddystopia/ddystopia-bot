@@ -41,7 +41,7 @@ module.exports.run = async (client, message, propArgs) => {
 
 function toFormat(word) {
   if (!word) return null
-  word = word.toLowerCase().replace(/[ьъы]$/g, '')
+  word = word.toLowerCase().replace(/[ьъы]$/g, '').replace(/ё/g, 'е')
   return word
 }
 
