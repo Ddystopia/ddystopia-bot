@@ -1,8 +1,7 @@
 const Discord = require('discord.js')
-const fs = require('fs')
 const readWrite = require('../utils/readWriteFile')
 const profiles = require(__dirname.replace(/cmds$/, '') + 'bank_profiles.json')
-const latesCredites = new Map()
+const latestCredits = new Map()
 
 class User {
   constructor(userId) {
@@ -22,7 +21,7 @@ class User {
     if (sum / profile.coins > 15 && profile.coins > 200)
       return `On this sum you must have more then ${+(sum / 15).toFixed(3)} coins`
 
-    latesCredites.set(this.id, Date.now() + 3 * 3600 * 1000)
+    latestCredits.set(this.id, Date.now() + 3 * 3600 * 1000)
     const percent = Math.max(
       -((Math.E * 6) ** (sum / 1e4) - 55),
       -(sum / 1e4 - 1) * 5 + 25,
@@ -82,7 +81,7 @@ class Deposit extends Deal {
     readWrite.profile(userId, profile)
     return true
   }
-  payDeposites(userId) {
+  payDeposits(userId) {
     const profile = readWrite.profile(userId)
     profile.coins += Math.floor(+this.sum)
     profiles[userId].deposit = null
@@ -100,8 +99,8 @@ class Credit extends Deal {
   repay(sum, userId) {
     const profile = readWrite.profile(userId)
     if (isNaN(+sum)) return
-    if (latesCredites.has(userId)) {
-      if (latesCredites.get(userId) < Date.now()) latesCredites.delete(userId)
+    if (latestCredits.has(userId)) {
+      if (latestCredits.get(userId) < Date.now()) latestCredits.delete(userId)
       else return 'Подождите немного'
     }
     if (sum > profile.coins) {
@@ -239,13 +238,15 @@ module.exports.run = async (client, message, args) => {
   switch (args[0]) {
     case 'create':
       if (args[1] === 'credit')
-        //prettier ignore
         response = profiles[userId].createCredit(args[2], args[3], userId)
       else if (args[1] === 'deposit')
         response = profiles[userId].createDeposit(args[2], args[3], userId)
+
       if (typeof response === 'string') message.reply(response)
-      else message.react('✅')
+      else if (response) message.react('✅')
+      else message.react('❌')
       break
+
     case 'repay':
       if (args[1] === 'credit') {
         if (!profiles[userId].credit) return message.reply("You don't have a credit")
@@ -254,9 +255,19 @@ module.exports.run = async (client, message, args) => {
         if (!profiles[userId].deposit) return message.reply("You don't have a deposit")
         response = profiles[userId].deposit.repay(args[2], userId)
       }
+
       if (typeof response === 'string') message.reply(response)
-      else message.react('✅')
+      else if (response) message.react('✅')
+      else message.react('❌')
       break
+
+    case 'remove':
+      response = ModerationCommands.remove(message, args)
+      if (typeof response === 'string') message.reply(response)
+      else if (response) message.react('✅')
+      else message.react('❌')
+      break
+
     case 'info':
       const user = args[1]
         ? profiles[args[1].match(/(\d{15,})/)[1]] || profiles[userId]
@@ -271,11 +282,9 @@ module.exports.run = async (client, message, args) => {
           'Кредит',
           `${
             user.credit
-              ? `Сумма: ${+user.credit.sum.toFixed(
-                  3
-                )}\nПроцент: ${+user.credit.percent.toFixed(3)}\nДедлайн: ${new Date(
-                  user.credit.deadline
-                )}`
+              ? `Сумма: ${+user.credit.sum.toFixed(3)}
+                Процент: ${+user.credit.percent.toFixed(3)}
+                Дедлайн: ${new Date(user.credit.deadline)}`
               : 'У вас нет кредита'
           }`
         )
@@ -283,11 +292,9 @@ module.exports.run = async (client, message, args) => {
           'Депозит',
           `${
             user.deposit
-              ? `Сумма: ${+user.deposit.sum.toFixed(
-                  3
-                )}\nПроцент: ${+user.deposit.percent.toFixed(3)}\nДедлайн: ${new Date(
-                  user.deposit.deadline
-                )}`
+              ? `Сумма: ${+user.deposit.sum.toFixed(3)}
+                Процент: ${+user.deposit.percent.toFixed(3)}
+                Дедлайн: ${new Date(user.deposit.deadline)}`
               : 'У вас нет депозита'
           }`
         )
@@ -295,11 +302,6 @@ module.exports.run = async (client, message, args) => {
       if (user.bancrot)
         embed.addField('Банкрот', `Банкрот снимется ${new Date(user.bancrot)}`)
       message.reply(embed)
-      break
-    case 'remove':
-      response = ModerationCommands.remove(message, args)
-      if (typeof response === 'string') message.reply(response)
-      else message.react('✅')
       break
     default:
       message.reply(`Command ${args[0]} not found`)
