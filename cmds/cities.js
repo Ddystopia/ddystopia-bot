@@ -10,11 +10,15 @@ module.exports.run = async (client, message, propArgs) => {
       message.react('✅')
       break
     case 'getWords':
-      message.reply(JSON.stringify(words))
+      let json = JSON.stringify(words).split('')
+      while (json.length) {
+        message.channel.send(json.slice(0, 1900).join(''))
+        json = json.slice(1900)
+      }
       break
     case 'setWords':
       try {
-				const json = message.content.match(/\[.+]/)[0]
+        const json = message.content.match(/\[.+]/)[0]
         const newWords = JSON.parse(json)
         words = newWords
       } catch (e) {
@@ -27,7 +31,7 @@ module.exports.run = async (client, message, propArgs) => {
       break
     default:
       if (!word) return
-			if (args.length !== 1) return
+      if (args.length !== 1) return
       if (isCorrect(word, words)) {
         words.push(word)
         message.react('✅')
@@ -41,7 +45,10 @@ module.exports.run = async (client, message, propArgs) => {
 
 function toFormat(word) {
   if (!word) return null
-  word = word.toLowerCase().replace(/[ьъы]$/g, '').replace(/ё/g, 'е')
+  word = word
+    .toLowerCase()
+    .replace(/[ьъы]$/g, '')
+    .replace(/ё/g, 'е')
   return word
 }
 
