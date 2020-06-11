@@ -163,7 +163,7 @@ class ModerationCommands {
 
       if (element.deposit)
         if (element.deposit.deadline <= Date.now())
-          element.deposit.payDeposites(element.id)
+          element.deposit.payDeposits(element.id)
 
       const member = client.guilds.cache
         .get('402105109653487627')
