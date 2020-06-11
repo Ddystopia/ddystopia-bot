@@ -31,7 +31,7 @@ module.exports.run = async (client, message, propArgs) => {
         const json = message.content.match(/\[.+]/)[0]
         const newWords = JSON.parse(json)
         if (!Array.isArray(newWords)) throw new Error()
-        words = words.concat(words, newWords)
+        words = words.concat(newWords)
       } catch (e) {
         return message.react('❌')
       }
