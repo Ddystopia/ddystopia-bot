@@ -19,7 +19,7 @@ class RolesBoard {
       if (!roles[roleId]) continue
       const role = message.member.guild.roles.cache.get(roleId)
       const cost = roles[roleId]
-      shopList.addField(++i, `${role.name} - ${cost} монет`)
+      shopList.addField(++i, `${role} - ${cost} монет`)
     }
     readWrite.file('roles.json', roles)
     return message.reply(shopList)
