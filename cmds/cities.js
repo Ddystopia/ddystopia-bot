@@ -26,6 +26,17 @@ module.exports.run = async (client, message, propArgs) => {
       }
       message.react('✅')
       break
+    case 'addWords':
+      try {
+        const json = message.content.match(/\[.+]/)[0]
+        const newWords = JSON.parse(json)
+        if (!Array.isArray(newWords)) throw new Error()
+        words = [...words, ...newWords]
+      } catch (e) {
+        return message.react('❌')
+      }
+      message.react('✅')
+      break
     case 'symbol':
       message.reply(words.length > 0 ? words[words.length - 1].split('').pop() : 'any')
       break
