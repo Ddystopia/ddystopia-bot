@@ -283,8 +283,8 @@ module.exports.run = async (client, message, args) => {
           `${
             user.credit
               ? `Сумма: ${+user.credit.sum.toFixed(3)}
-                Процент: ${+user.credit.percent.toFixed(3)}
-                Дедлайн: ${new Date(user.credit.deadline)}`
+Процент: ${+user.credit.percent.toFixed(3)}
+Дедлайн: ${new Date(user.credit.deadline)}`
               : 'У вас нет кредита'
           }`
         )
@@ -293,8 +293,8 @@ module.exports.run = async (client, message, args) => {
           `${
             user.deposit
               ? `Сумма: ${+user.deposit.sum.toFixed(3)}
-                Процент: ${+user.deposit.percent.toFixed(3)}
-                Дедлайн: ${new Date(user.deposit.deadline)}`
+Процент: ${+user.deposit.percent.toFixed(3)}
+Дедлайн: ${new Date(user.deposit.deadline)}`
               : 'У вас нет депозита'
           }`
         )
