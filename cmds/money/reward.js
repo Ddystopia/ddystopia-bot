@@ -1,5 +1,5 @@
-const fs = require('fs')
-const readWrite = require('../utils/readWriteFile')
+const { appendFile } = require('fs')
+const readWrite = require('../../utils/readWriteFile')
 
 module.exports.run = async (client, message, args) => {
   if (
@@ -21,8 +21,8 @@ module.exports.run = async (client, message, args) => {
 
   readWrite.profile(tillId, profileTill)
 
-  fs.appendFile(
-    __dirname.replace(/cmds$/, '') + `transactionLogs.log`,
+  appendFile(
+    __dirname.replace(/cmds.+$/, '') + `transactionLogs.log`,
     `REWARD from${message.author.username} till ${
       message.mentions.users.first().username
     } - ${transaction} coins\n`,

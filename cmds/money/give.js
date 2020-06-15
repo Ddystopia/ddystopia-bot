@@ -1,8 +1,7 @@
-const fs = require('fs')
-const readWrite = require('../utils/readWriteFile')
+const { appendFile } = require('fs')
+const readWrite = require('../../utils/readWriteFile')
 
 module.exports.run = async (client, message, args) => {
-  if (message.channel.id !== '693487254911582259') return
   if (!args) return
   if (isNaN(+args[0])) return
   if (+args[0] <= 0 || +args[0] > 1e4) return
@@ -25,8 +24,8 @@ module.exports.run = async (client, message, args) => {
   readWrite.profile(fromId, profileFrom)
   readWrite.profile(tillId, profileTill)
 
-  fs.appendFile(
-    __dirname.replace(/cmds$/, '') + `transactionLogs.log`,
+  appendFile(
+    __dirname.replace(/cmds.+$/, '') + `transactionLogs.log`,
     `GIVE from ${message.author.username} till ${
       message.mentions.users.first().username
     } - ${transaction} coins\n`,

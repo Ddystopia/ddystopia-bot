@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js')
-const readWrite = require('../utils/readWriteFile')
+const readWrite = require('../../utils/readWriteFile')
 
 module.exports.run = async (client, message, args) => {
   let userId

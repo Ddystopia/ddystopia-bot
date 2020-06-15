@@ -1,8 +1,7 @@
-const randomInteger = require('../utils/randomInteger.js')
-const readWrite = require('../utils/readWriteFile')
+const randomInteger = require('../../utils/randomInteger.js')
+const readWrite = require('../../utils/readWriteFile')
 
 module.exports.run = async (client, message, args) => {
-  if (message.channel.id !== '693487254911582259') return
   const profile = readWrite.profile(message.author.id)
 
   if (Date.now() - profile.resentDaily < 1000 * 60 * 60 * 12)

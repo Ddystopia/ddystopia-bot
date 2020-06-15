@@ -12,14 +12,23 @@ const { token, prefix } = require('./config.json')
 
 client.commands = new Collection()
 
-fs.readdir('./cmds/', (err, files) => {
-  if (err) throw new Error(err)
-  const jsFiles = files.filter(f => f.split('.').pop() === 'js')
-  if (jsFiles.length <= 0) throw new Error('No files to download')
-  console.log(`${jsFiles.length} commands have been loaded`)
-  jsFiles.forEach((f, i) => {
-    const props = require(`./cmds/${f}`)
-    client.commands.set(props.help.name, props)
+const getDirs = p => {
+  return fs.readdirSync(p).filter(f => fs.statSync(`${p}${f}`).isDirectory())
+}
+
+getDirs('./cmds/').forEach(dir => {
+  fs.readdir(`./cmds/${dir}`, (err, files) => {
+    if (err) return console.error(err)
+
+    let jsFiles = files.filter(f => f.split('.').pop() === 'js')
+    if (!jsFiles.length) return console.error(`Ошибка загрузки модуля [${dir}]`)
+    console.log(`${jsFiles.length} files in module [${dir}] have been loaded`)
+
+    jsFiles.forEach((f, i) => {
+      const props = require(`./cmds/${dir}/${f}`)
+      if (props.help.cmdList) for (let name of names) client.commands.set(name, props)
+      else client.commands.set(props.help.name, props)
+    })
   })
 })
 
@@ -66,7 +75,7 @@ client.on('message', async message => {
   const cmd = client.commands.get(command)
   if (command === 'help') return message.reply('Закреп')
 
-  if (cmd) cmd.run(client, message, args)
+  if (cmd) cmd.run(client, message, args, command)
   else message.reply('You need to enter a valid command!')
 })
 

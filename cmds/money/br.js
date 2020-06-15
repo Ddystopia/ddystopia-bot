@@ -1,7 +1,8 @@
 const { MessageEmbed } = require('discord.js')
-const useUserGames = require('../utils/useUserGames')
-const randomInteger = require('../utils/randomInteger')
-const readWrite = require('../utils/readWriteFile')
+const useUserGames = require('../../utils/useUserGames')
+const randomInteger = require('../../utils/randomInteger')
+const rainbow = require('../../utils/rainbow.js')
+const readWrite = require('../../utils/readWriteFile')
 const games = new Map()
 const lastGames = new Map()
 
@@ -34,7 +35,7 @@ module.exports.run = async (client, message, args) => {
     jackpot =
       ', но вам улыбнулясь удача, поэтому вы получаете надбавку в 10000 и множитель на выиграш 30!!!'
 
-  const embed = new MessageEmbed().setColor('#0099ff')
+  const embed = new MessageEmbed().setColor(rainbow())
 
   if (realNum >= 65) {
     let factor = realNum == 100 ? 7 : realNum >= 90 ? 3.5 : 2

@@ -1,7 +1,8 @@
 const { MessageEmbed } = require('discord.js')
-const randomInteger = require('../utils/randomInteger.js')
-const useUserGames = require('../utils/useUserGames')
-const readWrite = require('../utils/readWriteFile')
+const randomInteger = require('../../utils/randomInteger.js')
+const useUserGames = require('../../utils/useUserGames')
+const rainbow = require('../../utils/rainbow.js')
+const readWrite = require('../../utils/readWriteFile')
 const games = new Map()
 const lastGames = new Map()
 
@@ -44,7 +45,7 @@ module.exports.run = async (bot, message, args) => {
   if (profile.coins < bet) return message.reply(`Не хватает монет`)
   profile.coins -= bet
 
-  const embed = new MessageEmbed().setColor('#0099ff')
+  const embed = new MessageEmbed().setColor(rainbow())
 
   factors.splice(4, 0, arrow)
 

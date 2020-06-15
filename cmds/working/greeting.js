@@ -1,6 +1,6 @@
 const { MessageEmbed } = require('discord.js')
-const rainbow = require('../utils/rainbow.js')
-const randomInteger = require('../utils/randomInteger.js')
+const rainbow = require('../../utils/rainbow.js')
+const randomInteger = require('../../utils/randomInteger.js')
 
 const helloGifs = [
   'https://i.ibb.co/mCsGdhF/209127.gif',
@@ -17,17 +17,15 @@ const helloGifs = [
   'https://i.ibb.co/dP53hy4/20c2c7bc21fbfa535f09356c954b03cf.gif',
 ]
 
-let colorCounter = randomInteger(3, 10)
 let gifsCounter = randomInteger(1, 5)
 
 module.exports.run = async (client, member) => {
-  if (colorCounter >= 60) colorCounter = 0
   if (gifsCounter >= helloGifs.length) gifsCounter = 0
 
   const channel = member.guild.channels.cache.find(ch => ch.id == '692796617656369292')
 
   const embed = new MessageEmbed()
-    .setColor(rainbow[colorCounter++])
+    .setColor(rainbow())
     .setTitle('Приветствие')
     .setDescription('')
     .setThumbnail(

@@ -1,5 +1,5 @@
-const useUserGames = require('../utils/useUserGames')
-const readWrite = require('../utils/readWriteFile')
+const useUserGames = require('../../utils/useUserGames')
+const readWrite = require('../../utils/readWriteFile')
 let cost = 100
 const games = new Map()
 const lastGames = new Map()

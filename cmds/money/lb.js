@@ -11,12 +11,12 @@ module.exports.run = async (client, message, args) => {
       'https://cdn.discordapp.com/attachments/402109825896415232/692820764478668850/yummylogo.jpg'
     )
     .setTimestamp()
-  fs.readdir(__dirname.replace(/cmds$/, '') + `profiles/`, (err, files) => {
+  fs.readdir(__dirname.replace(/cmds.+$/, '') + `profiles/`, (err, files) => {
     if (err) throw new Error(err)
     const jsonFiles = files.filter(f => f.split('.').pop() === 'json')
     if (jsonFiles.length <= 0) throw new Error('No files to download')
     jsonFiles.forEach((f, i) => {
-      profiles.push([f.replace('.json', ''), require(`../profiles/${f}`)])
+      profiles.push([f.replace('.json', ''), require(`../../profiles/${f}`)])
     })
     profiles
       .sort((a, b) => +b[1].coins - +a[1].coins)

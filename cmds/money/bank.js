@@ -1,6 +1,6 @@
 const Discord = require('discord.js')
-const readWrite = require('../utils/readWriteFile')
-const profiles = require(__dirname.replace(/cmds$/, '') + 'bank_profiles.json')
+const readWrite = require('../../utils/readWriteFile')
+const profiles = require(__dirname.replace(/cmds.+$/, '') + 'bank_profiles.json')
 const latestCredits = new Map()
 
 class User {
@@ -16,7 +16,7 @@ class User {
     if (+days > 4) return 'Invalid argument days(so many)'
     if (+sum < 5e4 && +days > 2) return 'So many days on this sum'
 
-    const profile = require(__dirname.replace(/cmds$/, '') + `profiles/${this.id}.json`)
+    const profile = require(__dirname.replace(/cmds.+$/, '') + `profiles/${this.id}.json`)
     if (sum < 1000) 'Invalid argument sum(so few)'
     if (sum / profile.coins > 15 && profile.coins > 200)
       return `On this sum you must have more then ${+(sum / 15).toFixed(3)} coins`
@@ -140,7 +140,7 @@ class Credit extends Deal {
       if (!member) return
       const role = member.guild.roles.cache.find(r => r.name === 'Банкрот')
       member.roles.add(role)
-      const roles = require(__dirname.replace(/cmds$/, '') + `roles.json`)
+      const roles = require(__dirname.replace(/cmds.+$/, '') + `roles.json`)
       for (const roleId in roles) {
         if (!roles.hasOwnProperty(roleId)) continue
         const role = member.guild.roles.cache.get(roleId)

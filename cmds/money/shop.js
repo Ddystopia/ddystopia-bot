@@ -1,7 +1,7 @@
 const { MessageEmbed } = require('discord.js')
-const readWrite = require('../utils/readWriteFile')
+const readWrite = require('../../utils/readWriteFile')
 
-let roles = require(__dirname.replace(/cmds$/, '') + `roles.json`)
+let roles = require(__dirname.replace(/cmds.+$/, '') + `roles.json`)
 
 class RolesBoard {
   static shopList(message) {
@@ -114,7 +114,6 @@ class RolesBoard {
 }
 
 module.exports.run = async (client, message, args) => {
-  if (message.channel.id !== '693487254911582259') return
   switch (args[0]) {
     case undefined:
     case null:

@@ -1,7 +1,8 @@
 const { MessageEmbed } = require('discord.js')
-const useUserGames = require('../utils/useUserGames')
-const randomInteger = require('../utils/randomInteger.js')
-const readWrite = require('../utils/readWriteFile')
+const useUserGames = require('../../utils/useUserGames')
+const randomInteger = require('../../utils/randomInteger.js')
+const rainbow = require('../../utils/rainbow.js')
+const readWrite = require('../../utils/readWriteFile')
 
 const sides = ['h', 't']
 const sidesImages = {
@@ -35,7 +36,7 @@ module.exports.run = async (client, message, args) => {
       : loseSide
   if (profile.coins < bet) return message.reply(`Не хватает монет`)
 
-  const embed = new MessageEmbed().setColor('#0099ff').setImage(sidesImages[side])
+  const embed = new MessageEmbed().setColor(rainbow()).setImage(sidesImages[side])
 
   if (bettedSide == side) {
     profile.coins += bet

@@ -1,15 +1,14 @@
 const { MessageEmbed } = require('discord.js')
 const client = require('nekos.life')
 const { nsfw } = new client()
-const { reddit } = require('../utils/redditHentai')
+const { reddit } = require('../../utils/redditHentai')
 // prettier-ignore
 const generes = ["randomHentaiGif", "pussy", "nekoGif", "neko", "lesbian", "kuni", "cumsluts", "classic", "boobs", "bJ", "anal", "avatar", "yuri", "trap", "tits", "girlSoloGif", "girlSolo", "pussyWankGif", "pussyArt", "kemonomimi", "kitsune", "keta", "holo", "holoEro", "hentai", "futanari", "femdom", "feetGif", "eroFeet", "feet", "ero", "eroKitsune", "eroKemonomimi", "eroNeko", "eroYuri", "cumArts", "blowJob", "spank", "gasm"]
 
 const MAX_IMAGES_COUNT = 15
-let counter = 0
 
-const rainbow = require('../utils/rainbow')
-const randomInteger = require('../utils/randomInteger')
+const rainbow = require('../../utils/rainbow')
+const randomInteger = require('../../utils/randomInteger')
 
 const getImageURL = async genreProps => {
   const randImage = () => nsfw[generes[randomInteger(0, generes.length - 1)]]()
@@ -33,11 +32,10 @@ module.exports.run = async (client, message, args) => {
   for (let i = number; i >= 1; i--) {
     const urlObj = await getImageURL(args[0])
     const embed = new MessageEmbed()
-      .setColor(rainbow[counter])
+      .setColor(rainbow())
       .setImage(urlObj.url)
       .setFooter(urlObj.url)
     message.channel.send(embed)
-    counter = counter < 60 - 1 ? ++counter : 0
   }
 }
 
