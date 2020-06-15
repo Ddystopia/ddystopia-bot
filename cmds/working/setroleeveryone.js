@@ -1,10 +1,5 @@
 module.exports.run = async (client, message, args) => {
-  if (
-    !message.member.roles.cache.has('691736168693497877') && //Модератор
-    !message.member.roles.cache.has('606932311606296624') && //Администратор
-    !message.member.roles.cache.has('657964826852589609') //Главный администратор
-  )
-    return
+  if (!message.member.hasPermission('MANAGE_MESSAGES')) return
   if (!args[0]) return message.reply('Вы не указaли роль')
   let i = 0
 

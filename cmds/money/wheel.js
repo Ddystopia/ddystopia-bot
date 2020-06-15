@@ -42,7 +42,7 @@ module.exports.run = async (bot, message, args) => {
   const factor = factors[rand]
   const arrow = factorsTable[factor.toString()]
 
-  if (profile.coins < bet) return message.reply(`Не хватает монет`)
+  if (profile.coins < bet) return message.reply(`Не хватает ${currency}`)
   profile.coins -= bet
 
   const embed = new MessageEmbed().setColor(rainbow())
@@ -57,9 +57,9 @@ module.exports.run = async (bot, message, args) => {
   profile.coins += Math.floor(bet * factor)
   embed.addField(
     'Расчёт',
-    `Вы выиграли ${Math.floor(bet * factor)} монет\nНа вашем счету теперь ${
+    `Вы выиграли ${Math.floor(bet * factor)} ${currency}\nНа вашем счету теперь ${
       profile.coins
-    } монет\n`
+    } ${currency}\n`
   )
   readWrite.profile(message.author.id, profile)
 

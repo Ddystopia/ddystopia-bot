@@ -1,10 +1,5 @@
 module.exports.run = async (client, message, args) => {
-  if (
-    !message.member.roles.cache.has('691736168693497877') && //Модератор
-    !message.member.roles.cache.has('606932311606296624') && //Администратор
-    !message.member.roles.cache.has('657964826852589609') //Главный администратор
-  )
-    return
+  if (!message.member.hasPermission('MANAGE_MESSAGES')) return
   if (!args[0] || !args[1]) return
   if (!args[0].match(/(\d{15,})/)) return
   const channel = message.guild.channels.cache.get(args[0].match(/(\d{15,})/)[1])

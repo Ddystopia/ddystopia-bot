@@ -29,7 +29,7 @@ module.exports.run = async (client, message, args) => {
 			
   let jackpot = ''
 
-  if (profile.coins < bet || bet <= 0) return message.reply(`Не хватает монет`)
+  if (profile.coins < bet || bet <= 0) return message.reply(`Не хватает ${currency}`)
 
   if (betNum == realNum && randomInteger(0, 1) && games.get(message.author.id) < 20)
     jackpot =
@@ -49,14 +49,14 @@ module.exports.run = async (client, message, args) => {
       'Расчёт',
       `Вам выпало число ${realNum}, и вы выиграли ${
         bet * factor
-      } монет${jackpot}\nНа вашем счету теперь ${profile.coins} монет\n`
+      } ${currency}${jackpot}\nНа вашем счету теперь ${profile.coins} ${currency}\n`
     )
   } else {
     profile.coins -= bet
     if (jackpot) profile.coins += 10000
     embed.addField(
       'Расчёт',
-      `Вам выпало число ${realNum}, и вы потеряли ${bet} монет${jackpot}\nНа вашем счету теперь ${profile.coins} монет\n`
+      `Вам выпало число ${realNum}, и вы потеряли ${bet} ${currency}${jackpot}\nНа вашем счету теперь ${profile.coins} ${currency}\n`
     )
   }
   readWrite.profile(message.author.id, profile)

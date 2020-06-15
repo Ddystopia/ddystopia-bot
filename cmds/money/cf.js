@@ -34,7 +34,7 @@ module.exports.run = async (client, message, args) => {
       : randomInteger(0, 99) <= percent
       ? bettedSide
       : loseSide
-  if (profile.coins < bet) return message.reply(`Не хватает монет`)
+  if (profile.coins < bet) return message.reply(`Не хватает ${currency}`)
 
   const embed = new MessageEmbed().setColor(rainbow()).setImage(sidesImages[side])
 
@@ -42,13 +42,13 @@ module.exports.run = async (client, message, args) => {
     profile.coins += bet
     embed.addField(
       'Расчёт',
-      `Вы выиграли ${bet} монет\nНа вашем счету теперь ${profile.coins} монет\n`
+      `Вы выиграли ${bet} ${currency}\nНа вашем счету теперь ${profile.coins} ${currency}\n`
     )
   } else {
     profile.coins -= bet
     embed.addField(
       'Расчёт',
-      `Вы потеряли ${bet} монет\nНа вашем счету теперь ${profile.coins} монет\n`
+      `Вы потеряли ${bet} ${currency}\nНа вашем счету теперь ${profile.coins} ${currency}\n`
     )
   }
   readWrite.profile(message.author.id, profile)

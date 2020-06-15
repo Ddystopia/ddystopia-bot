@@ -17,7 +17,7 @@ module.exports.run = async (client, message, args) => {
   profile.resentDaily = Date.now()
 
 	readWrite.profile(message.author.id, profile)
-  message.reply(`Вы получили ${sum} монет, следующий раз получить можно через 12 часов`)
+  message.reply(`Вы получили ${sum} ${currency}, следующий раз получить можно через 12 часов`)
 }
 
 module.exports.help = {

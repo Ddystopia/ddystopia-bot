@@ -19,18 +19,13 @@ class RolesBoard {
       if (!roles[roleId]) continue
       const role = message.member.guild.roles.cache.get(roleId)
       const cost = roles[roleId]
-      shopList.addField(++i, `${role} - ${cost} монет`)
+      shopList.addField(++i, `${role} - ${cost} ${currency}`)
     }
     readWrite.file('roles.json', roles)
     return message.reply(shopList)
   }
   static addRole(message, args) {
-    if (
-      !message.member.roles.cache.has('691736168693497877') && //Модератор
-      !message.member.roles.cache.has('606932311606296624') && //Администратор
-      !message.member.roles.cache.has('657964826852589609') //Главный администратор
-    )
-      return message.reply('Не хватет прав')
+		if (!message.member.hasPermission('MANAGE_MESSAGES')) return
     if (!args[1]) return
     if (isNaN(+args[args.length - 1])) return
 
@@ -49,12 +44,7 @@ class RolesBoard {
     RolesBoard.shopList(message)
   }
   static removeRole(message, args) {
-    if (
-      !message.member.roles.cache.has('691736168693497877') && //Модератор
-      !message.member.roles.cache.has('606932311606296624') && //Администратор
-      !message.member.roles.cache.has('657964826852589609') //Главный администратор
-    )
-      return message.reply('Не хватет прав')
+		if (!message.member.hasPermission('MANAGE_MESSAGES')) return
     if (!args[1]) return
 
     let roleId
@@ -83,7 +73,7 @@ class RolesBoard {
     const id = message.author.id
     const profile = readWrite.profile(id)
 
-    if (profile.coins < cost) return message.reply(`Не хватает монет`)
+    if (profile.coins < cost) return message.reply(`Не хватает ${currency}`)
     if (message.member.roles.cache.has(role.id))
       return message.reply('У вас уже есть эта роль')
     profile.coins -= cost

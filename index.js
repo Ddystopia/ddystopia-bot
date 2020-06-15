@@ -9,6 +9,7 @@ const bannedChannels = ['649336430350303243', '501430596971790346', '40210510965
 const wordsGameChannels = ['714961392427466763']
 
 const { token, prefix } = require('./config.json')
+global.currency = '🌱'//если язык русский, то в родительском падеже(кого? чего?)
 
 client.commands = new Collection()
 
@@ -61,7 +62,6 @@ client.on('message', async message => {
   )
     return client.commands.get('cities').run(client, message, null)
   if (!message.content.startsWith(prefix)) return
-  if (message.content.startsWith(prefix + ' ')) return
   if (message.content.length < 3) return
 
   if (nonGrata.includes(message.author.id)) return
@@ -76,7 +76,6 @@ client.on('message', async message => {
   if (command === 'help') return message.reply('Закреп')
 
   if (cmd) cmd.run(client, message, args, command)
-  else message.reply('You need to enter a valid command!')
 })
 
 client.on('guildMemberAdd', member => {

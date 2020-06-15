@@ -19,7 +19,7 @@ class User {
     const profile = require(__dirname.replace(/cmds.+$/, '') + `profiles/${this.id}.json`)
     if (sum < 1000) 'Invalid argument sum(so few)'
     if (sum / profile.coins > 15 && profile.coins > 200)
-      return `On this sum you must have more then ${+(sum / 15).toFixed(3)} coins`
+      return `Для этой суммы, вы должны иметь больше, чем ${+(sum / 15).toFixed(3)} ${currency}`
 
     latestCredits.set(this.id, Date.now() + 3 * 3600 * 1000)
     const percent = Math.max(
@@ -194,12 +194,7 @@ class ModerationCommands {
   }
 
   static remove(message, args) {
-    if (
-      !message.member.roles.cache.has('691736168693497877') && //Модератор
-      !message.member.roles.cache.has('606932311606296624') && //Администратор
-      !message.member.roles.cache.has('657964826852589609') //Главный администратор
-    )
-      return
+		if (!message.member.hasPermission('MANAGE_MESSAGES')) return
     const user = message.mentions.users.first()
     if (!user) return "I don't know who is it"
     switch (args[1]) {

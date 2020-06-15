@@ -2,12 +2,7 @@ const { appendFile } = require('fs')
 const readWrite = require('../../utils/readWriteFile')
 
 module.exports.run = async (client, message, args) => {
-  if (
-    !message.member.roles.cache.has('691736168693497877') && //Модератор
-    !message.member.roles.cache.has('606932311606296624') && //Администратор
-    !message.member.roles.cache.has('657964826852589609') //Главный администратор
-  )
-    return
+  if (!message.member.hasPermission('MANAGE_MESSAGES')) return
   if (!args) return
   if (isNaN(+args[0]) && args[0] !== '-all') return
   if (!args[1]) return
@@ -29,7 +24,7 @@ module.exports.run = async (client, message, args) => {
     err => err && console.error(err)
   )
 
-  message.reply(`Было успешно переведено ${transaction} монет`)
+  message.reply(`Было успешно переведено ${transaction} ${currency}`)
 }
 
 module.exports.help = {
