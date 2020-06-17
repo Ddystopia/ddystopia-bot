@@ -2,7 +2,8 @@ const randomInteger = require('../../utils/randomInteger.js')
 const readWrite = require('../../utils/readWriteFile')
 
 module.exports.run = async (client, message, args) => {
-  const profile = readWrite.profile(message.author.id)
+	const profile = readWrite.profile(message.author.id)
+	if(profile.bancrot) return
 
   if (Date.now() - profile.resentDaily < 1000 * 60 * 60 * 12)
     return message.reply(

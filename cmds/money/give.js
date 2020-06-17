@@ -13,6 +13,7 @@ module.exports.run = async (client, message, args) => {
   if (!tillId) return
   const profileFrom = readWrite.profile(fromId)
   const profileTill = readWrite.profile(tillId)
+	if(profileTill.bancrot) return
 
   const transaction = args[0] == 'all' ? profileFrom.coins : +args[0]
 

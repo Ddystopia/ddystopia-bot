@@ -12,6 +12,7 @@ module.exports.run = async (client, message) => {
   if (!attachmentsNum) return
 
   const profile = readWrite.profile(message.author.id)
+	if(profile.bancrot) return
 
   profile.coins += attachmentsNum * cost
   readWrite.profile(message.author.id, profile)
