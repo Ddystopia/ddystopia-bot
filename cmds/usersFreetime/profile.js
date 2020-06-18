@@ -37,9 +37,9 @@ module.exports.run = async (client, message, args, command) => {
       break
 
     case 'about':
-      if (user.id !== message.author.id) return
-      profile.about = args.slice(0, 500).join(' ').replace(/\\n/g, '\n')
-      readWrite.profile(user.id, profile)
+      const ownProfile = readWrite.profile(message.author.id)
+      ownProfile.about = args.slice(0, 500).join(' ').replace(/\\n/g, '\n')
+      readWrite.profile(message.author.id, ownProfile)
       message.react('✅')
       break
 
@@ -55,11 +55,11 @@ module.exports.run = async (client, message, args, command) => {
 
         readWrite.profile(message.author.id, firstProfile)
         readWrite.profile(user.id, secondProfile)
-				message.react('✅')
+        message.react('✅')
       } else {
         const firstUserId = message.author.id
-				marryClipboard.set(firstUserId, user.id)
-				message.react('⏳')
+        marryClipboard.set(firstUserId, user.id)
+        message.react('⏳')
       }
       break
 
