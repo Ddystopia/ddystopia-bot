@@ -1,4 +1,4 @@
-const Discord = require('discord.js')
+const { MessageEmbed } = require('discord.js')
 const readWrite = require('../../utils/readWriteFile')
 const profiles = require(__dirname.replace(/cmds.+$/, '') + 'bank_profiles.json')
 const latestCredits = new Map()
@@ -19,7 +19,9 @@ class User {
     const profile = require(__dirname.replace(/cmds.+$/, '') + `profiles/${this.id}.json`)
     if (sum < 1000) 'Invalid argument sum(so few)'
     if (sum / profile.coins > 15 && profile.coins > 200)
-      return `Для этой суммы, вы должны иметь больше, чем ${+(sum / 15).toFixed(3)} ${currency}`
+      return `Для этой суммы, вы должны иметь больше, чем ${+(sum / 15).toFixed(
+        3
+      )} ${currency}`
 
     latestCredits.set(this.id, Date.now() + 3 * 3600 * 1000)
     const percent = Math.max(
@@ -156,18 +158,18 @@ class ModerationCommands {
       if (!profiles.hasOwnProperty(userId)) continue
       const element = profiles[userId]
       Object.setPrototypeOf(element.credit || {}, Credit.prototype)
-      Object.setPrototypeOf(element.deposit || {}, Deposit.prototype)
-      if (element.credit)
-        if (element.credit.deadline <= Date.now())
-          element.credit.badUser(element.id, client)
+			Object.setPrototypeOf(element.deposit || {}, Deposit.prototype)
+			
+      if (element.credit && element.credit.deadline <= Date.now())
+        element.credit.badUser(element.id, client)
 
-      if (element.deposit)
-        if (element.deposit.deadline <= Date.now())
-          element.deposit.payDeposits(element.id)
+      if (element.deposit && element.deposit.deadline <= Date.now())
+        element.deposit.payDeposits(element.id)
 
       const member = client.guilds.cache
         .get('402105109653487627')
-        .members.cache.get(`${userId}`)
+				.members.cache.get(`${userId}`)
+				
       if (member) {
         const role = member.guild.roles.cache.find(r => r.name === 'Банкрот')
         if (element.bancrot < Date.now()) {
@@ -194,7 +196,7 @@ class ModerationCommands {
   }
 
   static remove(message, args) {
-		if (!message.member.hasPermission('MANAGE_MESSAGES')) return
+    if (!message.member.hasPermission('MANAGE_MESSAGES')) return
     const user = message.mentions.users.first()
     if (!user) return "I don't know who is it"
     switch (args[1]) {
@@ -267,7 +269,7 @@ module.exports.run = async (client, message, args) => {
       const user = args[1]
         ? profiles[args[1].match(/(\d{15,})/)[1]] || profiles[userId]
         : profiles[userId]
-      const embed = new Discord.MessageEmbed()
+      const embed = new MessageEmbed()
         .setColor('#84ed39')
         .setTitle('Банковский профиль')
         .setThumbnail(
