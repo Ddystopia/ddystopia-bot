@@ -1,6 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const readWrite = require('../../utils/readWriteFile')
-const profiles = require(__dirname.replace(/cmds.+$/, '') + 'bank_profiles.json')
+const profiles = readWrite.file('bank_profiles.json')
 const latestCredits = new Map()
 
 class User {
@@ -16,7 +16,7 @@ class User {
     if (+days > 4) return 'Invalid argument days(so many)'
     if (+sum < 5e4 && +days > 2) return 'So many days on this sum'
 
-    const profile = require(__dirname.replace(/cmds.+$/, '') + `profiles/${this.id}.json`)
+    const profile = readWrite.profile(this.id)
     if (sum < 1000) 'Invalid argument sum(so few)'
     if (sum / profile.coins > 15 && profile.coins > 200)
       return `Для этой суммы, вы должны иметь больше, чем ${+(sum / 15).toFixed(
@@ -73,10 +73,8 @@ class Deposit extends Deal {
     if (profiles[userId].credit) return 'You already have a credit.'
     if (isNaN(+sum)) return
 
-    if (sum > profile.coins) {
-      sum = profile.coins
-      profile.coins = 0
-    } else profile.coins -= +sum
+    if (sum > profile.coins) return false
+    else profile.coins -= +sum
 
     this.sum += +sum
 
@@ -105,10 +103,8 @@ class Credit extends Deal {
       if (latestCredits.get(userId) < Date.now()) latestCredits.delete(userId)
       else return 'Подождите немного'
     }
-    if (sum > profile.coins) {
-      sum = profile.coins
-      profile.coins = 0
-    } else profile.coins -= +sum
+    if (sum > profile.coins) return false
+    else profile.coins -= +sum
 
     this.sum -= +sum
     if (this.sum <= 0) profiles[userId].credit = null
@@ -122,7 +118,7 @@ class Credit extends Deal {
       this.sum *= 1.5
       this.sum -=
         profile.coins + (profiles[userId].deposit ? profiles[userId].deposit.sum : 0)
-      profile.coins = 0
+      if (profile.coins > 0) profile.coins = 0
       if (this.sum > 0) makeBancrot()
 
       profiles[userId].credit = null
@@ -142,7 +138,7 @@ class Credit extends Deal {
       if (!member) return
       const role = member.guild.roles.cache.find(r => r.name === 'Банкрот')
       member.roles.add(role)
-      const roles = require(__dirname.replace(/cmds.+$/, '') + `roles.json`)
+      const roles = readWrite.file('roles.json')
       for (const roleId in roles) {
         if (!roles.hasOwnProperty(roleId)) continue
         const role = member.guild.roles.cache.get(roleId)
@@ -158,8 +154,8 @@ class ModerationCommands {
       if (!profiles.hasOwnProperty(userId)) continue
       const element = profiles[userId]
       Object.setPrototypeOf(element.credit || {}, Credit.prototype)
-			Object.setPrototypeOf(element.deposit || {}, Deposit.prototype)
-			
+      Object.setPrototypeOf(element.deposit || {}, Deposit.prototype)
+
       if (element.credit && element.credit.deadline <= Date.now())
         element.credit.badUser(element.id, client)
 
@@ -168,8 +164,8 @@ class ModerationCommands {
 
       const member = client.guilds.cache
         .get('402105109653487627')
-				.members.cache.get(`${userId}`)
-				
+        .members.cache.get(`${userId}`)
+
       if (member) {
         const role = member.guild.roles.cache.find(r => r.name === 'Банкрот')
         if (element.bancrot < Date.now()) {

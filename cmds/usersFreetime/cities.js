@@ -6,7 +6,7 @@ module.exports.run = async (client, message, propArgs) => {
   const word = toFormat(args[0])
   switch (args[0]) {
     case 'clear':
-			if (!message.member.hasPermission('MANAGE_MESSAGES')) return
+      if (!message.member.hasPermission('MANAGE_MESSAGES')) return
       words = []
       message.react('✅')
       break
@@ -18,7 +18,7 @@ module.exports.run = async (client, message, propArgs) => {
       }
       break
     case 'setWords':
-			if (!message.member.hasPermission('MANAGE_MESSAGES')) return
+      if (!message.member.hasPermission('MANAGE_MESSAGES')) return
       try {
         const json = message.content.match(/\[.+]/)[0]
         const newWords = JSON.parse(json)
@@ -29,7 +29,7 @@ module.exports.run = async (client, message, propArgs) => {
       message.react('✅')
       break
     case 'addWords':
-			if (!message.member.hasPermission('MANAGE_MESSAGES')) return
+      if (!message.member.hasPermission('MANAGE_MESSAGES')) return
       try {
         const json = message.content.match(/\[.+]/)[0]
         const newWords = JSON.parse(json)
@@ -51,7 +51,7 @@ module.exports.run = async (client, message, propArgs) => {
         message.react('✅')
       } else {
         message.react('❌')
-        message.delete({ timeout: 3000 })
+        message.delete({ timeout: 3000 }).catch(() => {})
       }
       break
   }
