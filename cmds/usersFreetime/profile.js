@@ -38,7 +38,7 @@ module.exports.run = async (client, message, args, command) => {
 
     case 'about':
       const ownProfile = readWrite.profile(message.author.id)
-      ownProfile.about = args.slice(0, 500).join(' ').replace(/\\n/g, '\n')
+      ownProfile.about = args.slice(0, 100).join(' ').replace(/\\n/g, '\n')
       readWrite.profile(message.author.id, ownProfile)
       message.react('✅')
       break
@@ -46,7 +46,8 @@ module.exports.run = async (client, message, args, command) => {
     case 'marry':
       if (user.id === message.author.id) return
       const firstProfile = readWrite.profile(message.author.id)
-      const secondProfile = profile
+			const secondProfile = profile
+			if(!!firstProfile.marry || !!secondProfile.marry) return 'Кто-то из вас двоих уже в отношениях'
 
       if (marryClipboard.get(user.id) === message.author.id) {
         marryClipboard.delete(user.id)

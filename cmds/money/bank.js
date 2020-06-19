@@ -134,7 +134,7 @@ class Credit extends Deal {
 
     function makeBancrot() {
       profile.coins = 0
-      profiles[userId].bancrot = Date.now() + 7 * 12 * 3600 * 1000
+      profiles[userId].bancrot = Date.now() + 7 * 24 * 3600 * 1000
       //402105109653487627 - server id
       const member = client.guilds.cache
         .get('402105109653487627')

@@ -73,7 +73,6 @@ client.on('message', async message => {
   const command = messageArray.shift().toLowerCase().slice(prefix.length)
   const args = messageArray
   const cmd = client.commands.get(command)
-  if (command === 'help') return message.reply('Закреп')
 
   if (cmd) cmd.run(client, message, args, command)
 })
