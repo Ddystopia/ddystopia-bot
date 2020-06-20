@@ -2,52 +2,52 @@ const readWrite = require('../../utils/readWriteFile')
 let words = readWrite.file('words.json', null, [])
 
 module.exports.run = async (client, message, propArgs) => {
-  if (message.author.bot) return
-  const args = propArgs || message.content.split(/\s+/g)
-  const word = toFormat(args[0])
-  switch (args[0]) {
-    case 'clear':
-      if (!message.member.hasPermission('MANAGE_MESSAGES')) return
-      words = []
-      readWrite.file('words.json', words)
-      message.react('✅')
-      break
-    case 'getWords':
-      let json = JSON.stringify(words).split('')
-      while (json.length) {
-        message.channel.send(json.slice(0, 1900).join(''))
-        json = json.slice(1900)
-      }
-      break
-    case 'addWords':
-      if (!message.member.hasPermission('MANAGE_MESSAGES')) return
-      try {
-        const json = message.content.match(/\[.+]/)[0]
-        const newWords = JSON.parse(json)
-        if (!Array.isArray(newWords)) throw new Error()
-        words = words.concat(newWords)
-        readWrite.file('words.json', words)
-      } catch (e) {
-        return message.react('❌')
-      }
-      message.react('✅')
-      break
-    case 'symbol':
-      message.reply(words.length > 0 ? words[words.length - 1].split('').pop() : 'any')
-      break
-    default:
-      if (!word) return
-      if (args.length !== 1) return
-      if (isCorrect(word, words)) {
-        words.push(word)
-        readWrite.file('words.json', words)
-        message.react('✅')
-      } else {
-        message.react('❌')
-        message.delete({ timeout: 3000 }).catch(() => {})
-      }
-      break
-  }
+  // if (message.author.bot) return
+  // const args = propArgs || message.content.split(/\s+/g)
+  // const word = toFormat(args[0])
+  // switch (args[0]) {
+  //   case 'clear':
+  //     if (!message.member.hasPermission('MANAGE_MESSAGES')) return
+  //     words = []
+  //     readWrite.file('words.json', words)
+  //     message.react('✅')
+  //     break
+  //   case 'getWords':
+  //     let json = JSON.stringify(words).split('')
+  //     while (json.length) {
+  //       message.channel.send(json.slice(0, 1900).join(''))
+  //       json = json.slice(1900)
+  //     }
+  //     break
+  //   case 'addWords':
+  //     if (!message.member.hasPermission('MANAGE_MESSAGES')) return
+  //     try {
+  //       const json = message.content.match(/\[.+]/)[0]
+  //       const newWords = JSON.parse(json)
+  //       if (!Array.isArray(newWords)) throw new Error()
+  //       words = words.concat(newWords)
+  //       readWrite.file('words.json', words)
+  //     } catch (e) {
+  //       return message.react('❌')
+  //     }
+  //     message.react('✅')
+  //     break
+  //   case 'symbol':
+  //     message.reply(words.length > 0 ? words[words.length - 1].split('').pop() : 'any')
+  //     break
+  //   default:
+  //     if (!word) return
+  //     if (args.length !== 1) return
+  //     if (isCorrect(word, words)) {
+  //       words.push(word)
+  //       readWrite.file('words.json', words)
+  //       message.react('✅')
+  //     } else {
+  //       message.react('❌')
+  //       message.delete({ timeout: 3000 }).catch(() => {})
+  //     }
+  //     break
+  // }
 }
 
 function toFormat(word) {

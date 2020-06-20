@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const rainbow = require('../../utils/rainbow.js')
+const { removeLoot } = require('../../utils/lootActions')
 const readWrite = require('../../utils/readWriteFile.js')
 const marryClipboard = new Map()
 
@@ -9,6 +10,10 @@ module.exports.run = async (client, message, args, command) => {
   const profile = readWrite.profile(user.id)
   switch (command) {
     case 'profile':
+      const loot = Object.entries(profile.loot)
+        .map(line => `${line[0]}  :  ${line[1]}`)
+        .join(' | ')
+
       const embed = new MessageEmbed()
         .setColor(rainbow())
         .setTitle('Profile')
@@ -18,9 +23,11 @@ module.exports.run = async (client, message, args, command) => {
           'https://discord.js.org'
         )
         .setThumbnail(user.avatarURL())
-        .addField(`😎 Активы`, profile.coins + currency)
-        .addField('🎉 Birthday', profile.birthday || 'Не указан')
-        .addField('💖 Married with', profile.marry || 'Не в браке')
+        .addField('🎩 Actives', profile.coins + currency)
+        .addField('😎 Reputation', profile.rep)
+        .addField('🎉 Birthday', profile.birthday || 'Не указан', true)
+        .addField('💖 Married with', profile.marry || 'Не в браке', true)
+        .addField('🛍 Loot', loot || 'Не имеет лута')
         .addField('📜 about', profile.about || 'Не указан')
         .setTimestamp()
       message.reply(embed)
@@ -28,6 +35,7 @@ module.exports.run = async (client, message, args, command) => {
 
     case 'birthday':
       if (user.id !== message.author.id) return
+      if (!args[0]) return
       const birthday = args[0].split(/[-/|]/).join('-')
       if (!/[0-3]\d-(0\d|1[012])-\d{4}/.test(birthday))
         return message.reply('invalid date')
@@ -43,16 +51,35 @@ module.exports.run = async (client, message, args, command) => {
       message.react('✅')
       break
 
+    case 'rep':
+      if (user.id === message.author.id) return
+      const SECONDS_COOLDOWN = 60 * 50
+      if (Date.now() - profile.timers.rep < 1000 * SECONDS_COOLDOWN)
+        return message.react('❌')
+
+      profile.timers.rep = Date.now()
+      profile.rep++
+      message.react('✅')
+      readWrite.profile(user.id, profile)
+      break
+
     case 'marry':
       if (user.id === message.author.id) return
       const firstProfile = readWrite.profile(message.author.id)
-			const secondProfile = profile
-			if(!!firstProfile.marry || !!secondProfile.marry) return 'Кто-то из вас двоих уже в отношениях'
+      const secondProfile = profile
+
+      if (!!firstProfile.marry || !!secondProfile.marry)
+        return message.reply('Кто-то из вас двоих уже в отношениях')
+      if (!firstProfile.loot['💍'] || !secondProfile.loot['💍'])
+        return message.reply('У кого-то из вас нет кольца')
 
       if (marryClipboard.get(user.id) === message.author.id) {
         marryClipboard.delete(user.id)
         firstProfile.marry = member.toString()
         secondProfile.marry = message.member.toString()
+
+        removeLoot(firstProfile, '💍')
+        removeLoot(secondProfile, '💍')
 
         readWrite.profile(message.author.id, firstProfile)
         readWrite.profile(user.id, secondProfile)
@@ -79,6 +106,6 @@ module.exports.run = async (client, message, args, command) => {
 }
 
 module.exports.help = {
-  names: ['profile', 'birthday', 'about', 'marry', 'tear'],
+  names: ['profile', 'birthday', 'about', 'marry', 'tear', 'rep'],
   cmdList: true,
 }

@@ -1,7 +1,7 @@
 const { MessageEmbed } = require('discord.js')
 const readWrite = require('../../utils/readWriteFile')
 
-let roles = require(__dirname.replace(/cmds.+$/, '') + `roles.json`)
+let roles = readWrite.file('roles.json')
 
 class RolesBoard {
   static shopList(message) {
@@ -24,8 +24,8 @@ class RolesBoard {
     readWrite.file('roles.json', roles)
     return message.reply(shopList)
   }
-  static addRole(message, args) {
-		if (!message.member.hasPermission('MANAGE_MESSAGES')) return
+  static add(message, args) {
+    if (!message.member.hasPermission('MANAGE_MESSAGES')) return
     if (!args[1]) return
     if (isNaN(+args[args.length - 1])) return
 
@@ -43,8 +43,8 @@ class RolesBoard {
 
     RolesBoard.shopList(message)
   }
-  static removeRole(message, args) {
-		if (!message.member.hasPermission('MANAGE_MESSAGES')) return
+  static remove(message, args) {
+    if (!message.member.hasPermission('MANAGE_MESSAGES')) return
     if (!args[1]) return
 
     let roleId
@@ -55,8 +55,7 @@ class RolesBoard {
     }
     const role = message.member.guild.roles.cache.get(roleId)
 
-    roles[role.id] = null
-    roles = sortAndCleanRoles(roles, message)
+    delete roles[role.id]
     readWrite.file('roles.json', roles)
 
     RolesBoard.shopList(message)
@@ -98,7 +97,8 @@ class RolesBoard {
 
     profile.coins += cost * 0.9
     message.member.roles.remove(role)
-    message.reply(`Success, you get ${cost * 0.9} coins`)
+
+    message.reply(`Успех, вы получили ${cost * 0.9} ${currency}`)
     readWrite.profile(id, profile)
   }
 }
@@ -110,11 +110,11 @@ module.exports.run = async (client, message, args) => {
     case false:
       RolesBoard.shopList(message, args)
       break
-    case 'addRole':
-      RolesBoard.addRole(message, args)
+    case 'add':
+      RolesBoard.add(message, args)
       break
-    case 'removeRole':
-      RolesBoard.removeRole(message, args)
+    case 'remove':
+      RolesBoard.remove(message, args)
       break
     case 'buy':
       RolesBoard.buy(message, args)
