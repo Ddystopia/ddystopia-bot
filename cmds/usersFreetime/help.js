@@ -97,11 +97,11 @@ http://yotx.ru/#!1/3_h/ubW/ugfSOG8L@2f7R/sH@w7yel1vY31tZPd9f3ti/2D/ZJNOwGjPG4dcp
     '\u200B',
     `
 1. >market - посмотреть таблицу
-2. >market buy [number on table] - купить лут
-3. >market sell [number on table] - продать лут`
+2. >market buy [лут] - купить лут
+3. >market sell [лут] - продать лут`
   )
 
-  const embedHentai = new EmbedInstance('Хентай комманды').addField(
+  const embedHentai = new EmbedInstance('Хентай команды').addField(
     '\u200B',
     `
 >hentai [genre] [n] - аргументы не обязательны

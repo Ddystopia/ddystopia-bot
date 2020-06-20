@@ -1,4 +1,3 @@
-const { MessageEmbed } = require('discord.js')
 const randomInteger = require('../../utils/randomInteger')
 const formatDuration = require('../../utils/formatDuration')
 const { addLoot, removeLoot } = require('../../utils/lootActions')
@@ -18,7 +17,7 @@ module.exports.run = async (client, message, args, command) => {
           )}`
         )
       const loots = Object.entries(loot)
-        .filter(line => line[1] < 1e4)
+        .filter(line => line[1] < 5000)
         .map(item => item[0])
       const winnedLoot = loots[randomInteger(0, loots.length - 1)]
 			addLoot(profile, winnedLoot)
