@@ -1,4 +1,5 @@
-let words = []
+const readWrite = require('../../utils/readWriteFile')
+let words = readWrite.file('words.json', null, [])
 
 module.exports.run = async (client, message, propArgs) => {
   if (message.author.bot) return
@@ -8,6 +9,7 @@ module.exports.run = async (client, message, propArgs) => {
     case 'clear':
       if (!message.member.hasPermission('MANAGE_MESSAGES')) return
       words = []
+      readWrite.file('words.json', words)
       message.react('✅')
       break
     case 'getWords':
@@ -17,17 +19,6 @@ module.exports.run = async (client, message, propArgs) => {
         json = json.slice(1900)
       }
       break
-    case 'setWords':
-      if (!message.member.hasPermission('MANAGE_MESSAGES')) return
-      try {
-        const json = message.content.match(/\[.+]/)[0]
-        const newWords = JSON.parse(json)
-        words = newWords
-      } catch (e) {
-        return message.react('❌')
-      }
-      message.react('✅')
-      break
     case 'addWords':
       if (!message.member.hasPermission('MANAGE_MESSAGES')) return
       try {
@@ -35,6 +26,7 @@ module.exports.run = async (client, message, propArgs) => {
         const newWords = JSON.parse(json)
         if (!Array.isArray(newWords)) throw new Error()
         words = words.concat(newWords)
+        readWrite.file('words.json', words)
       } catch (e) {
         return message.react('❌')
       }
@@ -48,6 +40,7 @@ module.exports.run = async (client, message, propArgs) => {
       if (args.length !== 1) return
       if (isCorrect(word, words)) {
         words.push(word)
+        readWrite.file('words.json', words)
         message.react('✅')
       } else {
         message.react('❌')

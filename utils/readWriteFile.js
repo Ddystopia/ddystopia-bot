@@ -7,15 +7,15 @@ const initial = {
 const write = (path, file) =>
   fs.writeFileSync(path, JSON.stringify(file), err => err && console.error(err))
 
-module.exports.file = (filePathProp, file) => {
+module.exports.file = (filePathProp, file, initial) => {
   let response = null
   const filePath = `${__dirname.replace(/utils$/, '')}${filePathProp}`
   try {
     response = require(filePath)
     if (file) write(filePath, file)
   } catch (err) {
-    write(filePath, {})
-    response = {}
+    write(filePath, initial || {})
+    response = initial || {}
   }
   return response
 }
