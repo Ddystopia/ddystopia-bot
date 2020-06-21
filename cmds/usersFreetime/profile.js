@@ -108,6 +108,6 @@ module.exports.run = async (client, message, args, command) => {
 }
 
 module.exports.help = {
-  names: ['profile', 'birthday', 'about', 'marry', 'tear', 'rep'],
+  aliases: ['profile', 'birthday', 'about', 'marry', 'tear', 'rep'],
   cmdList: true,
 }

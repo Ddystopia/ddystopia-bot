@@ -3,13 +3,13 @@ const client = new Client()
 const fs = require('fs')
 const readWrite = require('./utils/readWriteFile')
 
-const nonGrata = ['464804290876145665']
+const nonGrata = ['464804290876145665', '449543942556352513']
 const imageChannels = ['402109720833425408', '402114219438374913']
 const bannedChannels = ['649336430350303243', '501430596971790346', '402105109653487629']
 const wordsGameChannels = ['714961392427466763']
 
 const { token, prefix } = require('./config.json')
-global.currency = '🌱'//если язык русский, то в родительском падеже(кого? чего?)
+global.currency = '🌱' //если язык русский, то в родительском падеже(кого? чего?)
 
 client.commands = new Collection()
 
@@ -27,7 +27,8 @@ getDirs('./cmds/').forEach(dir => {
 
     jsFiles.forEach((f, i) => {
       const props = require(`./cmds/${dir}/${f}`)
-      if (props.help.cmdList) for (let name of props.help.names) client.commands.set(name, props)
+      if (props.help.cmdList)
+        for (let name of props.help.aliases) client.commands.set(name, props)
       else client.commands.set(props.help.name, props)
     })
   })
@@ -61,11 +62,12 @@ client.on('message', async message => {
     !message.content.startsWith(prefix)
   )
     return client.commands.get('cities').run(client, message, null)
-  if (!message.content.startsWith(prefix)) return
-  if (message.content.length < 3) return
+  if (!message.content.startsWith(prefix) || message.author.bot) return
 
-  if (nonGrata.includes(message.author.id)) return
-  if (message.author.bot) return
+  if (nonGrata.includes(message.author.id))
+    return message.reply(
+      'Вы мне настолько противны, что я не собираюсь исполнять ваши комманды'
+    )
 
   readWrite.profile(message.author.id)
 

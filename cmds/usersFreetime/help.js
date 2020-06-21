@@ -28,7 +28,8 @@ module.exports.run = async (client, message, args) => {
 	5. >tear - порвать брак
 	6. >loot  - собрать случайный лут
 	7. >giveLoot [@упоминание] [лут[|лут]+] - дать кому-то лут
-	8. >ship [@упоминание]{2,} - шипперство, от 2х и более пингов
+	8. >lootBox - открыть лутбокс, который вы должны предварительно купить (🎁)
+	9. >ship [@упоминание]{2,} - шипперство, от 2х и более пингов
 	Пример: >ship @Right @Left
 	`
   )
@@ -98,7 +99,10 @@ http://yotx.ru/#!1/3_h/ubW/ugfSOG8L@2f7R/sH@w7yel1vY31tZPd9f3ti/2D/ZJNOwGjPG4dcp
     `
 1. >market - посмотреть таблицу
 2. >market buy [лут[|лут]+] - купить лут
-3. >market sell [лут[|лут]+] - продать лут`
+3. >market sell [лут[|лут]+] - продать лут
+Пример: >market buy 🎁
+Пример: >market buy 🎁|🎟
+`
   )
 
   const embedHentai = new EmbedInstance('Хентай команды').addField(
@@ -116,6 +120,22 @@ http://yotx.ru/#!1/3_h/ubW/ugfSOG8L@2f7R/sH@w7yel1vY31tZPd9f3ti/2D/ZJNOwGjPG4dcp
  | ero | avatar | eroKemonomimi| eroNeko  |eroYuri |
  | cumArts | blowJob | spank | gasm |
 Есть ещё жанры, но они не стоят упоминания сдесь
+	`
+  )
+
+  const embedActions = new EmbedInstance('Команды действий').addField(
+    '\u200B',
+    `
+>[command] [@упоминание] - аргументы не обязательны
+
+Доступные действия(их писать вместо [conmmand])
+ | smug | baka | tickle | slap | poke | 
+ | pat | neko | nekoGif | meow | lizard | 
+ | kiss | hug | foxGirl | feed | cuddle | 
+ | kemonomimi | holo | woof | wallpaper |  
+ | gecg | avatar | waifu | why | goose |
+ | catText | OwOify | 8Ball | spoiler |
+ | fact | 
 	`
   )
 
@@ -143,6 +163,7 @@ http://yotx.ru/#!1/3_h/ubW/ugfSOG8L@2f7R/sH@w7yel1vY31tZPd9f3ti/2D/ZJNOwGjPG4dcp
     await message.author.send(embedPercents)
     await message.author.send(embedShop)
     await message.author.send(embedShop2)
+    await message.author.send(embedActions)
     await message.author.send(embedHentai)
     await message.author.send(embedModeration)
     message.react('✅')

@@ -34,7 +34,7 @@ class LootBoard {
     loot = sortAndCleanRoles(loot)
     readWrite.file('loot.json', loot)
 
-    LootBoard.shopList(message)
+    LootBoard.shopList(message, loot)
   }
   static remove(message, args) {
     if (!message.member.hasPermission('MANAGE_MESSAGES')) return
@@ -42,7 +42,7 @@ class LootBoard {
     delete loot[args[1]]
     readWrite.file('loot.json', loot)
 
-    LootBoard.shopList(message)
+    LootBoard.shopList(message, loot)
   }
   static buy(message, args, loot) {
     const lootArray = args
@@ -50,8 +50,9 @@ class LootBoard {
       .join('')
       .split('|')
       .filter(el => !!el)
-    if (lootArray.some(item => !loot[item]))
-      return message.reply('Что-то из этого не продаётся')
+			.filter(item => !!loot[item])
+			
+    if (lootArray.length < 1) return message.reply('Не продаётся')
     const cost = lootArray.reduce((sum, lootItem) => sum + loot[lootItem], 0)
     const profile = readWrite.profile(message.author.id)
 
@@ -69,11 +70,12 @@ class LootBoard {
       .join('')
       .split('|')
       .filter(el => !!el)
+      .filter(item => !!loot[item])
+
+    if (lootArray.length < 1) return message.reply('Не продаётся')
+
     const cost = lootArray.reduce((sum, lootItem) => sum + loot[lootItem], 0)
     const profile = readWrite.profile(message.author.id)
-
-    if (lootArray.some(item => !loot[item]))
-      return message.reply('Что-то из этого не продаётся')
 
     profile.coins += cost * 0.9
     lootArray.forEach(item => removeLoot(profile, item))
@@ -84,7 +86,7 @@ class LootBoard {
 }
 
 module.exports.run = async (client, message, args) => {
-	const loot = readWrite.file('loot.json')
+  const loot = readWrite.file('loot.json')
   switch (args[0]) {
     case undefined:
     case null:
