@@ -5,12 +5,14 @@ const readWrite = require('../../utils/readWriteFile.js')
 const marryClipboard = new Map()
 
 module.exports.run = async (client, message, args, command) => {
+  const loot = readWrite.file('loot.json')
   const user = message.mentions.users.first() || message.author
   const member = await message.guild.members.fetch(user.id)
   const profile = readWrite.profile(user.id)
   switch (command) {
     case 'profile':
-      const loot = Object.entries(profile.loot)
+      const usersLoot = Object.entries(profile.loot)
+        .sort((a, b) => loot[b[0]] - loot[a[0]])
         .map(line => `${line[0]}  :  ${line[1]}`)
         .join(' | ')
 
@@ -27,7 +29,7 @@ module.exports.run = async (client, message, args, command) => {
         .addField('😎 Reputation', profile.rep)
         .addField('🎉 Birthday', profile.birthday || 'Не указан', true)
         .addField('💖 Married with', profile.marry || 'Не в браке', true)
-        .addField('🛍 Loot', loot || 'Не имеет лута')
+        .addField('🛍 Loot', usersLoot || 'Не имеет лута')
         .addField('📜 about', profile.about || 'Не указан')
         .setTimestamp()
       message.reply(embed)

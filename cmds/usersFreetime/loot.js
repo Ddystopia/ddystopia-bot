@@ -3,9 +3,9 @@ const formatDuration = require('../../utils/formatDuration')
 const { addLoot, removeLoot } = require('../../utils/lootActions')
 const readWrite = require('../../utils/readWriteFile.js')
 const SECONDS_COOLDOWN = 60 * 60 * 24
-const loot = readWrite.file('loot.json')
 
 module.exports.run = async (client, message, args, command) => {
+	const loot = readWrite.file('loot.json')
   switch (command) {
     case 'loot':
       const profile = readWrite.profile(message.author.id)

@@ -3,7 +3,6 @@ const readWrite = require('../../utils/readWriteFile')
 const { addLoot, removeLoot } = require('../../utils/lootActions')
 const MAX_FIELDS = 25
 
-let loot = readWrite.file('loot.json')
 class EmbedInstance extends MessageEmbed {
   constructor(title) {
     super()
@@ -17,7 +16,7 @@ class EmbedInstance extends MessageEmbed {
 }
 
 class LootBoard {
-  static shopList(message) {
+  static shopList(message, loot) {
     const lootEntries = Object.entries(sortAndCleanRoles(loot, message))
     for (let i = 0; i < Math.ceil(lootEntries.length / MAX_FIELDS); i++) {
       const lootChunk = lootEntries.slice(i * MAX_FIELDS, (i + 1) * MAX_FIELDS)
@@ -27,7 +26,7 @@ class LootBoard {
       message.channel.send(shopList)
     }
   }
-  static add(message, args) {
+  static add(message, args, loot) {
     if (!message.member.hasPermission('MANAGE_MESSAGES')) return
     if (isNaN(+args[args.length - 1])) return
 
@@ -45,7 +44,7 @@ class LootBoard {
 
     LootBoard.shopList(message)
   }
-  static buy(message, args) {
+  static buy(message, args, loot) {
     const lootArray = args
       .slice(1)
       .join('')
@@ -64,7 +63,7 @@ class LootBoard {
     message.react('✅')
     readWrite.profile(message.author.id, profile)
   }
-  static sell(message, args) {
+  static sell(message, args, loot) {
     const lootArray = args
       .slice(1)
       .join('')
@@ -85,23 +84,24 @@ class LootBoard {
 }
 
 module.exports.run = async (client, message, args) => {
+	const loot = readWrite.file('loot.json')
   switch (args[0]) {
     case undefined:
     case null:
     case false:
-      LootBoard.shopList(message, args)
+      LootBoard.shopList(message, loot)
       break
     case 'add':
-      LootBoard.add(message, args)
+      LootBoard.add(message, args, loot)
       break
     case 'remove':
-      LootBoard.remove(message, args)
+      LootBoard.remove(message, args, loot)
       break
     case 'buy':
-      LootBoard.buy(message, args)
+      LootBoard.buy(message, args, loot)
       break
     case 'sell':
-      LootBoard.sell(message, args)
+      LootBoard.sell(message, args, loot)
       break
     default:
       message.reply('Я не знаю, что вы от меня хотите')
