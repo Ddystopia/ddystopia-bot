@@ -20,8 +20,8 @@ module.exports.run = async (client, message, args, command) => {
         .filter(line => line[1] < 5000)
         .map(item => item[0])
       const winnedLoot = loots[randomInteger(0, loots.length - 1)]
-			addLoot(profile, winnedLoot)
-			
+      addLoot(profile, winnedLoot)
+
       profile.timers.loot = Date.now()
       readWrite.profile(message.author.id, profile)
       message.reply(
@@ -30,15 +30,22 @@ module.exports.run = async (client, message, args, command) => {
       break
     case 'giveloot':
       if (!message.mentions.users.first()) return
-      if (!loot[args[1]]) return
+      const lootArray = args
+        .slice(1)
+        .join('')
+        .split('|')
+        .filter(el => !!el)
+      if (lootArray.some(item => !loot[item]))
+        return message.reply('Что-то из этого не продаётся')
       const profileFrom = readWrite.profile(message.author.id)
       const profileTill = readWrite.profile(message.mentions.users.first().id)
-      if (!profileFrom.loot[args[1]]) return message.reply('У вас такого нет')
+      if (Object.keys(profileFrom.loot).some(item => !loot[item]))
+        return message.reply('У вас такого нет')
 
-			addLoot(profileTill, args[1])
-			removeLoot(profileFrom, args[1])
+      lootArray.forEach(item => addLoot(profileTill, item))
+      lootArray.forEach(item => removeLoot(profileFrom, item))
 
-			message.react('✅')
+      message.react('✅')
       readWrite.profile(message.author.id, profileFrom)
       readWrite.profile(message.mentions.users.first().id, profileTill)
   }

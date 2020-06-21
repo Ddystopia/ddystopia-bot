@@ -46,31 +46,41 @@ class LootBoard {
     LootBoard.shopList(message)
   }
   static buy(message, args) {
-    if (!loot[args[1]]) return message.reply(`${args[1]} : Такая вещь не продаётся`)
-    const cost = loot[args[1]]
-    const id = message.author.id
-    const profile = readWrite.profile(id)
+    const lootArray = args
+      .slice(1)
+      .join('')
+      .split('|')
+      .filter(el => !!el)
+    if (lootArray.some(item => !loot[item]))
+      return message.reply('Что-то из этого не продаётся')
+    const cost = lootArray.reduce((sum, lootItem) => sum + loot[lootItem], 0)
+    const profile = readWrite.profile(message.author.id)
 
     if (profile.coins < cost) return message.reply(`Не хватает ${currency}`)
     profile.coins -= cost
-    addLoot(profile, args[1])
+
+    lootArray.forEach(item => addLoot(profile, item))
 
     message.react('✅')
-    readWrite.profile(id, profile)
+    readWrite.profile(message.author.id, profile)
   }
   static sell(message, args) {
-    if (!loot[args[1]]) return message.reply(`${args[1]} : Такая вещь не продаётся`)
-    const cost = loot[args[1]]
-    const id = message.author.id
-    const profile = readWrite.profile(id)
+    const lootArray = args
+      .slice(1)
+      .join('')
+      .split('|')
+      .filter(el => !!el)
+    const cost = lootArray.reduce((sum, lootItem) => sum + loot[lootItem], 0)
+    const profile = readWrite.profile(message.author.id)
 
-    if (!profile.loot[args[1]]) return message.reply('У вас нет этой вещи')
+    if (lootArray.some(item => !loot[item]))
+      return message.reply('Что-то из этого не продаётся')
 
     profile.coins += cost * 0.9
-    removeLoot(profile, args[1])
+    lootArray.forEach(item => removeLoot(profile, item))
 
     message.reply(`Успех, вы получили ${cost * 0.9} ${currency}`)
-    readWrite.profile(id, profile)
+    readWrite.profile(message.author.id, profile)
   }
 }
 
