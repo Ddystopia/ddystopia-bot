@@ -36,7 +36,7 @@ module.exports.run = async (client, message, args, command) => {
         .filter(item => !!loot[item])
 
       if (lootArray.length < 1) return message.reply('Не продаётся')
-      const profileFrom = profile
+      const profileFrom = readWrite.profile(message.author.id)
       const profileTill = readWrite.profile(message.mentions.users.first().id)
       if (Object.keys(profileFrom.loot).some(item => !loot[item]))
         return message.reply('У вас такого нет')

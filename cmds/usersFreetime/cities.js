@@ -2,7 +2,7 @@ const readWrite = require('../../utils/readWriteFile')
 let words = readWrite.file('words.json', null, [])
 
 module.exports.run = async (client, message, args) => {
-	if(message.author.bot) return
+  if (message.author && message.author.bot) return
   switch (args[0]) {
     case 'clear':
       if (!message.member.hasPermission('MANAGE_MESSAGES')) return
