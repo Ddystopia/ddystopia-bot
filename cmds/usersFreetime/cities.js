@@ -1,16 +1,29 @@
 const readWrite = require('../../utils/readWriteFile')
 let words = readWrite.file('words.json', null, [])
 
-module.exports.run = async (client, message, propArgs) => {
-  if (message.author.bot) return
-  const args = propArgs || message.content.split(/\s+/g)
-  const word = toFormat(args[0])
+module.exports.run = async (client, message, args) => {
   switch (args[0]) {
     case 'clear':
       if (!message.member.hasPermission('MANAGE_MESSAGES')) return
       words = []
       readWrite.file('words.json', words)
       message.react('✅')
+      break
+    case 'start':
+      const filter = m => !m.content.includes(' ')
+      const collector = message.channel.createMessageCollector(filter)
+
+      collector.on('collect', msg => {
+        const word = toFormat(msg.content)
+        if (isCorrect(word, words)) {
+          words.push(word)
+          readWrite.file('words.json', words)
+          msg.react('✅')
+        } else {
+          msg.react('❌')
+          msg.delete({ timeout: 3000 }).catch(() => {})
+        }
+      })
       break
     case 'getWords':
       let json = JSON.stringify(words).split('')
@@ -34,18 +47,6 @@ module.exports.run = async (client, message, propArgs) => {
       break
     case 'symbol':
       message.reply(words.length > 0 ? words[words.length - 1].split('').pop() : 'any')
-      break
-    default:
-      if (!word) return
-      if (args.length !== 1) return
-      if (isCorrect(word, words)) {
-        words.push(word)
-        readWrite.file('words.json', words)
-        message.react('✅')
-      } else {
-        message.react('❌')
-        message.delete({ timeout: 3000 }).catch(() => {})
-      }
       break
   }
 }

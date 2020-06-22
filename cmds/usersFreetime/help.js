@@ -12,14 +12,16 @@ class EmbedInstance extends MessageEmbed {
 }
 
 module.exports.run = async (client, message, args) => {
-  const embedIntroduction = new EmbedInstance('Введение').addField(
-    '\u200B',
-    `Бот ещё пишется, и в будущем комманд будет больше.\nЕсли увидите баг, соообщите модерации и не пользуйтесь им.\nЕсли что-то не ясно, спросите у пользователей онлайн, и поменьше трогайте модерацию(они злые)`
-  )
+  const embedIntroduction = new EmbedInstance('Введение')
+    .addField(
+      '\u200B',
+      `Бот ещё пишется, и в будущем комманд будет больше.\nЕсли увидите баг, соообщите модерации и не пользуйтесь им.\nЕсли что-то не ясно, спросите у пользователей онлайн, и поменьше трогайте модерацию(они злые)`
+    )
+    .setFooter('Реакции нажимать чтоб листать')
 
   const embedProfile = new EmbedInstance('Команды профиля').addField(
     '\u200B',
-		`
+    `
 		Если вы имеете лут 🎟, то вы можете обратится к администратору, и в замен он саздаст роль специально для вас!!!
 	1. >profile [@упоминание] - показать профиль, если не будет аргумента, или он будет некоректен, покажет ваш
 	2. >birthday [DD-MM-YYYY] - установить день рождения
@@ -155,21 +157,33 @@ http://yotx.ru/#!1/3_h/ubW/ugfSOG8L@2f7R/sH@w7yel1vY31tZPd9f3ti/2D/ZJNOwGjPG4dcp
 11. >cities setWords [JSON] - добавить массив слов
 		`
   )
-  try {
-    await message.author.send(embedIntroduction)
-    await message.author.send(embedProfile)
-    await message.author.send(embedCasino)
-    await message.author.send(embedBank)
-    await message.author.send(embedPercents)
-    await message.author.send(embedShop)
-    await message.author.send(embedShop2)
-    await message.author.send(embedActions)
-    await message.author.send(embedHentai)
-    await message.author.send(embedModeration)
-    message.react('✅')
-  } catch (err) {
-    message.reply("Я не могу отправить, попробуйте открыть лс")
+  // prettier-ignore
+  const embeds = [embedIntroduction, embedProfile, embedCasino, embedBank, embedPercents, embedShop, embedShop2, embedActions, embedHentai, embedModeration]
+  const msg = await message.reply(embeds[0].setDescription(`1 / ${embeds.length}`))
+  await msg.react('⬅')
+  await msg.react('✖')
+  await msg.react('➡')
+
+  let i = 0
+  const filter = (reaction, user) => {
+    return ['⬅', '✖', '➡'].includes(reaction.emoji.name) && user.id === message.author.id
   }
+  const step = reaction => {
+    let embed
+    if (reaction.emoji.name === '✖') msg.delete({ time: 0 }).catch(() => {})
+    else if (reaction.emoji.name === '⬅') embed = i > 0 ? embeds[--i] : null
+    else if (reaction.emoji.name === '➡')
+      embed = i < embeds.length - 1 ? embeds[++i] : null
+
+    if (!embed) return
+    msg.edit(embed.setDescription(`${i + 1} / ${embeds.length}`))
+  }
+
+  const collector = msg.createReactionCollector(filter, { time: 60000 })
+  collector.on('collect', step)
+  collector.on('end', () => {
+    msg.delete({ time: 0 }).catch(() => {})
+  })
 }
 
 module.exports.help = {

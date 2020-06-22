@@ -14,7 +14,11 @@ const initial = {
 }
 
 const write = (path, file) =>
-  fs.writeFileSync(path, JSON.stringify(file), err => err && console.error(err))
+  fs.writeFileSync(
+    path,
+    JSON.stringify(file).replace(/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3})Z/, '$1'),
+    err => err && console.error(err)
+  )
 
 module.exports.file = (filePathProp, file, initial) => {
   let response = null
@@ -39,8 +43,8 @@ module.exports.profile = (id, file) => {
       loot: (response.timers && response.timers.loot) || 0,
       rep: (response.timers && response.timers.rep) || 0,
     }
-		response.loot = response.loot || {}
-		response.rep = response.rep || 0
+    response.loot = response.loot || {}
+    response.rep = response.rep || 0
     delete response.resentDaily
     if (file) write(filePath, file)
   } catch (err) {
