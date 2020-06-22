@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const readWrite = require('../../utils/readWriteFile')
+const slider = require('../../utils/slider')
 const { addLoot, removeLoot } = require('../../utils/lootActions')
 const MAX_FIELDS = 25
 
@@ -7,7 +8,7 @@ class EmbedInstance extends MessageEmbed {
   constructor(title) {
     super()
     this.setColor('#0099ff')
-      .setTitle(title)
+      .setTitle('Market')
       .setThumbnail(
         'https://cdn.discordapp.com/attachments/402109825896415232/692820764478668850/yummylogo.jpg'
       )
@@ -18,13 +19,15 @@ class EmbedInstance extends MessageEmbed {
 class LootBoard {
   static shopList(message, loot) {
     const lootEntries = Object.entries(sortAndCleanRoles(loot, message))
+    const embeds = []
     for (let i = 0; i < Math.ceil(lootEntries.length / MAX_FIELDS); i++) {
       const lootChunk = lootEntries.slice(i * MAX_FIELDS, (i + 1) * MAX_FIELDS)
-      const shopList = new EmbedInstance(`Часть ${i + 1}`)
+      const shopList = new EmbedInstance()
       for (let item of lootChunk)
         shopList.addField('\u200B', `${item[0]} - ${item[1]}${currency}`, true)
-      message.channel.send(shopList)
+      embeds.push(shopList)
     }
+    slider(embeds, message)
   }
   static add(message, args, loot) {
     if (!message.member.hasPermission('MANAGE_MESSAGES')) return
@@ -50,8 +53,8 @@ class LootBoard {
       .join('')
       .split('|')
       .filter(el => !!el)
-			.filter(item => !!loot[item])
-			
+      .filter(item => !!loot[item])
+
     if (lootArray.length < 1) return message.reply('Не продаётся')
     const cost = lootArray.reduce((sum, lootItem) => sum + loot[lootItem], 0)
     const profile = readWrite.profile(message.author.id)

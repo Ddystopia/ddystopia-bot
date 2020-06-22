@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const rainbow = require('../../utils/rainbow')
+const slider = require('../../utils/slider')
 class EmbedInstance extends MessageEmbed {
   constructor(title) {
     super()
@@ -159,31 +160,7 @@ http://yotx.ru/#!1/3_h/ubW/ugfSOG8L@2f7R/sH@w7yel1vY31tZPd9f3ti/2D/ZJNOwGjPG4dcp
   )
   // prettier-ignore
   const embeds = [embedIntroduction, embedProfile, embedCasino, embedBank, embedPercents, embedShop, embedShop2, embedActions, embedHentai, embedModeration]
-  const msg = await message.reply(embeds[0].setDescription(`1 / ${embeds.length}`))
-  await msg.react('⬅')
-  await msg.react('✖')
-  await msg.react('➡')
-
-  let i = 0
-  const filter = (reaction, user) => {
-    return ['⬅', '✖', '➡'].includes(reaction.emoji.name) && user.id === message.author.id
-  }
-  const step = reaction => {
-    let embed
-    if (reaction.emoji.name === '✖') msg.delete({ time: 0 }).catch(() => {})
-    else if (reaction.emoji.name === '⬅') embed = i > 0 ? embeds[--i] : null
-    else if (reaction.emoji.name === '➡')
-      embed = i < embeds.length - 1 ? embeds[++i] : null
-
-    if (!embed) return
-    msg.edit(embed.setDescription(`${i + 1} / ${embeds.length}`))
-  }
-
-  const collector = msg.createReactionCollector(filter, { time: 60000 })
-  collector.on('collect', step)
-  collector.on('end', () => {
-    msg.delete({ time: 0 }).catch(() => {})
-  })
+  slider(embeds, message)
 }
 
 module.exports.help = {
