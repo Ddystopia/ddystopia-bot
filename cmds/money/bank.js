@@ -2,6 +2,7 @@ const { MessageEmbed } = require('discord.js')
 const readWrite = require('../../utils/readWriteFile')
 const profiles = readWrite.file('bank_profiles.json')
 const latestCredits = new Map()
+const log = require('../../utils/log.js')
 
 class User {
   constructor(userId) {
@@ -113,6 +114,7 @@ class Credit extends Deal {
   }
   badUser(userId, client, rec) {
     const profile = readWrite.profile(userId)
+    const member = client.guilds.cache.get('402105109653487627').members.cache.get(userId)
     if (rec) makeBancrot()
     else {
       this.sum *= 1.5
@@ -123,7 +125,7 @@ class Credit extends Deal {
 
       profiles[userId].credit = null
       profiles[userId].deposit = null
-      console.log('New Bancrot: ' + userId)
+      log('New Bancrot: ' + member)
     }
     readWrite.file('bank_profiles.json', profiles)
     readWrite.profile(userId, profile)
@@ -132,9 +134,6 @@ class Credit extends Deal {
       profile.coins = 0
       profiles[userId].bancrot = Date.now() + 7 * 24 * 3600 * 1000
       //402105109653487627 - server id
-      const member = client.guilds.cache
-        .get('402105109653487627')
-        .members.cache.get(userId)
       if (!member) return
       const role = member.guild.roles.cache.find(r => r.name === 'Банкрот')
       member.roles.add(role)
@@ -143,6 +142,7 @@ class Credit extends Deal {
         if (!roles.hasOwnProperty(roleId)) continue
         const role = member.guild.roles.cache.get(roleId)
         if (member.roles.cache.has(role.id)) member.roles.remove(role)
+        log('Remove bancrot ' + member)
       }
     }
   }
@@ -198,14 +198,17 @@ class ModerationCommands {
     switch (args[1]) {
       case 'credit':
         profiles[user.id].credit = null
+        log(`${message.author.username}(${member}) remove credit ${user.username}`)
         break
       case 'deposit':
         profiles[user.id].deposit = null
+        log(`${message.author.username}(${member}) remove deposit ${user.username}`)
         break
       case 'bancrot':
         profiles[user.id].bancrot = null
         const role = message.guild.roles.cache.find(r => r.name === 'Банкрот')
         message.guild.members.cache.get(user.id).roles.remove(role)
+        log(`${message.author.username}(${member}) remove bancrot ${user.username}`)
         break
       default:
         return "I don't know this property"

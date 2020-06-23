@@ -16,7 +16,8 @@ module.exports.run = async (client, message, args, command) => {
             SECONDS_COOLDOWN - (Date.now() - profile.timers.loot) / 1000
           )}`
         )
-      addLoot(profile, calcLoot(loot, MAX_DAILY_LOOT_COST))
+      const winnedLoot = calcLoot(loot, MAX_DAILY_LOOT_COST)
+      addLoot(profile, winnedLoot)
 
       profile.timers.loot = Date.now()
       readWrite.profile(message.author.id, profile)

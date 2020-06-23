@@ -1,10 +1,12 @@
-module.exports = async (embeds, message) => {
-  const msg = await message.reply(embeds[0].setDescription(`1 / ${embeds.length}`))
+module.exports = async (embeds, message, start) => {
+  let i = +start > 0 ? +start - 1 : 0
+	if (i > embeds.length - 1) i = embeds.length - 1
+	
+  const msg = await message.reply(embeds[i].setDescription(`${i + 1} / ${embeds.length}`))
   await msg.react('⬅')
   await msg.react('✖')
   await msg.react('➡')
 
-  let i = 0
   const filter = (reaction, user) => {
     return ['⬅', '✖', '➡'].includes(reaction.emoji.name) && user.id === message.author.id
   }
@@ -19,8 +21,9 @@ module.exports = async (embeds, message) => {
     msg.edit(embed.setDescription(`${i + 1} / ${embeds.length}`))
   }
 
-  const collector = msg.createReactionCollector(filter)
+  const collector = msg.createReactionCollector(filter, { dispose: true })
   collector.on('collect', step)
+  collector.on('remove', step)
   collector.on('end', () => {
     msg.delete({ time: 0 }).catch(() => {})
   })

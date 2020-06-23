@@ -1,6 +1,7 @@
 const { MessageEmbed } = require('discord.js')
 const fs = require('fs')
 const slider = require('../../utils/slider')
+const rainbow = require('../../utils/rainbow')
 const MAX_ROWS = 10
 
 module.exports.run = async (client, message, args) => {
@@ -20,7 +21,7 @@ module.exports.run = async (client, message, args) => {
     const embeds = []
     for (let page = 0; page < Math.floor(lb.length / 10); page++) {
       const embed = new MessageEmbed()
-        .setColor('#0099ff')
+        .setColor(rainbow())
         .setTitle('Leader board')
         .setThumbnail(
           'https://cdn.discordapp.com/attachments/402109825896415232/692820764478668850/yummylogo.jpg'
@@ -36,7 +37,7 @@ module.exports.run = async (client, message, args) => {
       }
       embeds.push(embed)
     }
-    slider(embeds, message)
+    slider(embeds, message, args[0])
   })
 }
 module.exports.help = {

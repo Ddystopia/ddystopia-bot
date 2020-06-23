@@ -2,6 +2,7 @@ const { MessageEmbed } = require('discord.js')
 const readWrite = require('../../utils/readWriteFile')
 const slider = require('../../utils/slider')
 const { addLoot, removeLoot } = require('../../utils/lootActions')
+const log = require('../../utils/log.js')
 const MAX_FIELDS = 25
 
 class EmbedInstance extends MessageEmbed {
@@ -35,54 +36,60 @@ class LootBoard {
 
     loot[args[1]] = +args[args.length - 1]
     loot = sortAndCleanRoles(loot)
-    readWrite.file('loot.json', loot)
-
+		readWrite.file('loot.json', loot)
+		
+		log(`${message.author.username}(${message.member}) add loot ${loot}`)
     LootBoard.shopList(message, loot)
   }
   static remove(message, args) {
-    if (!message.member.hasPermission('MANAGE_MESSAGES')) return
-
+		if (!message.member.hasPermission('MANAGE_MESSAGES')) return
+		
     delete loot[args[1]]
     readWrite.file('loot.json', loot)
-
+		
+		log(`${message.author.username}(${message.member}) remove loot ${loot}`)
     LootBoard.shopList(message, loot)
   }
   static buy(message, args, loot) {
-    const lootArray = args
-      .slice(1)
-      .join('')
-      .split('|')
-      .filter(el => !!el)
-      .filter(item => !!loot[item])
-
+		const lootArray = args
+		.slice(1)
+		.join('')
+		.split('|')
+		.filter(el => !!el)
+		.filter(item => !!loot[item])
+		
     if (lootArray.length < 1) return message.reply('Не продаётся')
     const cost = lootArray.reduce((sum, lootItem) => sum + loot[lootItem], 0)
     const profile = readWrite.profile(message.author.id)
-
+		
     if (profile.coins < cost) return message.reply(`Не хватает ${currency}`)
     profile.coins -= cost
-
+		
     lootArray.forEach(item => addLoot(profile, item))
-
-    message.react('✅')
+		
+		log(`${message.author.username}(${message.member}) buy loot ${loot}`)
+		message.react('✅')
+		
     readWrite.profile(message.author.id, profile)
   }
   static sell(message, args, loot) {
     const lootArray = args
-      .slice(1)
+		.slice(1)
       .join('')
       .split('|')
       .filter(el => !!el)
       .filter(item => !!loot[item])
-
+			
     if (lootArray.length < 1) return message.reply('Не продаётся')
-
+		
     const cost = lootArray.reduce((sum, lootItem) => sum + loot[lootItem], 0)
     const profile = readWrite.profile(message.author.id)
 
     profile.coins += cost * 0.9
     lootArray.forEach(item => removeLoot(profile, item))
 
+		
+		log(`${message.author.username}(${message.member}) sell loot ${loot}`)
     message.reply(`Успех, вы получили ${cost * 0.9} ${currency}`)
     readWrite.profile(message.author.id, profile)
   }

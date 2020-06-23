@@ -1,5 +1,5 @@
-const { appendFile } = require('fs')
 const readWrite = require('../../utils/readWriteFile')
+const log = require('../../utils/log.js')
 
 module.exports.run = async (client, message, args) => {
   if (!args) return
@@ -13,7 +13,7 @@ module.exports.run = async (client, message, args) => {
   if (!tillId) return
   const profileFrom = readWrite.profile(fromId)
   const profileTill = readWrite.profile(tillId)
-	if(profileTill.bancrot) return
+  if (profileTill.bancrot) return
 
   const transaction = args[0] == 'all' ? profileFrom.coins : +args[0]
 
@@ -25,12 +25,10 @@ module.exports.run = async (client, message, args) => {
   readWrite.profile(fromId, profileFrom)
   readWrite.profile(tillId, profileTill)
 
-  appendFile(
-    __dirname.replace(/cmds.+$/, '') + `transactionLogs.log`,
+  log(
     `GIVE from ${message.author.username} till ${
       message.mentions.users.first().username
-    } - ${transaction} coins\n`,
-    err => (err ? console.log(err) : null)
+    } - ${transaction} coins`
   )
 
   message.reply(`Было успешно переведено ${transaction} ${currency}`)

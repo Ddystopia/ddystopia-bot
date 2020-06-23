@@ -2,6 +2,7 @@ const { Client, Collection } = require('discord.js')
 const client = new Client()
 const fs = require('fs')
 const readWrite = require('./utils/readWriteFile')
+const log = require('./utils/log.js')
 
 const nonGrata = ['464804290876145665', '449543942556352513']
 const imageChannels = ['402109720833425408', '402114219438374913']
@@ -34,12 +35,12 @@ getDirs('./cmds/').forEach(dir => {
   })
 })
 
-client.on('ready', () => {
+client.on('ready', async () => {
   console.log(`Запустился бот ${client.user.username}`)
-  wordsGameChannels.forEach(id => {
+  wordsGameChannels.forEach(async id => {
     const channels = client.guilds.cache.get('402105109653487627').channels
-    const channel = channels.cache.get(id) || channels.fetch(id)
-    client.commands.get('cities').run(client, { channel }, ['start'])
+    const channel = channels.cache.get(id) || (await channels.fetch(id))
+    client.commands.get('cities').run(client, { channel, onReady: true }, ['start'])
   })
 
   checkTrigger()
@@ -51,8 +52,7 @@ client.on('ready', () => {
       info.lastCalcDate = Date.now()
       readWrite.file('workingInfo.json', info)
 
-      console.log('Percents have been calked')
-      console.log(new Date())
+      log('Percents have been calked')
     }
     client.commands.get('bank').run(client, true, 'setBancrots')
     setTimeout(checkTrigger, 30 * 60 * 1000)

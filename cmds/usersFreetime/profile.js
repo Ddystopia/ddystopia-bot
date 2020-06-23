@@ -25,7 +25,7 @@ module.exports.run = async (client, message, args, command) => {
           'https://discord.js.org'
         )
         .setThumbnail(user.avatarURL())
-        .addField('🎩 Actives', profile.coins + currency)
+        .addField('🎩 Actives', Math.floor(profile.coins) + currency)
         .addField('😎 Reputation', profile.rep)
         .addField('🎉 Birthday', profile.birthday || 'Не указан', true)
         .addField('💖 Married with', profile.marry || 'Не в браке', true)
@@ -38,7 +38,7 @@ module.exports.run = async (client, message, args, command) => {
     case 'birthday':
       if (user.id !== message.author.id) return
       if (!args[0]) return
-      const birthday = args[0].split(/[-/|]/).join('-')
+      const birthday = args[0].split(/[-/|\.]/).join('-')
       if (!/[0-3]\d-(0\d|1[012])-\d{4}/.test(birthday))
         return message.reply('invalid date')
       profile.birthday = birthday

@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const readWrite = require('../../utils/readWriteFile')
+const log = require('../../utils/log.js')
 
 let roles = readWrite.file('roles.json')
 
@@ -41,6 +42,9 @@ class RolesBoard {
     roles = sortAndCleanRoles(roles, message)
     readWrite.file('roles.json', roles)
 
+    log(
+      `${message.author.username}(${message.member}) add role to shop ${role.name}(${role})`
+    )
     RolesBoard.shopList(message)
   }
   static remove(message, args) {
@@ -58,6 +62,9 @@ class RolesBoard {
     delete roles[role.id]
     readWrite.file('roles.json', roles)
 
+    log(
+      `${message.author.username}(${message.member}) remove role from shop ${role.name}(${role})`
+    )
     RolesBoard.shopList(message)
   }
   static buy(message, args) {
@@ -78,6 +85,7 @@ class RolesBoard {
     profile.coins -= cost
     message.member.roles.add(role)
     message.react('✅')
+    log(`${message.author.username}(${message.member}) buy role ${role.name}(${role})`)
     readWrite.profile(id, profile)
   }
   static sell(message, args) {
@@ -98,6 +106,7 @@ class RolesBoard {
     profile.coins += cost * 0.9
     message.member.roles.remove(role)
 
+    log(`${message.author.username}(${message.member}) sell role ${role.name}(${role})`)
     message.reply(`Успех, вы получили ${cost * 0.9} ${currency}`)
     readWrite.profile(id, profile)
   }

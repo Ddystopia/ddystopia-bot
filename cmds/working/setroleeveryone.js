@@ -1,3 +1,4 @@
+const log = require('../../utils/log.js')
 module.exports.run = async (client, message, args) => {
   if (!message.member.hasPermission('MANAGE_MESSAGES')) return
   if (!args[0]) return message.reply('Вы не указaли роль')
@@ -39,7 +40,8 @@ module.exports.run = async (client, message, args) => {
         i++
       })
 
-  message.reply(`${i} людям была выдана роль Яммик`)
+	message.reply(`${i} людям была выдана роль ${role.name}`)
+	log(`${message.author.username}(${message.member}) set role ${role.name} ${i} users`)
   return i
 }
 

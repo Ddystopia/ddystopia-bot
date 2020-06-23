@@ -5,6 +5,7 @@ const initial = {
   loot: {},
   birthday: null,
   marry: null,
+  dailyLevel: 1,
   about: '',
   timers: {
     daily: 0,
@@ -45,6 +46,7 @@ module.exports.profile = (id, file) => {
     }
     response.loot = response.loot || {}
     response.rep = response.rep || 0
+    response.dailyLevel = response.dailyLevel || 1
     delete response.resentDaily
     if (file) write(filePath, file)
   } catch (err) {

@@ -2,7 +2,6 @@ const readWrite = require('../../utils/readWriteFile')
 let words = readWrite.file('words.json', null, [])
 
 module.exports.run = async (client, message, args) => {
-  if (message.author && message.author.bot) return
   switch (args[0]) {
     case 'clear':
       if (!message.member.hasPermission('MANAGE_MESSAGES')) return
@@ -11,11 +10,13 @@ module.exports.run = async (client, message, args) => {
       message.react('✅')
       break
     case 'start':
+      if (!message.onReady) return
       const filter = m => !m.content.includes(' ')
       const collector = message.channel.createMessageCollector(filter)
 
       collector.on('collect', msg => {
         const word = toFormat(msg.content)
+				if (msg.author.bot) return
         if (isCorrect(word, words)) {
           words.push(word)
           readWrite.file('words.json', words)

@@ -40,7 +40,7 @@ module.exports.run = async (client, message, args) => {
   const embedCasino = new EmbedInstance('Команды казино').addField(
     '\u200B',
     `
-1. >daily - раз в 12 часов, 2% шанс получить не 1к а 10к
+1. >daily [up / level] [n] - раз в 12 часов, можно улучшать
 2. >br [sum / all]
 3. >wheel [sum / all]
 4. >cf [sum / all] [t / h]
@@ -160,7 +160,7 @@ http://yotx.ru/#!1/3_h/ubW/ugfSOG8L@2f7R/sH@w7yel1vY31tZPd9f3ti/2D/ZJNOwGjPG4dcp
   )
   // prettier-ignore
   const embeds = [embedIntroduction, embedProfile, embedCasino, embedBank, embedPercents, embedShop, embedShop2, embedActions, embedHentai, embedModeration]
-  slider(embeds, message)
+  slider(embeds, message, args[0])
 }
 
 module.exports.help = {

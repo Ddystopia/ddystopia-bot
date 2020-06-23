@@ -1,5 +1,5 @@
-const { appendFile } = require('fs')
 const readWrite = require('../../utils/readWriteFile')
+const log = require('../../utils/log.js')
 
 module.exports.run = async (client, message, args) => {
   if (!message.member.hasPermission('MANAGE_MESSAGES')) return
@@ -16,12 +16,10 @@ module.exports.run = async (client, message, args) => {
 
   readWrite.profile(tillId, profileTill)
 
-  appendFile(
-    __dirname.replace(/cmds.+$/, '') + `transactionLogs.log`,
+  log(
     `REWARD from${message.author.username} till ${
       message.mentions.users.first().username
-    } - ${transaction} coins\n`,
-    err => err && console.error(err)
+    } - ${transaction} coins`
   )
 
   message.reply(`Было успешно переведено ${transaction} ${currency}`)
