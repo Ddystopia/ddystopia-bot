@@ -7,7 +7,7 @@ const bankProfiles = readWrite.file('bank_profiles.json')
 const MAX_ROWS = 10
 
 module.exports.run = async (client, message, args) => {
-  const lb = []
+  let lb = []
   const profiles = []
   const loot = readWrite.file('loot.json')
   readdir(__dirname.replace(/cmds.+$/, '') + `profiles/`, (err, files) => {
@@ -20,7 +20,6 @@ module.exports.run = async (client, message, args) => {
     })
 
     profiles
-      .sort((a, b) => +b[1].coins - +a[1].coins)
       .forEach(item => {
         const [id, profile] = item
         let actives = profile.coins
@@ -34,6 +33,7 @@ module.exports.run = async (client, message, args) => {
         )
         lb.push([id, Math.floor(actives)])
       })
+    lb = lb.filter(item => !!item[1]).sort((a, b) => +b[1] - +a[1])
     const embeds = []
     for (let page = 0; page < Math.floor(lb.length / 10); page++) {
       const embed = new MessageEmbed()
