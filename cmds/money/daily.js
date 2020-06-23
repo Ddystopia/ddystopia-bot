@@ -36,8 +36,12 @@ module.exports.run = async (client, message, args) => {
           .addField('Уровень', profile.dailyLevel)
           .addField('Сейчас ваш daily', calcLevelCost(profile.dailyLevel) + currency)
           .addField(
-            'Цена следующего',
+            'Цена до следующего',
             calcLevelCost(profile.dailyLevel) * 15 + 100 + currency
+          )
+          .addField(
+            'Следующее daily',
+            calcLevelCost(profile.dailyLevel + 1) + currency
           )
       )
     default:

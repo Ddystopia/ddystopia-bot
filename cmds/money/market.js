@@ -98,11 +98,6 @@ class LootBoard {
 module.exports.run = async (client, message, args) => {
   const loot = readWrite.file('loot.json')
   switch (args[0]) {
-    case undefined:
-    case null:
-    case false:
-      LootBoard.shopList(message, loot)
-      break
     case 'add':
       LootBoard.add(message, args, loot)
       break
@@ -116,7 +111,7 @@ module.exports.run = async (client, message, args) => {
       LootBoard.sell(message, args, loot)
       break
     default:
-      message.reply('Я не знаю, что вы от меня хотите')
+      LootBoard.shopList(message, loot)
   }
 }
 

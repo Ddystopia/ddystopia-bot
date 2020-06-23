@@ -1,23 +1,39 @@
 const { MessageEmbed } = require('discord.js')
-const fs = require('fs')
+const { readdir } = require('fs')
 const slider = require('../../utils/slider')
 const rainbow = require('../../utils/rainbow')
+const readWrite = require('../../utils/readWriteFile')
+const bankProfiles = readWrite.file('bank_profiles.json')
 const MAX_ROWS = 10
 
 module.exports.run = async (client, message, args) => {
   const lb = []
   const profiles = []
-  fs.readdir(__dirname.replace(/cmds.+$/, '') + `profiles/`, (err, files) => {
+  const loot = readWrite.file('loot.json')
+  readdir(__dirname.replace(/cmds.+$/, '') + `profiles/`, (err, files) => {
     if (err) throw new Error(err)
     const jsonFiles = files.filter(f => f.split('.').pop() === 'json')
     if (jsonFiles.length <= 0) throw new Error('No files to download')
     jsonFiles.forEach(f => {
-      profiles.push([f.replace('.json', ''), require(`../../profiles/${f}`)])
+      const id = f.replace('.json', '')
+      profiles.push([id, readWrite.profile(id)])
     })
 
     profiles
       .sort((a, b) => +b[1].coins - +a[1].coins)
-      .forEach(item => lb.push([item[0], item[1].coins]))
+      .forEach(item => {
+        const [id, profile] = item
+        let actives = profile.coins
+        if (bankProfiles[id] && bankProfiles[id].deposit)
+          actives += bankProfiles[id].deposit.sum
+        if (bankProfiles[id] && bankProfiles[id].credit)
+          actives -= bankProfiles[id].credit.sum
+        actives += Object.entries(profile.loot).reduce(
+          (sum, lootArray) => sum + loot[lootArray[0]],
+          0
+        )
+        lb.push([id, Math.floor(actives)])
+      })
     const embeds = []
     for (let page = 0; page < Math.floor(lb.length / 10); page++) {
       const embed = new MessageEmbed()

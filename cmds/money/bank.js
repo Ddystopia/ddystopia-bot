@@ -123,6 +123,7 @@ class Credit extends Deal {
       if (profile.coins > 0) profile.coins = 0
       if (this.sum > 0) makeBancrot()
 
+			profile.dailyLevel = 1
       profiles[userId].credit = null
       profiles[userId].deposit = null
       log('New Bancrot: ' + member)
