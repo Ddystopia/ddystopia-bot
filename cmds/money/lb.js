@@ -19,21 +19,20 @@ module.exports.run = async (client, message, args) => {
       profiles.push([id, readWrite.profile(id)])
     })
 
-    profiles
-      .forEach(item => {
-        const [id, profile] = item
-        let actives = profile.coins
-        if (bankProfiles[id] && bankProfiles[id].deposit)
-          actives += bankProfiles[id].deposit.sum
-        if (bankProfiles[id] && bankProfiles[id].credit)
-          actives -= bankProfiles[id].credit.sum
-        actives += Object.entries(profile.loot).reduce(
-          (sum, lootArray) => sum + loot[lootArray[0]],
-          0
-        )
-        lb.push([id, Math.floor(actives)])
-      })
-    lb = lb.filter(item => !!item[1]).sort((a, b) => +b[1] - +a[1])
+    profiles.forEach(item => {
+      const [id, profile] = item
+      let actives = profile.coins
+      if (bankProfiles[id] && bankProfiles[id].deposit)
+        actives += bankProfiles[id].deposit.sum
+      if (bankProfiles[id] && bankProfiles[id].credit)
+        actives -= bankProfiles[id].credit.sum
+      actives += Object.entries(profile.loot).reduce(
+        (sum, lootArray) => sum + loot[lootArray[0]],
+        0
+      )
+      lb.push([id, Math.floor(actives)])
+    })
+    lb = lb.filter(a => !isNaN(+a[1])).sort((a, b) => b[1] - a[1])
     const embeds = []
     for (let page = 0; page < Math.floor(lb.length / 10); page++) {
       const embed = new MessageEmbed()
