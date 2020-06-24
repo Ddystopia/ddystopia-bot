@@ -1,6 +1,7 @@
 const { MessageEmbed } = require('discord.js')
 const rainbow = require('../../utils/rainbow.js')
 const { removeLoot } = require('../../utils/lootActions')
+const calcXp = require('../../utils/calcXp.js')
 const readWrite = require('../../utils/readWriteFile.js')
 const marryClipboard = new Map()
 
@@ -13,7 +14,7 @@ module.exports.run = async (client, message, args, command) => {
     case 'profile':
       const usersLoot = Object.entries(profile.loot)
         .sort((a, b) => loot[b[0]] - loot[a[0]])
-        .map(line => `${line[0]}  :  ${line[1]}`)
+        .map(line => `${line[0]} ${line[1]}`)
         .join(' | ')
 
       const embed = new MessageEmbed()
@@ -25,8 +26,10 @@ module.exports.run = async (client, message, args, command) => {
           'https://discord.js.org'
         )
         .setThumbnail(user.avatarURL())
-        .addField('🎩 Actives', Math.floor(profile.coins) + currency)
-        .addField('😎 Reputation', profile.rep)
+        .addField('🎩 Actives', Math.floor(profile.coins) + currency, true)
+        .addField('👑 Level', profile.level, true)
+        .addField('⚔ xp', `${profile.xp} / ${calcXp(profile.level)}`, true)
+        .addField('😎 Reputation', profile.rep, true)
         .addField('🎉 Birthday', profile.birthday || 'Не указан', true)
         .addField('💖 Married with', profile.marry || 'Не в браке', true)
         .addField('🛍 Loot', usersLoot || 'Не имеет лута')

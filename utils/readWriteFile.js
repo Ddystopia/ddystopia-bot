@@ -1,6 +1,8 @@
 const fs = require('fs')
 const initial = {
-  coins: 0,
+	coins: 0,
+	xp: 0,
+	level: 0,
   rep: 0,
   loot: {},
   birthday: null,
@@ -46,6 +48,8 @@ module.exports.profile = (id, file) => {
     }
     response.loot = response.loot || {}
     response.rep = response.rep || 0
+    response.level = response.level || 0
+    response.xp = response.xp || 0
     response.dailyLevel = response.dailyLevel || 1
     delete response.resentDaily
     if (file) write(filePath, file)
