@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js')
-const readWrite = require('../../utils/readWriteFile')
+const User = require('../../classes/User')
 
 module.exports.run = async (client, message, args) => {
   let userId
@@ -9,11 +9,11 @@ module.exports.run = async (client, message, args) => {
     return message.reply("I don't know who is it")
   }
 
-  const profile = readWrite.profile(userId)
+  const user = User.getOrCreateUser(userId)
 
   const embed = new MessageEmbed()
     .setColor('#0099ff')
-    .addField('Расчёт', `На счету ${Math.floor(profile.coins)} ${currency}`)
+    .addField('Расчёт', `На счету ${Math.floor(user.coins)} ${currency}`)
   message.reply(embed)
 }
 

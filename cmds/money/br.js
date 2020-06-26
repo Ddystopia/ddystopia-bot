@@ -1,8 +1,8 @@
 const { MessageEmbed } = require('discord.js')
+const User = require('../../classes/User')
 const useUserGames = require('../../utils/useUserGames')
 const randomInteger = require('../../utils/randomInteger')
 const rainbow = require('../../utils/rainbow.js')
-const readWrite = require('../../utils/readWriteFile')
 const games = new Map()
 const lastGames = new Map()
 
@@ -14,9 +14,9 @@ module.exports.run = async (client, message, args) => {
 
   const userGames = useUserGames(message.author.id, games, lastGames)
 
-  const profile = readWrite.profile(message.author.id)
+  const user = User.getOrCreateUser(message.author.id)
 
-  const bet = args[0] == 'all' ? profile.coins : +args[0]
+  const bet = args[0] == 'all' ? user.coins : +args[0]
   const betNum = randomInteger(-30, 70) + 30
   let percent = 50 - (userGames * 1.2 - 12)
   if (percent < 10) percent = 10
@@ -29,7 +29,7 @@ module.exports.run = async (client, message, args) => {
 			
   let jackpot = ''
 
-  if (profile.coins < bet) return message.reply(`Не хватает ${currency}`)
+  if (user.coins < bet) return message.reply(`Не хватает ${currency}`)
 
   if (betNum == realNum && randomInteger(0, 1) && games.get(message.author.id) < 20)
     jackpot =
@@ -42,24 +42,24 @@ module.exports.run = async (client, message, args) => {
     //if == 100 factor = 7 if >= 90 factor = 3.5 else factor = 2
     if (jackpot) {
       factor *= 30
-      profile.coins += 10000
+      user.coins += 10000
     }
-    profile.coins += bet * factor - bet
+    user.coins += bet * factor - bet
     embed.addField(
       'Расчёт',
       `Вам выпало число ${realNum}, и вы выиграли ${
         bet * factor
-      } ${currency}${jackpot}\nНа вашем счету теперь ${profile.coins} ${currency}\n`
+      } ${currency}${jackpot}\nНа вашем счету теперь ${user.coins} ${currency}\n`
     )
   } else {
-    profile.coins -= bet
-    if (jackpot) profile.coins += 10000
+    user.coins -= bet
+    if (jackpot) user.coins += 10000
     embed.addField(
       'Расчёт',
-      `Вам выпало число ${realNum}, и вы потеряли ${bet} ${currency}${jackpot}\nНа вашем счету теперь ${profile.coins} ${currency}\n`
+      `Вам выпало число ${realNum}, и вы потеряли ${bet} ${currency}${jackpot}\nНа вашем счету теперь ${user.coins} ${currency}\n`
     )
   }
-  readWrite.profile(message.author.id, profile)
+  user.save()
   message.reply(embed)
 }
 

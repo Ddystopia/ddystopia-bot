@@ -1,5 +1,5 @@
+const User = require('../../classes/User')
 const useUserGames = require('../../utils/useUserGames')
-const readWrite = require('../../utils/readWriteFile')
 let cost = 100
 const games = new Map()
 const lastGames = new Map()
@@ -11,11 +11,11 @@ module.exports.run = async (client, message) => {
   const attachmentsNum = message.attachments.size
   if (!attachmentsNum) return
 
-  const profile = readWrite.profile(message.author.id)
-	if(profile.bancrot) return
+  const user = User.getOrCreateUser(message.author.id)
+  if (user.bancrot) return
 
-  profile.coins += attachmentsNum * cost
-  readWrite.profile(message.author.id, profile)
+  user.coins += attachmentsNum * cost
+  user.save()
 }
 
 module.exports.help = {

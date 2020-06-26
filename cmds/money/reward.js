@@ -1,4 +1,4 @@
-const readWrite = require('../../utils/readWriteFile')
+const User = require('../../classes/User')
 const log = require('../../utils/log.js')
 
 module.exports.run = async (client, message, args) => {
@@ -9,12 +9,12 @@ module.exports.run = async (client, message, args) => {
 
   const tillId = message.mentions.users.first().id
   if (!tillId) return
-  const profileTill = readWrite.profile(tillId)
+  const user = User.getOrCreateUser(tillId)
 
-  const transaction = args[0] === '-all' ? -profileTill.coins : +args[0]
-  profileTill.coins += transaction
+  const transaction = args[0] === '-all' ? -user.coins : +args[0]
+  user.coins += transaction
 
-  readWrite.profile(tillId, profileTill)
+  user.save()
 
   log(
     `REWARD from${message.author.username} till ${

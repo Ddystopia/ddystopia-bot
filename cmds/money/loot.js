@@ -1,59 +1,52 @@
+const User = require('../../classes/User')
 const randomInteger = require('../../utils/randomInteger')
 const formatDuration = require('../../utils/formatDuration')
-const { addLoot, removeLoot } = require('../../utils/lootActions')
 const readWrite = require('../../utils/readWriteFile.js')
 const SECONDS_COOLDOWN = 60 * 60 * 24
 const MAX_DAILY_LOOT_COST = 5000
 
 module.exports.run = async (client, message, args, command) => {
-  const loot = readWrite.file('loot.json')
+  const loot = readWrite('loot.json')
   switch (command) {
     case 'loot': {
-      const profile = readWrite.profile(message.author.id)
-      if (Date.now() - profile.timers.loot < 1000 * SECONDS_COOLDOWN)
+      const user = User.getOrCreateUser(message.author.id)
+      if (Date.now() - user.timers.loot < 1000 * SECONDS_COOLDOWN)
         return message.reply(
           `Вы уже получили свою долю, следующий раз получить можно через ${formatDuration(
-            SECONDS_COOLDOWN - (Date.now() - profile.timers.loot) / 1000
+            SECONDS_COOLDOWN - (Date.now() - user.timers.loot) / 1000
           )}`
         )
       const winnedLoot = calcLoot(loot, MAX_DAILY_LOOT_COST)
-      addLoot(profile, winnedLoot)
+      user.addLoot([winnedLoot])
 
-      profile.timers.loot = Date.now()
-      readWrite.profile(message.author.id, profile)
+      user.timers.loot = Date.now()
+      user.save()
       message.reply(
         `Вы получили ${winnedLoot}, следующий раз получить можно через 24 часа`
       )
       break
     }
 
-    case 'giveloot':
+    case 'giveloot': {
       if (!message.mentions.users.first()) return
-      const lootArray = args
-        .slice(1)
-        .join('')
-        .split('|')
-        .filter(el => !!el)
-        .filter(item => !!loot[item])
+      const userFrom = User.getOrCreateUser(message.author.id)
+      const userTill = User.getOrCreateUser(message.mentions.users.first().id)
+      const lootArray = userFrom.getLootArray(args.slice(1), loot)
 
       if (lootArray.length < 1) return message.reply('Не продаётся')
-      const profileFrom = readWrite.profile(message.author.id)
-      const profileTill = readWrite.profile(message.mentions.users.first().id)
-      if (Object.keys(profileFrom.loot).some(item => !loot[item]))
-        return message.reply('У вас такого нет')
 
-      lootArray.forEach(item => addLoot(profileTill, item))
-      lootArray.forEach(item => removeLoot(profileFrom, item))
+      userFrom.removeLoot(lootArray)
+      userTill.addLoot(lootArray)
 
       message.react('✅')
-      readWrite.profile(message.author.id, profileFrom)
-      readWrite.profile(message.mentions.users.first().id, profileTill)
+      userFrom.save()
+      userTill.save()
       break
-
+    }
     case 'lootbox': {
-      const profile = readWrite.profile(message.author.id)
-      if (!profile.loot['🎁']) return message.reply('Нечего открывать ¯\\_(ツ)_/¯')
-      removeLoot(profile, '🎁')
+      const user = User.getOrCreateUser(message.author.id)
+      if (!user.loot['🎁']) return message.reply('Нечего открывать ¯\\_(ツ)_/¯')
+      user.removeLoot(['🎁'])
       const number = randomInteger(0, 100)
 
       let maxCost = 0
@@ -64,7 +57,8 @@ module.exports.run = async (client, message, args, command) => {
       else maxCost = MAX_DAILY_LOOT_COST
 
       const winnedLoot = calcLoot(loot, maxCost)
-      addLoot(profile, winnedLoot)
+      user.addLoot([winnedLoot])
+      user.save()
       message.reply(`Вы получили ${winnedLoot}`)
     }
   }

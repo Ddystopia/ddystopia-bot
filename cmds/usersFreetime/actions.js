@@ -12,7 +12,7 @@ function getAction(actionProps, actions) {
 }
 
 module.exports.run = async (client, message, args, command) => {
-  const responseMessage = !!message.mentions.users.size
+  const responseMessage = message.mentions.users.size
     ? `${message.member} ${command} ${message.mentions.users.first()}`
     : `${message.member} ${command}`
 

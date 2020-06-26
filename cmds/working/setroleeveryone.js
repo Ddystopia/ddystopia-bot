@@ -10,12 +10,12 @@ module.exports.run = async (client, message, args) => {
 
   const isBasic = args[1] === 'basic' ? true : false
   const delIfAnother = args[2] === 'delIfAnother' ? true : false
-  const role = message.guild.roles.cache.find(r => r.name.toLowerCase() === nameFromArgs)
+  const role = message.guild.roles.cache.find(r => r.name.toLowerCase() === nameFromArgs.toLowerCase())
   if (!role) return message.reply(`Role ${nameFromArgs} is not found`)
 
   if (!isBasic)
     message.guild.members.cache
-      .filter(m => !m.user.bot && !m.roles.cache.find(r => r.name.toLowerCase() === nameFromArgs))
+      .filter(m => !m.user.bot && !m.roles.cache.find(r => r.name.toLowerCase() === nameFromArgs.toLowerCase()))
       .forEach(async member => {
         member.roles.add(role)
         i++

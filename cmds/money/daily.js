@@ -1,27 +1,26 @@
 const { MessageEmbed } = require('discord.js')
-const randomInteger = require('../../utils/randomInteger.js')
+const User = require('../../classes/User')
 const rainbow = require('../../utils/rainbow')
-const readWrite = require('../../utils/readWriteFile')
 const formatDuration = require('../../utils/formatDuration')
 
 const SECONDS_COOLDOWN = 60 * 60 * 12
 
 module.exports.run = async (client, message, args) => {
-  const profile = readWrite.profile(message.author.id)
-  if (profile.bancrot) return
+  const user = User.getOrCreateUser(message.author.id)
+  if (user.bancrot) return
 
   switch (args[0]) {
     case 'up':
       for (let i = 0; i < (+args[1] || 1); i++) {
-        const nextLevelCost = calcLevelCost(profile.dailyLevel) * 15 + 100
-        if (profile.coins < nextLevelCost) continue
+        const nextLevelCost = calcLevelCost(user.dailyLevel) * 15 + 100
+        if (user.coins < nextLevelCost) continue
 
-        profile.coins -= nextLevelCost
-        profile.dailyLevel++
+        user.coins -= nextLevelCost
+        user.dailyLevel++
       }
 
-      message.reply(`У вас ${profile.dailyLevel} уровень`)
-      readWrite.profile(message.author.id, profile)
+      message.reply(`У вас ${user.dailyLevel} уровень`)
+      user.save()
       return message.react('✅')
 
     case 'level':
@@ -33,39 +32,38 @@ module.exports.run = async (client, message, args) => {
             'https://cdn.discordapp.com/attachments/402109825896415232/692820764478668850/yummylogo.jpg'
           )
           .setTimestamp()
-          .addField('Уровень', profile.dailyLevel)
-          .addField('Сейчас ваш daily', calcLevelCost(profile.dailyLevel) + currency)
+          .addField('Уровень', user.dailyLevel)
+          .addField('Сейчас ваш daily', calcLevelCost(user.dailyLevel) + currency)
           .addField(
             'Цена до следующего',
-            calcLevelCost(profile.dailyLevel) * 15 + 100 + currency
+            calcLevelCost(user.dailyLevel) * 15 + 100 + currency
           )
-          .addField(
-            'Следующее daily',
-            calcLevelCost(profile.dailyLevel + 1) + currency
-          )
+          .addField('Следующее daily', calcLevelCost(user.dailyLevel + 1) + currency)
       )
-    default:
-      if (Date.now() - profile.timers.daily < 1000 * SECONDS_COOLDOWN)
+    default: {
+      if (Date.now() - user.timers.daily < 1000 * SECONDS_COOLDOWN)
         return message.reply(
           `Вы уже получили свою долю, следующий раз получить можно через ${formatDuration(
-            SECONDS_COOLDOWN - (Date.now() - profile.timers.daily) / 1000
+            SECONDS_COOLDOWN - (Date.now() - user.timers.daily) / 1000
           )}`
         )
-      const sum = calcLevelCost(profile.dailyLevel)
-      profile.coins += sum
-      profile.timers.daily = Date.now()
+      const sum = calcLevelCost(user.dailyLevel)
+      user.coins += sum
+      user.timers.daily = Date.now()
 
-      readWrite.profile(message.author.id, profile)
+      user.save()
       message.reply(
         `Вы получили ${sum}${currency}, следующий раз получить можно через 12 часов`
       )
       break
+    }
   }
 }
 
 const calcLevelCost = level => {
   let first = 0
   let second = 0
+  level += 2
 
   if (level <= 7) {
     first = 0

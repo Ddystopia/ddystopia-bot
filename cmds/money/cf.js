@@ -1,8 +1,8 @@
 const { MessageEmbed } = require('discord.js')
+const User = require('../../classes/User')
 const useUserGames = require('../../utils/useUserGames')
 const randomInteger = require('../../utils/randomInteger.js')
 const rainbow = require('../../utils/rainbow.js')
-const readWrite = require('../../utils/readWriteFile')
 
 const sides = ['h', 't']
 const sidesImages = {
@@ -21,9 +21,9 @@ module.exports.run = async (client, message, args) => {
 
   const userGames = useUserGames(message.author.id, games, lastGames)
 
-	const profile = readWrite.profile(message.author.id)
+	const user = User.getOrCreateUser(message.author.id)
 	
-  const bet = args[0] == 'all' ? profile.coins : +args[0]
+  const bet = args[0] == 'all' ? user.coins : +args[0]
   const bettedSide = args[1]
   let percent = 50 - (userGames * 1.2 - 12)
   if (percent < 10) percent = 10
@@ -34,24 +34,24 @@ module.exports.run = async (client, message, args) => {
       : randomInteger(0, 99) <= percent
       ? bettedSide
       : loseSide
-  if (profile.coins < bet) return message.reply(`Не хватает ${currency}`)
+  if (user.coins < bet) return message.reply(`Не хватает ${currency}`)
 
   const embed = new MessageEmbed().setColor(rainbow()).setImage(sidesImages[side])
 
   if (bettedSide == side) {
-    profile.coins += bet
+    user.coins += bet
     embed.addField(
       'Расчёт',
-      `Вы выиграли ${bet} ${currency}\nНа вашем счету теперь ${profile.coins} ${currency}\n`
+      `Вы выиграли ${bet} ${currency}\nНа вашем счету теперь ${user.coins} ${currency}\n`
     )
   } else {
-    profile.coins -= bet
+    user.coins -= bet
     embed.addField(
       'Расчёт',
-      `Вы потеряли ${bet} ${currency}\nНа вашем счету теперь ${profile.coins} ${currency}\n`
+      `Вы потеряли ${bet} ${currency}\nНа вашем счету теперь ${user.coins} ${currency}\n`
     )
   }
-  readWrite.profile(message.author.id, profile)
+  user.save()
   message.reply(embed)
 }
 

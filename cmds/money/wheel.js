@@ -1,8 +1,8 @@
 const { MessageEmbed } = require('discord.js')
+const User = require('../../classes/User')
 const randomInteger = require('../../utils/randomInteger.js')
 const useUserGames = require('../../utils/useUserGames')
 const rainbow = require('../../utils/rainbow.js')
-const readWrite = require('../../utils/readWriteFile')
 const games = new Map()
 const lastGames = new Map()
 
@@ -25,9 +25,9 @@ module.exports.run = async (bot, message, args) => {
 
   const userGames = useUserGames(message.author.id, games, lastGames)
 
-  const profile = readWrite.profile(message.author.id)
+  const user = User.getOrCreateUser(message.author.id)
 
-  const bet = args[0] == 'all' ? profile.coins : +args[0]
+  const bet = args[0] == 'all' ? user.coins : +args[0]
 
   let percent = 50 - (userGames * 1.2 - 12)
   if (percent < 10) percent = 10
@@ -42,8 +42,8 @@ module.exports.run = async (bot, message, args) => {
   const factor = factors[rand]
   const arrow = factorsTable[factor.toString()]
 
-  if (profile.coins < bet) return message.reply(`Не хватает ${currency}`)
-  profile.coins -= bet
+  if (user.coins < bet) return message.reply(`Не хватает ${currency}`)
+  user.coins -= bet
 
   const embed = new MessageEmbed().setColor(rainbow())
 
@@ -54,15 +54,14 @@ module.exports.run = async (bot, message, args) => {
     .join('')
     .trim()
 
-  profile.coins += Math.floor(bet * factor)
+  user.coins += Math.floor(bet * factor)
   embed.addField(
     'Расчёт',
     `Вы выиграли ${Math.floor(bet * factor)} ${currency}\nНа вашем счету теперь ${
-      profile.coins
+      user.coins
     } ${currency}\n`
   )
-  readWrite.profile(message.author.id, profile)
-
+  user.save()
   message.reply('\n' + response, embed)
 }
 

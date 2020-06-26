@@ -1,12 +1,13 @@
 const { MessageEmbed } = require('discord.js')
+const User = require('../../classes/User')
+const { onlyEmoji } = require('emoji-aware')
 const readWrite = require('../../utils/readWriteFile')
 const slider = require('../../utils/slider')
-const { addLoot, removeLoot } = require('../../utils/lootActions')
 const log = require('../../utils/log.js')
 const MAX_FIELDS = 25
 
 class EmbedInstance extends MessageEmbed {
-  constructor(title) {
+  constructor() {
     super()
     this.setColor('#0099ff')
       .setTitle('Market')
@@ -36,67 +37,55 @@ class LootBoard {
 
     loot[args[1]] = +args[args.length - 1]
     loot = sortAndCleanRoles(loot)
-		readWrite.file('loot.json', loot)
-		
-		log(`${message.author.username}(${message.member}) add loot ${loot}`)
+    readWrite('loot.json', loot)
+
+    log(`${message.author.username}(${message.member}) add loot ${loot}`)
     LootBoard.shopList(message, loot)
   }
-  static remove(message, args) {
-		if (!message.member.hasPermission('MANAGE_MESSAGES')) return
-		
+  static remove(message, args, loot) {
+    if (!message.member.hasPermission('MANAGE_MESSAGES')) return
+
     delete loot[args[1]]
-    readWrite.file('loot.json', loot)
-		
-		log(`${message.author.username}(${message.member}) remove loot ${loot}`)
+    readWrite('loot.json', loot)
+
+    log(`${message.author.username}(${message.member}) remove loot ${loot}`)
     LootBoard.shopList(message, loot)
   }
   static buy(message, args, loot) {
-		const lootArray = args
-		.slice(1)
-		.join('')
-		.split('|')
-		.filter(el => !!el)
-		.filter(item => !!loot[item])
-		
+    const lootArray = onlyEmoji(args.slice(1).join('')).filter(item => !!loot[item])
+
     if (lootArray.length < 1) return message.reply('Не продаётся')
     const cost = lootArray.reduce((sum, lootItem) => sum + loot[lootItem], 0)
-    const profile = readWrite.profile(message.author.id)
-		
-    if (profile.coins < cost) return message.reply(`Не хватает ${currency}`)
-    profile.coins -= cost
-		
-    lootArray.forEach(item => addLoot(profile, item))
-		
-		log(`${message.author.username}(${message.member}) buy loot ${loot}`)
-		message.react('✅')
-		
-    readWrite.profile(message.author.id, profile)
+    const user = User.getOrCreateUser(message.author.id)
+
+    if (user.coins < cost) return message.reply(`Не хватает ${currency}`)
+    user.coins -= cost
+
+    user.addLoot(lootArray)
+
+    log(`${message.author.username}(${message.member}) buy loot ${loot}`)
+    message.react('✅')
+
+    user.save()
   }
   static sell(message, args, loot) {
-    const lootArray = args
-		.slice(1)
-      .join('')
-      .split('|')
-      .filter(el => !!el)
-      .filter(item => !!loot[item])
-			
+    const user = User.getOrCreateUser(message.author.id)
+    const lootArray = user.getLootArray(args.slice(1), loot)
     if (lootArray.length < 1) return message.reply('Не продаётся')
-		
+
     const cost = lootArray.reduce((sum, lootItem) => sum + loot[lootItem], 0)
-    const profile = readWrite.profile(message.author.id)
 
-    profile.coins += cost * 0.9
-    lootArray.forEach(item => removeLoot(profile, item))
+    user.coins += cost * 0.9
+    user.removeLoot(lootArray)
 
-		
-		log(`${message.author.username}(${message.member}) sell loot ${loot}`)
+    log(`${message.author.username}(${message.member}) sell loot ${loot}`)
     message.reply(`Успех, вы получили ${cost * 0.9} ${currency}`)
-    readWrite.profile(message.author.id, profile)
+    user.save()
   }
 }
 
 module.exports.run = async (client, message, args) => {
-  const loot = readWrite.file('loot.json')
+  const loot = readWrite('loot.json')
   switch (args[0]) {
     case 'add':
       LootBoard.add(message, args, loot)

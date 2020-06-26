@@ -1,10 +1,11 @@
 const { MessageEmbed } = require('discord.js')
+const User = require('../../classes/User')
 const readWrite = require('../../utils/readWriteFile')
-const profiles = readWrite.file('bank_profiles.json')
+const profiles = readWrite('bank_profiles.json')
 const latestCredits = new Map()
 const log = require('../../utils/log.js')
 
-class User {
+class BankMember {
   constructor(userId) {
     this.credit = null
     this.deposit = null
@@ -17,9 +18,9 @@ class User {
     if (+days > 4) return 'Invalid argument days(so many)'
     if (+sum < 5e4 && +days > 2) return 'So many days on this sum'
 
-    const profile = readWrite.profile(this.id)
+    const user = User.getOrCreateUser(this.id)
     if (sum < 1000) 'Invalid argument sum(so few)'
-    if (sum / profile.coins > 15 && profile.coins > 200)
+    if (sum / user.coins > 15 && user.coins > 200)
       return `Для этой суммы, вы должны иметь больше, чем ${+(sum / 15).toFixed(
         3
       )} ${currency}`
@@ -59,88 +60,87 @@ class Deal {
 class Deposit extends Deal {
   constructor(sum, days, percent, userId) {
     super(sum, days, percent)
-    const profile = readWrite.profile(userId)
+    const user = User.getOrCreateUser(userId)
 
-    if (profile.coins <= 0) return
-    if (this.sum > profile.coins) {
-      this.sum = profile.coins
-      profile.coins = 0
-    } else profile.coins -= +sum
+    if (user.coins <= 0) return
+    if (this.sum > user.coins) {
+      this.sum = user.coins
+      user.coins = 0
+    } else user.coins -= +sum
 
-    readWrite.profile(userId, profile)
+    user.save()
   }
   repay(sum, userId) {
-    const profile = readWrite.profile(userId)
+    const user = User.getOrCreateUser(userId)
     if (profiles[userId].credit) return 'You already have a credit.'
     if (isNaN(+sum)) return
 
-    if (sum > profile.coins) return false
-    else profile.coins -= +sum
+    if (sum > user.coins) return false
+    else user.coins -= +sum
 
     this.sum += +sum
 
-    readWrite.profile(userId, profile)
+    user.save()
     return true
   }
   payDeposits(userId) {
-    const profile = readWrite.profile(userId)
-    profile.coins += Math.floor(+this.sum)
+    const user = User.getOrCreateUser(userId)
+    user.coins += Math.floor(+this.sum)
     profiles[userId].deposit = null
-    readWrite.profile(userId, profile)
+    user.save()
   }
 }
 
 class Credit extends Deal {
   constructor(sum, days, percent, userId) {
     super(sum, days, percent)
-    const profile = readWrite.profile(userId)
-    profile.coins += +sum
-    readWrite.profile(userId, profile)
+    const user = User.getOrCreateUser(userId)
+    user.coins += +sum
+    user.save()
   }
   repay(sum, userId) {
-    const profile = readWrite.profile(userId)
+    const user = User.getOrCreateUser(userId)
     if (isNaN(+sum)) return
     if (latestCredits.has(userId)) {
       if (latestCredits.get(userId) < Date.now()) latestCredits.delete(userId)
       else return 'Подождите немного'
     }
-    if (sum > profile.coins) return false
-    else profile.coins -= +sum
+    if (sum > user.coins) return false
+    else user.coins -= +sum
 
     this.sum -= +sum
     if (this.sum <= 0) profiles[userId].credit = null
-    readWrite.profile(userId, profile)
+    user.save()
     return true
   }
   badUser(userId, client, rec) {
-    const profile = readWrite.profile(userId)
+    const user = User.getOrCreateUser(userId)
     const member = client.guilds.cache.get('402105109653487627').members.cache.get(userId)
     if (rec) makeBancrot()
     else {
       this.sum *= 1.5
       this.sum -=
-        profile.coins + (profiles[userId].deposit ? profiles[userId].deposit.sum : 0)
-      if (profile.coins > 0) profile.coins = 0
+        user.coins + (profiles[userId].deposit ? profiles[userId].deposit.sum : 0)
+      if (user.coins > 0) user.coins = 0
       if (this.sum > 0) makeBancrot()
 
-			profile.dailyLevel = 1
+      user.dailyLevel = 1
       profiles[userId].credit = null
       profiles[userId].deposit = null
       log('New Bancrot: ' + member)
     }
-    readWrite.file('bank_profiles.json', profiles)
-    readWrite.profile(userId, profile)
+    readWrite('bank_profiles.json', profiles)
+    user.save()
 
     function makeBancrot() {
-      profile.coins = 0
+      user.coins = 0
       profiles[userId].bancrot = Date.now() + 7 * 24 * 3600 * 1000
       //402105109653487627 - server id
       if (!member) return
       const role = member.guild.roles.cache.find(r => r.name === 'Банкрот')
       member.roles.add(role)
-      const roles = readWrite.file('roles.json')
+      const roles = readWrite('roles.json')
       for (const roleId in roles) {
-        if (!roles.hasOwnProperty(roleId)) continue
         const role = member.guild.roles.cache.get(roleId)
         if (member.roles.cache.has(role.id)) member.roles.remove(role)
         log('Remove bancrot ' + member)
@@ -152,7 +152,6 @@ class Credit extends Deal {
 class ModerationCommands {
   static setBancrots(client) {
     for (const userId in profiles) {
-      if (!profiles.hasOwnProperty(userId)) continue
       const element = profiles[userId]
       Object.setPrototypeOf(element.credit || {}, Credit.prototype)
       Object.setPrototypeOf(element.deposit || {}, Deposit.prototype)
@@ -176,20 +175,19 @@ class ModerationCommands {
           Credit.prototype.badUser(userId, client, true)
         }
       }
-      readWrite.file('bank_profiles.json', profiles)
+      readWrite('bank_profiles.json', profiles)
     }
   }
 
-  static calcPercents(client) {
+  static calcPercents() {
     for (const userId in profiles) {
-      if (!profiles.hasOwnProperty(userId)) continue
       const element = profiles[userId]
       if (element.credit)
         element.credit.sum += (element.credit.sum * element.credit.percent) / 100
       if (element.deposit)
         element.deposit.sum += (element.deposit.sum * element.deposit.percent) / 100
     }
-    readWrite.file('bank_profiles.json', profiles)
+    readWrite('bank_profiles.json', profiles)
   }
 
   static remove(message, args) {
@@ -199,18 +197,25 @@ class ModerationCommands {
     switch (args[1]) {
       case 'credit':
         profiles[user.id].credit = null
-        log(`${message.author.username}(${member}) remove credit ${user.username}`)
+        log(
+          `${message.author.username}(${message.member}) remove credit ${user.username}`
+        )
         break
       case 'deposit':
         profiles[user.id].deposit = null
-        log(`${message.author.username}(${member}) remove deposit ${user.username}`)
+        log(
+          `${message.author.username}(${message.member}) remove deposit ${user.username}`
+        )
         break
-      case 'bancrot':
+      case 'bancrot': {
         profiles[user.id].bancrot = null
         const role = message.guild.roles.cache.find(r => r.name === 'Банкрот')
         message.guild.members.cache.get(user.id).roles.remove(role)
-        log(`${message.author.username}(${member}) remove bancrot ${user.username}`)
+        log(
+          `${message.author.username}(${message.member}) remove bancrot ${user.username}`
+        )
         break
+      }
       default:
         return "I don't know this property"
     }
@@ -223,11 +228,10 @@ module.exports.run = async (client, message, args) => {
   if (args === 'setBancrots') return ModerationCommands.setBancrots(client) //inclusion
   if (message.channel.id !== '694199268847648813') return
   const userId = message.author.id
-  readWrite.profile(userId)
 
-  if (!profiles[userId]) profiles[userId] = new User(userId)
+  if (!profiles[userId]) profiles[userId] = new BankMember(userId)
   //set prototypes after JSON
-  Object.setPrototypeOf(profiles[userId], User.prototype)
+  Object.setPrototypeOf(profiles[userId], BankMember.prototype)
   Object.setPrototypeOf(profiles[userId].credit || {}, Credit.prototype)
   Object.setPrototypeOf(profiles[userId].deposit || {}, Deposit.prototype)
 
@@ -265,7 +269,7 @@ module.exports.run = async (client, message, args) => {
       else message.react('❌')
       break
 
-    case 'info':
+    case 'info': {
       const user = args[1]
         ? profiles[args[1].match(/(\d{15,})/)[1]] || profiles[userId]
         : profiles[userId]
@@ -300,11 +304,10 @@ module.exports.run = async (client, message, args) => {
         embed.addField('Банкрот', `Банкрот снимется ${new Date(user.bancrot)}`)
       message.reply(embed)
       break
-    default:
-      message.reply(`Command ${args[0]} not found`)
+    }
   }
 
-  readWrite.file('bank_profiles.json', profiles)
+  readWrite('bank_profiles.json', profiles)
 }
 
 module.exports.help = {

@@ -1,25 +1,25 @@
 const readWrite = require('../../utils/readWriteFile')
-let words = readWrite.file('words.json', null, [])
+let words = readWrite('words.json', null, [])
 
 module.exports.run = async (client, message, args) => {
   switch (args[0]) {
     case 'clear':
       if (!message.member.hasPermission('MANAGE_MESSAGES')) return
       words = []
-      readWrite.file('words.json', words)
+      readWrite('words.json', words)
       message.react('✅')
       break
-    case 'start':
+    case 'start': {
       if (!message.onReady) return
       const filter = m => !m.content.includes(' ')
       const collector = message.channel.createMessageCollector(filter)
 
       collector.on('collect', msg => {
         const word = toFormat(msg.content)
-				if (msg.author.bot) return
+        if (msg.author.bot) return
         if (isCorrect(word, words)) {
           words.push(word)
-          readWrite.file('words.json', words)
+          readWrite('words.json', words)
           msg.react('✅')
         } else {
           msg.react('❌')
@@ -27,13 +27,15 @@ module.exports.run = async (client, message, args) => {
         }
       })
       break
-    case 'getWords':
+    }
+    case 'getWords': {
       let json = JSON.stringify(words).split('')
       while (json.length) {
         message.channel.send(json.slice(0, 1900).join(''))
         json = json.slice(1900)
       }
       break
+    }
     case 'addWords':
       if (!message.member.hasPermission('MANAGE_MESSAGES')) return
       try {
@@ -41,7 +43,7 @@ module.exports.run = async (client, message, args) => {
         const newWords = JSON.parse(json)
         if (!Array.isArray(newWords)) throw new Error()
         words = words.concat(newWords)
-        readWrite.file('words.json', words)
+        readWrite('words.json', words)
       } catch (e) {
         return message.react('❌')
       }
