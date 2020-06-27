@@ -5,7 +5,6 @@ const path = require('path')
 const slider = require('../../utils/slider')
 const rainbow = require('../../utils/rainbow')
 const readWrite = require('../../utils/readWriteFile')
-const bankProfiles = readWrite('bank_profiles.json')
 const MAX_ROWS = 10
 
 module.exports.run = async (client, message, args, command) => {
@@ -21,10 +20,11 @@ module.exports.run = async (client, message, args, command) => {
       profiles.push([id, User.getOrCreateUser(id)])
     })
 
-    profiles.forEach(item => {
+    profiles.forEach(async item => {
       const [id, profile] = item
       let actives
       if (command === 'forbs') {
+        const bankProfiles = readWrite('bank_profiles.json')
         actives = profile.coins
         if (bankProfiles[id] && bankProfiles[id].deposit)
           actives += bankProfiles[id].deposit.sum
@@ -35,11 +35,15 @@ module.exports.run = async (client, message, args, command) => {
           0
         )
       } else actives = profile.level
-      lb.push([id, Math.floor(actives)])
+      const member =
+        message.guild.members.cache.get(id) ||
+        (await message.guild.members.fetch(id).catch(() => {}))
+      if (!member || member.user.bot) return
+      lb.push([member, Math.floor(actives)])
     })
     lb = lb.filter(a => !isNaN(+a[1])).sort((a, b) => b[1] - a[1])
     const embeds = []
-    for (let page = 0; page < Math.floor(lb.length / 10); page++) {
+    for (let page = 0, i = 0; page < Math.floor(lb.length / 10); page++) {
       const embed = new MessageEmbed()
         .setColor(rainbow())
         .setTitle('Leader board')
@@ -48,14 +52,11 @@ module.exports.run = async (client, message, args, command) => {
         )
         .setTimestamp()
       const lbChunk = lb.slice(page * MAX_ROWS, (page + 1) * MAX_ROWS)
-      let i = 0
       for (let item of lbChunk) {
-        const member = message.guild.members.cache.get(item[0])
-        if (!member) continue
-        const username = member.nickname || member.user.username
+        const [member, actives] = item
         embed.addField(
           ++i,
-          `${username} - ${item[1]}${command === 'forbs' ? currency : ' level'}`
+          `${member.displayName} - ${actives}${command === 'forbs' ? currency : ' level'}`
         )
       }
       embeds.push(embed)
