@@ -7,7 +7,8 @@
     "discord.js": "^12.0.2",
     "emoji-aware": "^3.0.5",
     "nekos.life": "^2.0.7",
-    "random-reddit": "^1.0.0"
+    "random-reddit": "^1.0.0",
+    "sqlite3": "^4.2.0"
   },
   "description": "Test bot",
   "main": "index.js",
