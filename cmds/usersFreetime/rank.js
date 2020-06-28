@@ -6,7 +6,7 @@ const Leveling = require('../../classes/Leveling')
 module.exports.run = async (client, message) => {
   message.channel.startTyping()
   const member = message.mentions.members.first() || message.member
-  const user = User.getOrCreateUser(member.id)
+  const user = await User.getOrCreateUser(member.id)
   const progress = user.xp / Leveling.calcXp(user.level)
 
   const canvas = Canvas.createCanvas(800, 250)

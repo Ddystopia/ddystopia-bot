@@ -11,8 +11,8 @@ module.exports.run = async (client, message, args) => {
   const fromId = message.author.id
   const tillId = message.mentions.users.first().id
   if (!tillId) return
-  const profileFrom = User.getOrCreateUser(fromId)
-  const profileTill = User.getOrCreateUser(tillId)
+  const profileFrom = await User.getOrCreateUser(fromId)
+  const profileTill = await User.getOrCreateUser(tillId)
   if (profileTill.bancrot) return
 
   const transaction = args[0] == 'all' ? profileFrom.coins : +args[0]

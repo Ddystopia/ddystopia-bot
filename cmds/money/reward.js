@@ -9,7 +9,7 @@ module.exports.run = async (client, message, args) => {
 
   const tillId = message.mentions.users.first().id
   if (!tillId) return
-  const user = User.getOrCreateUser(tillId)
+  const user = await User.getOrCreateUser(tillId)
 
   const transaction = args[0] === '-all' ? -user.coins : +args[0]
   user.coins += transaction

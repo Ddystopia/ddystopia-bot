@@ -9,7 +9,7 @@ module.exports.run = async (client, message, args, command) => {
   const loot = readWrite('loot.json')
   switch (command) {
     case 'loot': {
-      const user = User.getOrCreateUser(message.author.id)
+      const user = await User.getOrCreateUser(message.author.id)
       if (Date.now() - user.timers.loot < 1000 * SECONDS_COOLDOWN)
         return message.reply(
           `Вы уже получили свою долю, следующий раз получить можно через ${formatDuration(
@@ -29,8 +29,8 @@ module.exports.run = async (client, message, args, command) => {
 
     case 'giveloot': {
       if (!message.mentions.users.first()) return
-      const userFrom = User.getOrCreateUser(message.author.id)
-      const userTill = User.getOrCreateUser(message.mentions.users.first().id)
+      const userFrom = await User.getOrCreateUser(message.author.id)
+      const userTill = await User.getOrCreateUser(message.mentions.users.first().id)
       const lootArray = userFrom.getLootArray(args.slice(1), loot)
 
       if (lootArray.length < 1) return message.reply('Не продаётся')
@@ -44,7 +44,7 @@ module.exports.run = async (client, message, args, command) => {
       break
     }
     case 'lootbox': {
-      const user = User.getOrCreateUser(message.author.id)
+      const user = await User.getOrCreateUser(message.author.id)
       if (!user.loot['🎁']) return message.reply('Нечего открывать ¯\\_(ツ)_/¯')
       user.removeLoot(['🎁'])
       const number = randomInteger(0, 100)

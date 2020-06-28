@@ -11,14 +11,14 @@ class BankMember {
     this.deposit = null
     this.id = userId
   }
-  createCredit(sum, days) {
+  async createCredit(sum, days) {
     if (this.credit) return 'You already have credit.'
     if (isNaN(+sum) || isNaN(+days)) return 'Invalid arguments'
     if (+sum > 1e5) return 'Invalid argument sum(so many)'
     if (+days > 4) return 'Invalid argument days(so many)'
     if (+sum < 5e4 && +days > 2) return 'So many days on this sum'
 
-    const user = User.getOrCreateUser(this.id)
+    const user = await User.getOrCreateUser(this.id)
     if (sum < 1000) 'Invalid argument sum(so few)'
     if (sum / user.coins > 15 && user.coins > 200)
       return `Для этой суммы, вы должны иметь больше, чем ${+(sum / 15).toFixed(
@@ -60,7 +60,10 @@ class Deal {
 class Deposit extends Deal {
   constructor(sum, days, percent, userId) {
     super(sum, days, percent)
-    const user = User.getOrCreateUser(userId)
+    this.init(sum, userId)
+  }
+  async init(sum, userId) {
+    const user = await User.getOrCreateUser(userId)
 
     if (user.coins <= 0) return
     if (this.sum > user.coins) {
@@ -70,8 +73,8 @@ class Deposit extends Deal {
 
     user.save()
   }
-  repay(sum, userId) {
-    const user = User.getOrCreateUser(userId)
+  async repay(sum, userId) {
+    const user = await User.getOrCreateUser(userId)
     if (profiles[userId].credit) return 'You already have a credit.'
     if (isNaN(+sum)) return
 
@@ -83,8 +86,8 @@ class Deposit extends Deal {
     user.save()
     return true
   }
-  payDeposits(userId) {
-    const user = User.getOrCreateUser(userId)
+  async payDeposits(userId) {
+    const user = await User.getOrCreateUser(userId)
     user.coins += Math.floor(+this.sum)
     profiles[userId].deposit = null
     user.save()
@@ -94,12 +97,15 @@ class Deposit extends Deal {
 class Credit extends Deal {
   constructor(sum, days, percent, userId) {
     super(sum, days, percent)
-    const user = User.getOrCreateUser(userId)
+    this.init(sum, userId)
+  }
+  async init(sum, userId) {
+    const user = await User.getOrCreateUser(userId)
     user.coins += +sum
     user.save()
   }
-  repay(sum, userId) {
-    const user = User.getOrCreateUser(userId)
+  async repay(sum, userId) {
+    const user = await User.getOrCreateUser(userId)
     if (isNaN(+sum)) return
     if (latestCredits.has(userId)) {
       if (latestCredits.get(userId) < Date.now()) latestCredits.delete(userId)
@@ -113,8 +119,8 @@ class Credit extends Deal {
     user.save()
     return true
   }
-  badUser(userId, client, rec) {
-    const user = User.getOrCreateUser(userId)
+  async badUser(userId, client, rec) {
+    const user = await User.getOrCreateUser(userId)
     const member = client.guilds.cache.get('402105109653487627').members.cache.get(userId)
     if (rec) makeBancrot()
     else {
@@ -239,9 +245,9 @@ module.exports.run = async (client, message, args) => {
   switch (args[0]) {
     case 'create':
       if (args[1] === 'credit')
-        response = profiles[userId].createCredit(args[2], args[3], userId)
+        response = await profiles[userId].createCredit(args[2], args[3], userId)
       else if (args[1] === 'deposit')
-        response = profiles[userId].createDeposit(args[2], args[3], userId)
+        response = await profiles[userId].createDeposit(args[2], args[3], userId)
 
       if (typeof response === 'string') message.reply(response)
       else if (response) message.react('✅')
@@ -251,10 +257,10 @@ module.exports.run = async (client, message, args) => {
     case 'repay':
       if (args[1] === 'credit') {
         if (!profiles[userId].credit) return message.reply("You don't have a credit")
-        response = profiles[userId].credit.repay(args[2], userId)
+        response = await profiles[userId].credit.repay(args[2], userId)
       } else if (args[1] === 'deposit') {
         if (!profiles[userId].deposit) return message.reply("You don't have a deposit")
-        response = profiles[userId].deposit.repay(args[2], userId)
+        response = await profiles[userId].deposit.repay(args[2], userId)
       }
 
       if (typeof response === 'string') message.reply(response)

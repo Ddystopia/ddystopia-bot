@@ -14,7 +14,7 @@ module.exports.run = async (client, message, args) => {
 
   const userGames = useUserGames(message.author.id, games, lastGames)
 
-  const user = User.getOrCreateUser(message.author.id)
+  const user = await User.getOrCreateUser(message.author.id)
 
   const bet = args[0] == 'all' ? user.coins : +args[0]
   const betNum = randomInteger(-30, 70) + 30

@@ -6,7 +6,7 @@ const formatDuration = require('../../utils/formatDuration')
 const SECONDS_COOLDOWN = 60 * 60 * 12
 
 module.exports.run = async (client, message, args) => {
-  const user = User.getOrCreateUser(message.author.id)
+  const user = await User.getOrCreateUser(message.author.id)
   if (user.bancrot) return
 
   switch (args[0]) {

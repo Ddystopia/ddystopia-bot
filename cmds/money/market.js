@@ -51,12 +51,12 @@ class LootBoard {
     log(`${message.author.username}(${message.member}) remove loot ${loot}`)
     LootBoard.shopList(message, loot)
   }
-  static buy(message, args, loot) {
+  static async buy(message, args, loot) {
     const lootArray = onlyEmoji(args.slice(1).join('')).filter(item => !!loot[item])
 
     if (lootArray.length < 1) return message.reply('Не продаётся')
     const cost = lootArray.reduce((sum, lootItem) => sum + loot[lootItem], 0)
-    const user = User.getOrCreateUser(message.author.id)
+    const user = await User.getOrCreateUser(message.author.id)
 
     if (user.coins < cost) return message.reply(`Не хватает ${currency}`)
     user.coins -= cost
@@ -68,9 +68,9 @@ class LootBoard {
 
     user.save()
   }
-  static sell(message, args, loot) {
-    const user = User.getOrCreateUser(message.author.id)
-    const lootArray = user.getLootArray(args.slice(1), loot)
+  static async sell(message, args, loot) {
+    const user = await User.getOrCreateUser(message.author.id)
+    const lootArray = await User.getLootArray(args.slice(1), loot)
     if (lootArray.length < 1) return message.reply('Не продаётся')
 
     const cost = lootArray.reduce((sum, lootItem) => sum + loot[lootItem], 0)

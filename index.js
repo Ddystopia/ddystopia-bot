@@ -40,7 +40,7 @@ client.on('ready', async () => {
   console.log(`Запустился бот ${client.user.username}`)
   const channels = client.guilds.cache.get('402105109653487627').channels
 
-  Leveling.voiceLeveling(channels)
+  // Leveling.voiceLeveling(channels)
 
   wordsGameChannels.forEach(async id => {
     const channel =
@@ -65,13 +65,13 @@ client.on('ready', async () => {
   }
 })
 
-client.on('message', message => {
-  Leveling.textLeveling(message.author.id)
-})
-client.on('message', message => {
-  if (imageChannels.includes(message.channel.id))
-    client.commands.get('increaseMoneyForImage').run(client, message)
-})
+// client.on('message', message => {
+//   Leveling.textLeveling(message.author.id)
+// })
+// client.on('message', message => {
+//   if (imageChannels.includes(message.channel.id))
+//     client.commands.get('increaseMoneyForImage').run(client, message)
+// })
 
 client.on('message', async message => {
   if (bannedChannels.includes(message.channel.id)) return // do not listening commands from banned channels

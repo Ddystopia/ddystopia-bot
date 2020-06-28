@@ -6,8 +6,8 @@ class Leveling {
     return 5 * level ** 2 + 50 * level + 100
   }
 
-  static _calcLeveling(newExp, id) {
-    const user = User.getOrCreateUser(id)
+  static async _calcLeveling(newExp, id) {
+    const user = await User.getOrCreateUser(id)
     if (!user.xp) user.xp = 0
     user.xp += randomInteger(newExp, newExp + 7 * Leveling._XP_TIME)
     let xp = Leveling.calcXp(user.level) // xp for up

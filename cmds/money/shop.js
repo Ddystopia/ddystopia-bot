@@ -67,7 +67,7 @@ class RolesBoard {
     )
     RolesBoard.shopList(message)
   }
-  static buy(message, args) {
+  static async buy(message, args) {
     if (isNaN(+args[1])) return
     const roleId = Object.keys(roles)[+args[1] - 1]
     const role = message.member.guild.roles.cache.get(roleId)
@@ -77,7 +77,7 @@ class RolesBoard {
     if (!cost) return message.reply('Такая роль не продаётся')
 
     const id = message.author.id
-    const user = User.getOrCreateUser(id)
+    const user = await User.getOrCreateUser(id)
 
     if (user.coins < cost) return message.reply(`Не хватает ${currency}`)
     if (message.member.roles.cache.has(role.id))
@@ -88,7 +88,7 @@ class RolesBoard {
     log(`${message.author.username}(${message.member}) buy role ${role.name}(${role})`)
     user.save()
   }
-  static sell(message, args) {
+  static async sell(message, args) {
     if (isNaN(+args[1])) return
     const roleId = Object.keys(roles)[+args[1] - 1]
     const role = message.member.guild.roles.cache.get(roleId)
@@ -98,7 +98,7 @@ class RolesBoard {
     if (!cost) return message.reply('Такая роль не продаётся')
 
     const id = message.author.id
-    const user = User.getOrCreateUser(id)
+    const user = await User.getOrCreateUser(id)
 
     if (!message.member.roles.cache.has(role.id))
       return message.reply('У вас нет этой роли')

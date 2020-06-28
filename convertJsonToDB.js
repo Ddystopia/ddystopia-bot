@@ -17,22 +17,23 @@ db.serialize(() => {
       profiles.push({ ...profile, loot: JSON.stringify(profile.loot || {}) })
     })
   db.run(`CREATE TABLE IF NOT EXISTS users(
-		id VARCHAR,
-		_coins INT,
-		xp INT,
-		level INT,
-		rep INT,
-		loot JSON,
-		birthday DATE,
-		marry VARCHAR,
-		dailyLevel INT,
-		dailyTimer INT,
-		lootTimer INT,
-		about TEXT
-		)`)
+    id VARCHAR NOT NULL, 
+    _coins INT DEFAULT 0,
+    xp INT DEFAULT 0,
+    level INT DEFAULT 0,
+    rep INT DEFAULT 0,
+    loot JSON,
+    birthday DATE,
+    marry VARCHAR,
+    dailyLevel INT DEFAULT 0,
+    dailyTimer INT DEFAULT 0,
+    lootTimer INT DEFAULT 0,
+    about TEXT,
+    PRIMARY KEY (id)
+    )`)
   const stmt = db.prepare(`INSERT INTO users
-	(id, _coins, xp, level, rep, loot, birthday, marry, dailyLevel, dailyTimer, lootTimer, about)
-	VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`)
+  (id, _coins, xp, level, rep, loot, birthday, marry, dailyLevel, dailyTimer, lootTimer, about)
+  VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`)
   for (const profile of profiles) {
     stmt.run(
       profile.id,
@@ -41,11 +42,11 @@ db.serialize(() => {
       profile.level || 0,
       profile.rep || 0,
       profile.loot,
-      profile.birthday || null,
-      profile.marry || null,
+      profile.birthday,
+      profile.marry,
       profile.dailyLevel || 0,
-      profile.dailyTimer,
-      profile.lootTimer,
+      profile.dailyTimer || 0,
+      profile.lootTimer || 0,
       profile.about || ''
     )
   }
@@ -76,7 +77,14 @@ db.serialize(() => {
       id,
     }))
   db.run(
-    'CREATE TABLE IF NOT EXISTS deposits(id VARCHAR, sum INT, percent INT, deadline INT)'
+    `CREATE TABLE IF NOT EXISTS deposits(
+      id VARCHAR,
+      sum INT,
+      percent INT,
+      deadline INT,
+      PRIMARY KEY (id),
+      FOREIGN KEY (id) REFERENCES users(id)
+    )`
   )
   const stmt = db.prepare(
     'INSERT INTO deposits(id, sum, percent, deadline) VALUES(?,?,?,?)'
@@ -93,7 +101,14 @@ db.serialize(() => {
       id,
     }))
   db.run(
-    'CREATE TABLE IF NOT EXISTS credits(id VARCHAR, sum INT, percent INT, deadline INT)'
+    `CREATE TABLE IF NOT EXISTS credits(
+      id VARCHAR,
+      sum INT,
+      percent INT,
+      deadline INT,
+      PRIMARY KEY (id),
+      FOREIGN KEY (id) REFERENCES users(id)
+    )`
   )
   const stmt = db.prepare(
     'INSERT INTO credits(id, sum, percent, deadline) VALUES(?,?,?,?)'
@@ -109,8 +124,24 @@ db.serialize(() => {
       deadline: bancrot,
       id,
     }))
-  db.run('CREATE TABLE IF NOT EXISTS bancrots(id VARCHAR, deadline INT)')
+  db.run(`CREATE TABLE IF NOT EXISTS bancrots(
+    id VARCHAR,
+    deadline INT,
+    PRIMARY KEY (id),
+    FOREIGN KEY (id) REFERENCES users(id)
+  )
+  `)
   const stmt = db.prepare('INSERT INTO bancrots(id, deadline) VALUES(?,?)')
   for (const row of bancrots) stmt.run(row.id, row.deadline)
   stmt.finalize()
 })
+
+db.serialize(() => {
+  db.run('CREATE INDEX userIdIndex ON users(id)')
+  db.run('CREATE INDEX userLevelIndex ON users(level)')
+  db.run('CREATE INDEX coinIndex ON users(_coins)')
+  db.run('CREATE INDEX creditsIdIndex ON credits(id)')
+  db.run('CREATE INDEX depositsIdIndex ON deposits(id)')
+})
+
+db.close()

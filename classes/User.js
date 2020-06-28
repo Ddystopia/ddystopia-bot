@@ -1,6 +1,7 @@
-const { readFileSync, writeFileSync } = require('fs')
+const sqlite3 = require('sqlite3').verbose()
+const db = new sqlite3.Database('./data.db')
 const { onlyEmoji } = require('emoji-aware')
-const path = require('path')
+
 class User {
   constructor({
     id,
@@ -13,7 +14,8 @@ class User {
     marry,
     dailyLevel,
     about,
-    timers,
+    dailyTimer,
+    lootTimer,
   }) {
     this.id = id
     this._coins = _coins || 0
@@ -26,8 +28,8 @@ class User {
     this.dailyLevel = dailyLevel || 0
     this.about = about || ''
     this.timers = {
-      daily: (timers && timers.daily) || 0,
-      loot: (timers && timers.loot) || 0,
+      daily: dailyTimer || 0,
+      loot: lootTimer || 0,
     }
   }
   get coins() {
@@ -36,17 +38,13 @@ class User {
   set coins(value) {
     this._coins = Math.floor(value)
   }
-  static getOrCreateUser(id) {
-    let response
-    try {
-      const file = JSON.parse(
-        readFileSync(path.join(__dirname, '..', `profiles/${id}.json`), 'utf-8')
-      )
-      response = new User({ ...file, id })
-    } catch (err) {
-      response = new User({ id })
-    }
-    return response
+  static async getOrCreateUser(id) {
+    return await new Promise(resolve =>
+      db.get('SELECT * FROM users WHERE id = ?', [id], (err, row) => {
+        if (!row) db.run('INSERT INTO users(id) values(?)', [id])
+        resolve(new User(row || { id }))
+      })
+    )
   }
   getLootArray(args, loot) {
     const lootIndexes = {}
@@ -63,10 +61,40 @@ class User {
     return lootArray
   }
   save() {
-    writeFileSync(
-      path.join(__dirname, '..', `profiles/${this.id}.json`),
-      this.toJSONString()
-    )
+    db.serialize(() => {
+      db.run(
+        `
+      UPDATE users SET 
+      id=?,
+      _coins=?,
+      xp=?,
+      level=?,
+      rep=?,
+      loot=?,
+      birthday=?,
+      marry=?,
+      dailyLevel=?,
+      dailyTimer=?,
+      lootTimer=?,
+      about=?
+     WHERE id=?`,
+        [
+          this.id,
+          this._coins,
+          this.xp,
+          this.level,
+          this.rep,
+          this.loot,
+          this.birthday,
+          this.marry,
+          this.dailyLevel,
+          this.dailyTimer,
+          this.lootTimer,
+					this.about,
+					this.id
+        ]
+      )
+    })
   }
   addLoot(lootArray) {
     lootArray.forEach(loot => {
@@ -80,7 +108,7 @@ class User {
       else this.loot[loot]--
     })
   }
-  toJSONString() {
+  _toJSONString() {
     return JSON.stringify({ ...this }).replace(
       /(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3})Z/,
       '$1'

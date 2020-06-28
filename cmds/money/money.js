@@ -9,7 +9,7 @@ module.exports.run = async (client, message, args) => {
     return message.reply("I don't know who is it")
   }
 
-  const user = User.getOrCreateUser(userId)
+  const user = await User.getOrCreateUser(userId)
 
   const embed = new MessageEmbed()
     .setColor('#0099ff')

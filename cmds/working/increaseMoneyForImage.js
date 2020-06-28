@@ -11,7 +11,7 @@ module.exports.run = async (client, message) => {
   const attachmentsNum = message.attachments.size
   if (!attachmentsNum) return
 
-  const user = User.getOrCreateUser(message.author.id)
+  const user = await User.getOrCreateUser(message.author.id)
   if (user.bancrot) return
 
   user.coins += attachmentsNum * cost

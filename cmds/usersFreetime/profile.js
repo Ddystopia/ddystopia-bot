@@ -12,7 +12,7 @@ module.exports.run = async (client, message, args, command) => {
     (message.mentions.users.first() && message.mentions.users.first().id) ||
     message.author.id
   const member = await message.guild.members.fetch(id)
-  const profile = User.getOrCreateUser(id)
+  const profile = await User.getOrCreateUser(id)
   switch (command) {
     case 'profile':
       {
@@ -56,7 +56,7 @@ module.exports.run = async (client, message, args, command) => {
     }
 
     case 'about': {
-      const ownProfile = User.getOrCreateUser(message.author.id)
+      const ownProfile = await User.getOrCreateUser(message.author.id)
       ownProfile.about = args.slice(0, 100).join(' ').replace(/\\n/g, '\n')
       ownProfile.save()
       message.react('✅')
@@ -77,7 +77,7 @@ module.exports.run = async (client, message, args, command) => {
 
     case 'marry': {
       if (member.user.id === message.author.id) return
-      const firstProfile = User.getOrCreateUser(message.author.id)
+      const firstProfile = await User.getOrCreateUser(message.author.id)
       const secondProfile = profile
 
       if (!!firstProfile.marry || !!secondProfile.marry)
@@ -107,7 +107,7 @@ module.exports.run = async (client, message, args, command) => {
     case 'tear': {
       if (member.user.id !== message.author.id) return
       const firstProfile = profile
-      const secondProfile = User.getOrCreateUser(profile.marry.match(/(\d{15,})/)[1])
+      const secondProfile = await User.getOrCreateUser(profile.marry.match(/(\d{15,})/)[1])
       profile.marry = null
       secondProfile.marry = null
 
