@@ -40,7 +40,7 @@ client.on('ready', async () => {
   console.log(`Запустился бот ${client.user.username}`)
   const channels = client.guilds.cache.get('402105109653487627').channels
 
-  // Leveling.voiceLeveling(channels)
+  Leveling.voiceLeveling(channels)
 
   wordsGameChannels.forEach(async id => {
     const channel =
@@ -65,26 +65,24 @@ client.on('ready', async () => {
   }
 })
 
-// client.on('message', message => {
-//   Leveling.textLeveling(message.author.id)
-// })
-// client.on('message', message => {
-//   if (imageChannels.includes(message.channel.id))
-//     client.commands.get('increaseMoneyForImage').run(client, message)
-// })
+client.on('message', message => {
+  Leveling.textLeveling(message.author.id)
+})
+client.on('message', message => {
+  if (imageChannels.includes(message.channel.id))
+    client.commands.get('increaseMoneyForImage').run(client, message)
+})
 
 client.on('message', async message => {
   if (bannedChannels.includes(message.channel.id)) return // do not listening commands from banned channels
   if (!message.content.startsWith(prefix)) return // filter simple text
   if (nonGrata.includes(message.author.id) || message.author.bot) return
-  message.channel.startTyping()
 
   const args = message.content.split(/\s+/g)
   const commandName = args.shift().toLowerCase().slice(prefix.length)
   const command = client.commands.get(commandName)
 
-  if (command) await command.run(client, message, args, commandName)
-  message.channel.stopTyping()
+  if (command) command.run(client, message, args, commandName)
 })
 
 client.on('guildMemberAdd', member => {

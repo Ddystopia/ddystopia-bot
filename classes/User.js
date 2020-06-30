@@ -54,6 +54,7 @@ class User {
     const lootArray = []
     onlyEmoji(args.join(''))
       .filter(item => !!loot[item])
+      .filter(item => !!this.loot[item])
       .forEach(
         loot => (lootIndexes[loot] = lootIndexes[loot] ? lootIndexes[loot] + 1 : 1)
       )
@@ -73,14 +74,32 @@ class User {
       level=${this.level},
       rep=${this.rep},
       loot='${JSON.stringify(this.loot)}',
-      birthday=${this.birthday},
-      marry=${this.marry},
+      birthday='${this.birthday}',
+      marry='${this.marry || ''}',
       dailyLevel=${this.dailyLevel},
       dailyTimer=${this.timers.daily},
       lootTimer=${this.timers.loot},
       about='${this.about || ''}'
 			WHERE id=${this.id}`,
-        err => err && console.error(err)
+        err => {
+          if (err) {
+            console.error(err)
+            console.log(`UPDATE users SET 
+					id=${this.id},
+					_coins=${this._coins},
+					xp=${this.xp},
+					level=${this.level},
+					rep=${this.rep},
+					loot='${JSON.stringify(this.loot)}',
+					birthday='${this.birthday}',
+					marry=${this.marry},
+					dailyLevel=${this.dailyLevel},
+					dailyTimer=${this.timers.daily},
+					lootTimer=${this.timers.loot},
+					about='${this.about || ''}'
+					WHERE id=${this.id}`)
+          }
+        }
       )
     })
   }

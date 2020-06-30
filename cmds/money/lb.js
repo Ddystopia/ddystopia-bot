@@ -28,10 +28,10 @@ module.exports.run = async (client, message, args, command) => {
           actives = user.coins
           if (bankMember.deposit) actives += bankMember.deposit.sum
           if (bankMember.credit) actives -= bankMember.credit.sum
-          actives += Object.entries(user.loot).reduce(
-            (sum, lootArray) => sum + loot.find(loot => loot.loot === lootArray[0]),
-            0
-          )
+          actives += Object.entries(user.loot).reduce((sum, lootArray) => {
+            const usersLoot = loot.find(loot => loot.loot === lootArray[0]) || { cost: 0 }
+            return sum + usersLoot.cost
+          }, 0)
         } else actives = user.level
         const member =
           message.guild.members.cache.get(user.id) ||

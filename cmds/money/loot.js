@@ -1,12 +1,21 @@
 const User = require('../../classes/User')
 const randomInteger = require('../../utils/randomInteger')
 const formatDuration = require('../../utils/formatDuration')
-const readWrite = require('../../utils/readWriteFile.js')
+const useUserGames = require('../../utils/useUserGames')
+const sqlite3 = require('sqlite3').verbose()
+const games = new Map()
+const lastGames = new Map()
 const SECONDS_COOLDOWN = 60 * 60 * 24
 const MAX_DAILY_LOOT_COST = 5000
 
 module.exports.run = async (client, message, args, command) => {
-  const loot = readWrite('loot.json')
+  const loot = await new Promise(resolve => {
+    const db = new sqlite3.Database('./data.db')
+    db.all('SELECT * FROM loot', (err, rows) =>
+      resolve(rows.reduce((loot, row) => ({ ...loot, [row.loot]: row.cost }), {}))
+    )
+    db.close()
+  })
   switch (command) {
     case 'loot': {
       const user = await User.getOrCreateUser(message.author.id)
@@ -29,6 +38,7 @@ module.exports.run = async (client, message, args, command) => {
 
     case 'giveloot': {
       if (!message.mentions.users.first()) return
+
       const userFrom = await User.getOrCreateUser(message.author.id)
       const userTill = await User.getOrCreateUser(message.mentions.users.first().id)
       const lootArray = userFrom.getLootArray(args.slice(1), loot)
@@ -47,13 +57,15 @@ module.exports.run = async (client, message, args, command) => {
       const user = await User.getOrCreateUser(message.author.id)
       if (!user.loot['🎁']) return message.reply('Нечего открывать ¯\\_(ツ)_/¯')
       user.removeLoot(['🎁'])
-      const number = randomInteger(0, 100)
+      const userGames = useUserGames(message.author.id, games, lastGames)
+      let number = randomInteger(0, 100)
+      if (userGames > 10) number -= (userGames / 1.5) % 30
 
       let maxCost = 0
-      if (number === 0) maxCost = 2e4
-      else if (number > 90) maxCost = 9e6
+      if (number === 100) maxCost = 2e4
+      else if (number > 95) maxCost = 9e6
       else if (number > 85) maxCost = 1e6
-      else if (number > 75) maxCost = 2e4
+      else if (number > 70) maxCost = 2e4
       else maxCost = MAX_DAILY_LOOT_COST
 
       const winnedLoot = calcLoot(loot, maxCost)

@@ -33,8 +33,8 @@ db.parallelize(() => {
     PRIMARY KEY (id)
     )`)
     const stmt = db.prepare(`INSERT INTO users
-  (id, _coins, xp, level, rep, loot, birthday, marry, dailyLevel, dailyTimer, lootTimer, about)
-  VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`)
+  (id, _coins, xp, level, rep, loot, marry, dailyLevel, dailyTimer, lootTimer, about)
+  VALUES(?,?,?,?,?,?,?,?,?,?,?)`)
     for (const profile of profiles) {
       stmt.run(
         profile.id,
@@ -43,7 +43,6 @@ db.parallelize(() => {
         profile.level || 0,
         profile.rep || 0,
         profile.loot,
-        profile.birthday,
         profile.marry,
         profile.dailyLevel || 0,
         profile.dailyTimer || 0,

@@ -14,7 +14,7 @@ module.exports = (() => {
   let counter = 0
   return () => {
     const color = rainbow[counter]
-    counter = counter < COLOR_SIZE - 1 ? ++counter : 0
+    counter = (counter + 1) % COLOR_SIZE
     return color
   }
 })()

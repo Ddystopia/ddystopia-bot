@@ -1,9 +1,9 @@
 const { MessageEmbed } = require('discord.js')
 const User = require('../../classes/User')
 const { onlyEmoji } = require('emoji-aware')
-const readWrite = require('../../utils/readWriteFile')
 const slider = require('../../utils/slider')
 const log = require('../../utils/log.js')
+const sqlite3 = require('sqlite3').verbose()
 const MAX_FIELDS = 25
 
 class EmbedInstance extends MessageEmbed {
@@ -37,7 +37,15 @@ class LootBoard {
 
     loot[args[1]] = +args[args.length - 1]
     loot = sortAndCleanRoles(loot)
-    readWrite('loot.json', loot)
+    const db = new sqlite3.Database('./data.db')
+    db.serialize(() => {
+      const lootToWrite = Object.entries(loot)
+      db.run('CREATE TABLE IF NOT EXISTS loot(loot VARCHAR, cost INT)')
+      const stmt = db.prepare('INSERT INTO loot(loot, cost) VALUES(?,?)')
+      for (const row of lootToWrite) stmt.run(row[0], row[1])
+      stmt.finalize()
+    })
+    db.close()
 
     log(`${message.author.username}(${message.member}) add loot ${loot}`)
     LootBoard.shopList(message, loot)
@@ -46,7 +54,15 @@ class LootBoard {
     if (!message.member.hasPermission('MANAGE_MESSAGES')) return
 
     delete loot[args[1]]
-    readWrite('loot.json', loot)
+    const db = new sqlite3.Database('./data.db')
+    db.serialize(() => {
+      const lootToWrite = Object.entries(loot)
+      db.run('CREATE TABLE IF NOT EXISTS loot(loot VARCHAR, cost INT)')
+      const stmt = db.prepare('INSERT INTO loot(loot, cost) VALUES(?,?)')
+      for (const row of lootToWrite) stmt.run(row[0], row[1])
+      stmt.finalize()
+    })
+    db.close()
 
     log(`${message.author.username}(${message.member}) remove loot ${loot}`)
     LootBoard.shopList(message, loot)
@@ -70,7 +86,7 @@ class LootBoard {
   }
   static async sell(message, args, loot) {
     const user = await User.getOrCreateUser(message.author.id)
-    const lootArray = await User.getLootArray(args.slice(1), loot)
+    const lootArray = user.getLootArray(args.slice(1), loot)
     if (lootArray.length < 1) return message.reply('Не продаётся')
 
     const cost = lootArray.reduce((sum, lootItem) => sum + loot[lootItem], 0)
@@ -85,7 +101,13 @@ class LootBoard {
 }
 
 module.exports.run = async (client, message, args) => {
-  const loot = readWrite('loot.json')
+  const loot = await new Promise(resolve => {
+    const db = new sqlite3.Database('./data.db')
+    db.all('SELECT * FROM loot', (err, rows) =>
+      resolve(rows.reduce((loot, row) => ({ ...loot, [row.loot]: row.cost }), {}))
+    )
+    db.close()
+  })
   switch (args[0]) {
     case 'add':
       LootBoard.add(message, args, loot)

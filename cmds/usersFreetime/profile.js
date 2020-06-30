@@ -2,12 +2,18 @@ const { MessageEmbed } = require('discord.js')
 const User = require('../../classes/User')
 const Leveling = require('../../classes/Leveling.js')
 const rainbow = require('../../utils/rainbow.js')
-const readWrite = require('../../utils/readWriteFile.js')
+const sqlite3 = require('sqlite3').verbose()
 const marryClipboard = new Map()
 const repClipboard = new Map()
 
 module.exports.run = async (client, message, args, command) => {
-  const loot = readWrite('loot.json')
+  const loot = await new Promise(resolve => {
+    const db = new sqlite3.Database('./data.db')
+    db.all('SELECT * FROM loot', (err, rows) =>
+      resolve(rows.reduce((loot, row) => ({ ...loot, [row.loot]: row.cost }), {}))
+    )
+    db.close()
+  })
   const id =
     (message.mentions.users.first() && message.mentions.users.first().id) ||
     message.author.id
@@ -47,7 +53,7 @@ module.exports.run = async (client, message, args, command) => {
       if (member.user.id !== message.author.id) return
       if (!args[0]) return
       const birthday = args[0].split(/[-/|.]/).join('-')
-      if (!/[0-3]\d-(0\d|1[012])-\d{4}/.test(birthday))
+      if (!/\d{4}-(0\d|1[012])-[0-3]\d/.test(birthday))
         return message.reply('invalid date')
       profile.birthday = birthday
       profile.save()
@@ -105,9 +111,11 @@ module.exports.run = async (client, message, args, command) => {
     }
 
     case 'tear': {
-      if (member.user.id !== message.author.id) return
+      if (member.user.id !== message.author.id || !profile.marry) return
       const firstProfile = profile
-      const secondProfile = await User.getOrCreateUser(profile.marry.match(/(\d{15,})/)[1])
+      const secondProfile = await User.getOrCreateUser(
+        profile.marry.match(/(\d{15,})/)[1]
+      )
       profile.marry = null
       secondProfile.marry = null
 
