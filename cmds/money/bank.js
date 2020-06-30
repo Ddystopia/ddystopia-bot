@@ -1,172 +1,32 @@
 const { MessageEmbed } = require('discord.js')
-const User = require('../../classes/User')
-const readWrite = require('../../utils/readWriteFile')
-const profiles = readWrite('bank_profiles.json')
-const latestCredits = new Map()
+const { BankMember } = require('../../classes/BankMember')
+const { Credit } = require('../../classes/Deals')
+const sqlite3 = require('sqlite3').verbose()
 const log = require('../../utils/log.js')
 
-class BankMember {
-  constructor(userId) {
-    this.credit = null
-    this.deposit = null
-    this.id = userId
-  }
-  async createCredit(sum, days) {
-    if (this.credit) return 'You already have credit.'
-    if (isNaN(+sum) || isNaN(+days)) return 'Invalid arguments'
-    if (+sum > 1e5) return 'Invalid argument sum(so many)'
-    if (+days > 4) return 'Invalid argument days(so many)'
-    if (+sum < 5e4 && +days > 2) return 'So many days on this sum'
-
-    const user = await User.getOrCreateUser(this.id)
-    if (sum < 1000) 'Invalid argument sum(so few)'
-    if (sum / user.coins > 15 && user.coins > 200)
-      return `Для этой суммы, вы должны иметь больше, чем ${+(sum / 15).toFixed(
-        3
-      )} ${currency}`
-
-    latestCredits.set(this.id, Date.now() + 3 * 3600 * 1000)
-    const percent = Math.max(
-      -((Math.E * 6) ** (sum / 1e4) - 55),
-      -(sum / 1e4 - 1) * 5 + 25,
-      15
-    )
-    this.credit = new Credit(sum, days, percent, this.id)
-    return true
-  }
-  createDeposit(sum, days) {
-    if (this.deposit) return 'You already have deposit.'
-    if (this.credit) return "You have some credit, I can't make deposit."
-    if (isNaN(+sum) || isNaN(+days)) return 'Invalid arguments'
-    if (+sum < 500) return 'Too small sum'
-    if (+days < 5) return 'Too few days'
-    if (+days > 100) return 'Too many days'
-
-    const percent =
-      Math.min((Math.E ** 6) ** (days / 10) / 3, (days / 10 - 1) * 6.5 + 15, 20) / 2.35
-    this.deposit = new Deposit(sum, days, percent, this.id)
-    return true
-  }
-}
-
-class Deal {
-  constructor(sum, days, percent) {
-    this.sum = (+sum * percent) / 100 + +sum
-    this.deadline = Date.now() + days * 24 * 3600 * 1000
-    this.percent = percent
-  }
-}
-
-class Deposit extends Deal {
-  constructor(sum, days, percent, userId) {
-    super(sum, days, percent)
-    this.init(sum, userId)
-  }
-  async init(sum, userId) {
-    const user = await User.getOrCreateUser(userId)
-
-    if (user.coins <= 0) return
-    if (this.sum > user.coins) {
-      this.sum = user.coins
-      user.coins = 0
-    } else user.coins -= +sum
-
-    user.save()
-  }
-  async repay(sum, userId) {
-    const user = await User.getOrCreateUser(userId)
-    if (profiles[userId].credit) return 'You already have a credit.'
-    if (isNaN(+sum)) return
-
-    if (sum > user.coins) return false
-    else user.coins -= +sum
-
-    this.sum += +sum
-
-    user.save()
-    return true
-  }
-  async payDeposits(userId) {
-    const user = await User.getOrCreateUser(userId)
-    user.coins += Math.floor(+this.sum)
-    profiles[userId].deposit = null
-    user.save()
-  }
-}
-
-class Credit extends Deal {
-  constructor(sum, days, percent, userId) {
-    super(sum, days, percent)
-    this.init(sum, userId)
-  }
-  async init(sum, userId) {
-    const user = await User.getOrCreateUser(userId)
-    user.coins += +sum
-    user.save()
-  }
-  async repay(sum, userId) {
-    const user = await User.getOrCreateUser(userId)
-    if (isNaN(+sum)) return
-    if (latestCredits.has(userId)) {
-      if (latestCredits.get(userId) < Date.now()) latestCredits.delete(userId)
-      else return 'Подождите немного'
-    }
-    if (sum > user.coins) return false
-    else user.coins -= +sum
-
-    this.sum -= +sum
-    if (this.sum <= 0) profiles[userId].credit = null
-    user.save()
-    return true
-  }
-  async badUser(userId, client, rec) {
-    const user = await User.getOrCreateUser(userId)
-    const member = client.guilds.cache.get('402105109653487627').members.cache.get(userId)
-    if (rec) makeBancrot()
-    else {
-      this.sum *= 1.5
-      this.sum -=
-        user.coins + (profiles[userId].deposit ? profiles[userId].deposit.sum : 0)
-      if (user.coins > 0) user.coins = 0
-      if (this.sum > 0) makeBancrot()
-
-      user.dailyLevel = 1
-      profiles[userId].credit = null
-      profiles[userId].deposit = null
-      log('New Bancrot: ' + member)
-    }
-    readWrite('bank_profiles.json', profiles)
-    user.save()
-
-    function makeBancrot() {
-      user.coins = 0
-      profiles[userId].bancrot = Date.now() + 7 * 24 * 3600 * 1000
-      //402105109653487627 - server id
-      if (!member) return
-      const role = member.guild.roles.cache.find(r => r.name === 'Банкрот')
-      member.roles.add(role)
-      const roles = readWrite('roles.json')
-      for (const roleId in roles) {
-        const role = member.guild.roles.cache.get(roleId)
-        if (member.roles.cache.has(role.id)) member.roles.remove(role)
-        log('Remove bancrot ' + member)
-      }
-    }
-  }
-}
-
 class ModerationCommands {
-  static setBancrots(client) {
+  static async getBankProfiles() {
+    return new Promise(resolve => {
+      const db = new sqlite3.Database('./data.db')
+      db.all(`SELECT id FROM users`, (err, p) =>
+        resolve(p.map(us => BankMember.getOrCreateBankMember(us.id)))
+      )
+      db.close()
+    })
+  }
+  static async setBancrots(client) {
+    const profiles = await ModerationCommands.getBankProfiles()
     for (const userId in profiles) {
-      const element = profiles[userId]
-      Object.setPrototypeOf(element.credit || {}, Credit.prototype)
-      Object.setPrototypeOf(element.deposit || {}, Deposit.prototype)
+      const element = await profiles[userId]
+      if (!!element.credit && element.credit.deadline <= Date.now()) {
+        element.credit.badUser(element, client)
+        element.save()
+      }
 
-      if (element.credit && element.credit.deadline <= Date.now())
-        element.credit.badUser(element.id, client)
-
-      if (element.deposit && element.deposit.deadline <= Date.now())
-        element.deposit.payDeposits(element.id)
+      if (!!element.deposit && element.deposit.deadline <= Date.now()) {
+        element.deposit.payDeposits(element)
+        element.save()
+      }
 
       const member = client.guilds.cache
         .get('402105109653487627')
@@ -177,44 +37,46 @@ class ModerationCommands {
         if (element.bancrot < Date.now()) {
           element.bancrot = null
           member.roles.remove(role)
+          element.save()
         } else if (element.bancrot && !member.roles.cache.has(role.id)) {
-          Credit.prototype.badUser(userId, client, true)
+          Credit.prototype.badUser(element, client, true)
         }
       }
-      readWrite('bank_profiles.json', profiles)
     }
   }
 
-  static calcPercents() {
+  static async calcPercents() {
+    const profiles = await ModerationCommands.getBankProfiles()
     for (const userId in profiles) {
       const element = profiles[userId]
       if (element.credit)
         element.credit.sum += (element.credit.sum * element.credit.percent) / 100
       if (element.deposit)
         element.deposit.sum += (element.deposit.sum * element.deposit.percent) / 100
+      if (element.credit || element.deposit) element.save()
     }
-    readWrite('bank_profiles.json', profiles)
   }
 
-  static remove(message, args) {
+  static async remove(message, args) {
     if (!message.member.hasPermission('MANAGE_MESSAGES')) return
     const user = message.mentions.users.first()
     if (!user) return "I don't know who is it"
+    const bankMember = await BankMember.getOrCreateBankMember(user.id)
     switch (args[1]) {
       case 'credit':
-        profiles[user.id].credit = null
+        bankMember.credit = null
         log(
           `${message.author.username}(${message.member}) remove credit ${user.username}`
         )
         break
       case 'deposit':
-        profiles[user.id].deposit = null
+        bankMember.deposit = null
         log(
           `${message.author.username}(${message.member}) remove deposit ${user.username}`
         )
         break
       case 'bancrot': {
-        profiles[user.id].bancrot = null
+        bankMember.bancrot = null
         const role = message.guild.roles.cache.find(r => r.name === 'Банкрот')
         message.guild.members.cache.get(user.id).roles.remove(role)
         log(
@@ -225,29 +87,24 @@ class ModerationCommands {
       default:
         return "I don't know this property"
     }
+    bankMember.save()
     return true
   }
 }
 
 module.exports.run = async (client, message, args) => {
-  if (args === 'calcPercents') return ModerationCommands.calcPercents(client) //inclusion
+  if (args === 'calcPercents') return ModerationCommands.calcPercents() //inclusion
   if (args === 'setBancrots') return ModerationCommands.setBancrots(client) //inclusion
   if (message.channel.id !== '694199268847648813') return
   const userId = message.author.id
-
-  if (!profiles[userId]) profiles[userId] = new BankMember(userId)
-  //set prototypes after JSON
-  Object.setPrototypeOf(profiles[userId], BankMember.prototype)
-  Object.setPrototypeOf(profiles[userId].credit || {}, Credit.prototype)
-  Object.setPrototypeOf(profiles[userId].deposit || {}, Deposit.prototype)
+  const bankMember = await BankMember.getOrCreateBankMember(userId)
 
   let response
   switch (args[0]) {
     case 'create':
-      if (args[1] === 'credit')
-        response = await profiles[userId].createCredit(args[2], args[3], userId)
+      if (args[1] === 'credit') response = await bankMember.createCredit(args[2], args[3])
       else if (args[1] === 'deposit')
-        response = await profiles[userId].createDeposit(args[2], args[3], userId)
+        response = await bankMember.createDeposit(args[2], args[3])
 
       if (typeof response === 'string') message.reply(response)
       else if (response) message.react('✅')
@@ -256,11 +113,11 @@ module.exports.run = async (client, message, args) => {
 
     case 'repay':
       if (args[1] === 'credit') {
-        if (!profiles[userId].credit) return message.reply("You don't have a credit")
-        response = await profiles[userId].credit.repay(args[2], userId)
+        if (!bankMember.credit) return message.reply("You don't have a credit")
+        response = await bankMember.credit.repay(args[2], bankMember)
       } else if (args[1] === 'deposit') {
-        if (!profiles[userId].deposit) return message.reply("You don't have a deposit")
-        response = await profiles[userId].deposit.repay(args[2], userId)
+        if (!bankMember.deposit) return message.reply("You don't have a deposit")
+        response = await bankMember.deposit.repay(args[2], bankMember)
       }
 
       if (typeof response === 'string') message.reply(response)
@@ -269,16 +126,16 @@ module.exports.run = async (client, message, args) => {
       break
 
     case 'remove':
-      response = ModerationCommands.remove(message, args)
+      response = await ModerationCommands.remove(message, args)
       if (typeof response === 'string') message.reply(response)
       else if (response) message.react('✅')
       else message.react('❌')
       break
 
     case 'info': {
-      const user = args[1]
-        ? profiles[args[1].match(/(\d{15,})/)[1]] || profiles[userId]
-        : profiles[userId]
+      const user = message.mentions.users.first()
+        ? await BankMember.getOrCreateBankMember(message.mentions.users.first().id)
+        : bankMember
       const embed = new MessageEmbed()
         .setColor('#84ed39')
         .setTitle('Банковский профиль')
@@ -289,7 +146,7 @@ module.exports.run = async (client, message, args) => {
           'Кредит',
           `${
             user.credit
-              ? `Сумма: ${+user.credit.sum.toFixed(3)}
+              ? `Сумма: ${user.credit.sum}
 Процент: ${+user.credit.percent.toFixed(3)}
 Дедлайн: ${new Date(user.credit.deadline)}`
               : 'У вас нет кредита'
@@ -299,7 +156,7 @@ module.exports.run = async (client, message, args) => {
           'Депозит',
           `${
             user.deposit
-              ? `Сумма: ${+user.deposit.sum.toFixed(3)}
+              ? `Сумма: ${user.deposit.sum}
 Процент: ${+user.deposit.percent.toFixed(3)}
 Дедлайн: ${new Date(user.deposit.deadline)}`
               : 'У вас нет депозита'
@@ -312,8 +169,6 @@ module.exports.run = async (client, message, args) => {
       break
     }
   }
-
-  readWrite('bank_profiles.json', profiles)
 }
 
 module.exports.help = {

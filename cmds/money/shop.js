@@ -1,11 +1,30 @@
 const { MessageEmbed } = require('discord.js')
 const User = require('../../classes/User')
-const readWrite = require('../../utils/readWriteFile')
+const sqlite3 = require('sqlite3').verbose()
 const log = require('../../utils/log.js')
-
-let roles = readWrite('roles.json')
-
 class RolesBoard {
+  static async getRoles() {
+    const db = new sqlite3.Database('./data.db')
+    const roles = new Promise(resolve =>
+      db.all('SELECT id, cost FROM roles ORDER BY cost DESC', (err, roles) => {
+        const res = roles.reduce((res, row) => ({ ...res, [row.id]: row.cost }), {})
+        resolve(res)
+      })
+    )
+    db.close()
+    return roles
+  }
+  static save() {
+    const db = new sqlite3.Database('./data.db')
+    db.serialize(() => {
+      const roles = Object.entries(RolesBoard.roles)
+      db.run('CREATE TABLE IF NOT EXISTS roles(id VARCHAR, cost INT)')
+      const stmt = db.prepare('INSERT INTO roles(id, cost) VALUES(?,?)')
+      for (const row of roles) stmt.run(row[0], row[1])
+      stmt.finalize()
+    })
+    db.close()
+  }
   static shopList(message) {
     const shopList = new MessageEmbed()
       .setColor('#0099ff')
@@ -14,15 +33,14 @@ class RolesBoard {
         'https://cdn.discordapp.com/attachments/402109825896415232/692820764478668850/yummylogo.jpg'
       )
       .setTimestamp()
-    roles = sortAndCleanRoles(roles, message)
+    RolesBoard.roles = sortAndCleanRoles(RolesBoard.roles, message)
     let i = 0
-    for (const roleId in roles) {
-      if (!roles[roleId]) continue
+    for (const roleId in RolesBoard.roles) {
+      if (!RolesBoard.roles[roleId]) continue
       const role = message.member.guild.roles.cache.get(roleId)
-      const cost = roles[roleId]
+      const cost = RolesBoard.roles[roleId]
       shopList.addField(++i, `${role} - ${cost} ${currency}`)
     }
-    readWrite('roles.json', roles)
     return message.reply(shopList)
   }
   static add(message, args) {
@@ -38,9 +56,7 @@ class RolesBoard {
     }
 
     const role = message.member.guild.roles.cache.get(roleId)
-    roles[role.id] = +args[args.length - 1]
-    roles = sortAndCleanRoles(roles, message)
-    readWrite('roles.json', roles)
+    RolesBoard.roles[role.id] = +args[args.length - 1]
 
     log(
       `${message.author.username}(${message.member}) add role to shop ${role.name}(${role})`
@@ -59,8 +75,7 @@ class RolesBoard {
     }
     const role = message.member.guild.roles.cache.get(roleId)
 
-    delete roles[role.id]
-    readWrite('roles.json', roles)
+    delete RolesBoard.roles[role.id]
 
     log(
       `${message.author.username}(${message.member}) remove role from shop ${role.name}(${role})`
@@ -69,11 +84,11 @@ class RolesBoard {
   }
   static async buy(message, args) {
     if (isNaN(+args[1])) return
-    const roleId = Object.keys(roles)[+args[1] - 1]
+    const roleId = Object.keys(RolesBoard.roles)[+args[1] - 1]
     const role = message.member.guild.roles.cache.get(roleId)
     if (!role) return message.reply('Такая роль не существует')
 
-    const cost = roles[role.id]
+    const cost = RolesBoard.roles[role.id]
     if (!cost) return message.reply('Такая роль не продаётся')
 
     const id = message.author.id
@@ -90,11 +105,11 @@ class RolesBoard {
   }
   static async sell(message, args) {
     if (isNaN(+args[1])) return
-    const roleId = Object.keys(roles)[+args[1] - 1]
+    const roleId = Object.keys(RolesBoard.roles)[+args[1] - 1]
     const role = message.member.guild.roles.cache.get(roleId)
     if (!role) return message.reply('Такая роль не существует')
 
-    const cost = roles[role.id]
+    const cost = RolesBoard.roles[role.id]
     if (!cost) return message.reply('Такая роль не продаётся')
 
     const id = message.author.id
@@ -113,6 +128,7 @@ class RolesBoard {
 }
 
 module.exports.run = async (client, message, args) => {
+  RolesBoard.roles = await RolesBoard.getRoles(message)
   switch (args[0]) {
     case undefined:
     case null:

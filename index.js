@@ -77,12 +77,14 @@ client.on('message', async message => {
   if (bannedChannels.includes(message.channel.id)) return // do not listening commands from banned channels
   if (!message.content.startsWith(prefix)) return // filter simple text
   if (nonGrata.includes(message.author.id) || message.author.bot) return
+  message.channel.startTyping()
 
   const args = message.content.split(/\s+/g)
   const commandName = args.shift().toLowerCase().slice(prefix.length)
   const command = client.commands.get(commandName)
 
-  if (command) command.run(client, message, args, commandName)
+  if (command) await command.run(client, message, args, commandName)
+  message.channel.stopTyping()
 })
 
 client.on('guildMemberAdd', member => {

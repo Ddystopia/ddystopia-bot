@@ -1,4 +1,5 @@
 module.exports = async (embeds, message, start) => {
+	if(embeds.length < 1) throw new ReferenceError('Cannot find any embed')
   let i = +start > 0 ? +start - 1 : 0
 	if (i > embeds.length - 1) i = embeds.length - 1
 	
