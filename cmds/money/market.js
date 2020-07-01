@@ -87,6 +87,10 @@ class LootBoard {
   static async sell(message, args, loot) {
     const user = await User.getOrCreateUser(message.author.id)
     const lootArray = user.getLootArray(args.slice(1), loot)
+    if (args[1] === 'all')
+      for (loot in user.loot)
+        for (let i = 0; i < user.loot[loot]; i++) lootArray.push(loot)
+
     if (lootArray.length < 1) return message.reply('Не продаётся')
 
     const cost = lootArray.reduce((sum, lootItem) => sum + loot[lootItem], 0)

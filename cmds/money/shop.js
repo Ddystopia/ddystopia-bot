@@ -62,6 +62,7 @@ class RolesBoard {
       `${message.author.username}(${message.member}) add role to shop ${role.name}(${role})`
     )
     RolesBoard.shopList(message)
+    RolesBoard.save()
   }
   static remove(message, args) {
     if (!message.member.hasPermission('MANAGE_MESSAGES')) return
@@ -81,6 +82,7 @@ class RolesBoard {
       `${message.author.username}(${message.member}) remove role from shop ${role.name}(${role})`
     )
     RolesBoard.shopList(message)
+    RolesBoard.save()
   }
   static async buy(message, args) {
     if (isNaN(+args[1])) return

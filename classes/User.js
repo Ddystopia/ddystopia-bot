@@ -74,7 +74,7 @@ class User {
       level=${this.level},
       rep=${this.rep},
       loot='${JSON.stringify(this.loot)}',
-      birthday='${this.birthday}',
+      birthday='${this.birthday || ''}',
       marry='${this.marry || ''}',
       dailyLevel=${this.dailyLevel},
       dailyTimer=${this.timers.daily},
