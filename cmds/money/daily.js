@@ -12,7 +12,7 @@ module.exports.run = async (client, message, args) => {
   switch (args[0]) {
     case 'up':
       for (let i = 0; i < (+args[1] || 1); i++) {
-        const nextLevelCost = calcLevelCost(user.dailyLevel) * 15 + 100
+        const nextLevelCost = calcLevelCost(user.dailyLevel) * 10 + 100
         if (user.coins < nextLevelCost) continue
 
         user.coins -= nextLevelCost

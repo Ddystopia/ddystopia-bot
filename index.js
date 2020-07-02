@@ -82,7 +82,16 @@ client.on('message', async message => {
   const commandName = args.shift().toLowerCase().slice(prefix.length)
   const command = client.commands.get(commandName)
 
-  if (command) command.run(client, message, args, commandName)
+  if (command) {
+    log(
+      `User ${message.member.displayName}(${message.member}) use command ${commandName} with args ${args}`
+    )
+    command.run(client, message, args, commandName).catch(err => {
+      console.log(new Date())
+      console.error(err)
+      log(err)
+    })
+  }
 })
 
 client.on('guildMemberAdd', member => {

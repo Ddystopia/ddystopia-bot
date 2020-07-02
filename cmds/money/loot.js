@@ -41,7 +41,11 @@ module.exports.run = async (client, message, args, command) => {
 
       const userFrom = await User.getOrCreateUser(message.author.id)
       const userTill = await User.getOrCreateUser(message.mentions.users.first().id)
-      const lootArray = userFrom.getLootArray(args.slice(1), loot)
+      let lootArray = []
+      if (args[1] === 'all')
+        for (const loot in userFrom.loot)
+          for (let i = 0; i < userFrom.loot[loot]; i++) lootArray.push(loot)
+      else lootArray = userFrom.getLootArray(args.slice(1), loot)
 
       if (lootArray.length < 1) return message.reply('Не продаётся')
 

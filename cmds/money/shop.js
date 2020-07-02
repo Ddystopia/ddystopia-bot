@@ -14,17 +14,6 @@ class RolesBoard {
     db.close()
     return roles
   }
-  static save() {
-    const db = new sqlite3.Database('./data.db')
-    db.serialize(() => {
-      const roles = Object.entries(RolesBoard.roles)
-      db.run('CREATE TABLE IF NOT EXISTS roles(id VARCHAR, cost INT)')
-      const stmt = db.prepare('INSERT INTO roles(id, cost) VALUES(?,?)')
-      for (const row of roles) stmt.run(row[0], row[1])
-      stmt.finalize()
-    })
-    db.close()
-  }
   static shopList(message) {
     const shopList = new MessageEmbed()
       .setColor('#0099ff')
@@ -62,7 +51,11 @@ class RolesBoard {
       `${message.author.username}(${message.member}) add role to shop ${role.name}(${role})`
     )
     RolesBoard.shopList(message)
-    RolesBoard.save()
+    const db = new sqlite3.Database('./data.db')
+    db.run(
+      `UPDATE roles SET id=${role.id} cost=${+args[args.length - 1]} WHERE id=${role.id}`
+    )
+    db.close()
   }
   static remove(message, args) {
     if (!message.member.hasPermission('MANAGE_MESSAGES')) return
@@ -82,7 +75,9 @@ class RolesBoard {
       `${message.author.username}(${message.member}) remove role from shop ${role.name}(${role})`
     )
     RolesBoard.shopList(message)
-    RolesBoard.save()
+    const db = new sqlite3.Database('./data.db')
+    db.run(`DELETE FROM roles WHERE id=${role.id}`)
+    db.close()
   }
   static async buy(message, args) {
     if (isNaN(+args[1])) return

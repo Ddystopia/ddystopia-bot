@@ -38,13 +38,11 @@ class LootBoard {
     loot[args[1]] = +args[args.length - 1]
     loot = sortAndCleanRoles(loot)
     const db = new sqlite3.Database('./data.db')
-    db.serialize(() => {
-      const lootToWrite = Object.entries(loot)
-      db.run('CREATE TABLE IF NOT EXISTS loot(loot VARCHAR, cost INT)')
-      const stmt = db.prepare('INSERT INTO loot(loot, cost) VALUES(?,?)')
-      for (const row of lootToWrite) stmt.run(row[0], row[1])
-      stmt.finalize()
-    })
+    db.run(
+      `UPDATE loot SET 
+       loot=${args[1]} cost=${+args[args.length - 1]}
+       WHERE loot=${args[1]}`
+    )
     db.close()
 
     log(`${message.author.username}(${message.member}) add loot ${loot}`)
@@ -55,13 +53,7 @@ class LootBoard {
 
     delete loot[args[1]]
     const db = new sqlite3.Database('./data.db')
-    db.serialize(() => {
-      const lootToWrite = Object.entries(loot)
-      db.run('CREATE TABLE IF NOT EXISTS loot(loot VARCHAR, cost INT)')
-      const stmt = db.prepare('INSERT INTO loot(loot, cost) VALUES(?,?)')
-      for (const row of lootToWrite) stmt.run(row[0], row[1])
-      stmt.finalize()
-    })
+    db.run(`DELETE FROM loot WHERE loot=${args[1]}`)
     db.close()
 
     log(`${message.author.username}(${message.member}) remove loot ${loot}`)
@@ -86,10 +78,11 @@ class LootBoard {
   }
   static async sell(message, args, loot) {
     const user = await User.getOrCreateUser(message.author.id)
-    const lootArray = user.getLootArray(args.slice(1), loot)
+    let lootArray = []
     if (args[1] === 'all')
-      for (loot in user.loot)
+      for (const loot in user.loot)
         for (let i = 0; i < user.loot[loot]; i++) lootArray.push(loot)
+    else lootArray = user.getLootArray(args.slice(1), loot)
 
     if (lootArray.length < 1) return message.reply('Не продаётся')
 
