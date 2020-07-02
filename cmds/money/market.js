@@ -40,8 +40,8 @@ class LootBoard {
     const db = new sqlite3.Database('./data.db')
     db.run(
       `UPDATE loot SET 
-       loot=${args[1]} cost=${+args[args.length - 1]}
-       WHERE loot=${args[1]}`
+       loot='${args[1]}' cost=${+args[args.length - 1]}
+       WHERE loot='${args[1]}'`
     )
     db.close()
 
@@ -53,7 +53,7 @@ class LootBoard {
 
     delete loot[args[1]]
     const db = new sqlite3.Database('./data.db')
-    db.run(`DELETE FROM loot WHERE loot=${args[1]}`)
+    db.run(`DELETE FROM loot WHERE loot='${args[1]}'`)
     db.close()
 
     log(`${message.author.username}(${message.member}) remove loot ${loot}`)
