@@ -30,8 +30,9 @@ getDirs('./cmds/').forEach(dir => {
     jsFiles.forEach(f => {
       const props = require(`./cmds/${dir}/${f}`)
       if (props.help.cmdList)
-        for (let name of props.help.aliases) client.commands.set(name, props)
-      else client.commands.set(props.help.name, props)
+        for (let name of props.help.aliases)
+          client.commands.set(name.toLowerCase(), props)
+      else client.commands.set(props.help.name.toLowerCase(), props)
     })
   })
 })

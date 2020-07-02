@@ -2,7 +2,7 @@ const { MessageEmbed } = require('discord.js')
 const client = require('nekos.life')
 const { sfw } = new client()
 // prettier-ignore
-const actions = ['smug','baka','tickle','slap','poke','pat','neko','nekoGif','meow','lizard','kiss','hug','foxGirl','feed','cuddle','kemonomimi','holo','woof','wallpaper','goose','gecg','avatar','waifu','why','catText','OwOify','8Ball','fact','spoiler',]
+const actions = ['smug','baka','tickle','slap','poke','pat','neko','nekoGif','meow','lizard','kiss','hug','foxGirl','feed','cuddle','kemonomimi','holo','woof','wallpaper','goose','gecg','avatar','waifu']
 
 const rainbow = require('../../utils/rainbow')
 
