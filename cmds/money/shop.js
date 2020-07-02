@@ -52,9 +52,10 @@ class RolesBoard {
     )
     RolesBoard.shopList(message)
     const db = new sqlite3.Database('./data.db')
-    db.run(
-      `UPDATE roles SET id=${role.id} cost=${+args[args.length - 1]} WHERE id=${role.id}`
-    )
+    db.serialize(() => {
+      db.run(`DELETE FROM roles WHERE id='${role.id}'`)
+      db.run(`INSERT INTO roles (id, cost) VALUES(${role.id},${+args[args.length - 1]})`)
+    })
     db.close()
   }
   static remove(message, args) {
@@ -70,14 +71,14 @@ class RolesBoard {
     const role = message.member.guild.roles.cache.get(roleId)
 
     delete RolesBoard.roles[role.id]
+    const db = new sqlite3.Database('./data.db')
+    db.run(`DELETE FROM roles WHERE id='${role.id}'`)
+    db.close()
 
     log(
       `${message.author.username}(${message.member}) remove role from shop ${role.name}(${role})`
     )
     RolesBoard.shopList(message)
-    const db = new sqlite3.Database('./data.db')
-    db.run(`DELETE FROM roles WHERE id=${role.id}`)
-    db.close()
   }
   static async buy(message, args) {
     if (isNaN(+args[1])) return

@@ -38,11 +38,12 @@ class LootBoard {
     loot[args[1]] = +args[args.length - 1]
     loot = sortAndCleanRoles(loot)
     const db = new sqlite3.Database('./data.db')
-    db.run(
-      `UPDATE loot SET 
-       loot='${args[1]}' cost=${+args[args.length - 1]}
-       WHERE loot='${args[1]}'`
-    )
+    db.serialize(() => {
+      db.run(`DELETE FROM loot WHERE loot='${args[1]}'`)
+      db.run(
+        `INSERT INTO loot (loot, cost) VALUES ('${args[1]}',${+args[args.length - 1]})`
+      )
+    })
     db.close()
 
     log(`${message.author.username}(${message.member}) add loot ${loot}`)
