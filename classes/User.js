@@ -65,6 +65,12 @@ class User {
     return lootArray
   }
   save() {
+    if (this.bancrot) {
+      this.coins = 0
+      this.xp = 0
+      this.loot = {}
+      this.dailyLevel = 0
+    }
     db.serialize(() => {
       db.run(
         `UPDATE users SET 

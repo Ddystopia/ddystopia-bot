@@ -61,9 +61,9 @@ module.exports.run = async (client, message, args, command) => {
       const user = await User.getOrCreateUser(message.author.id)
       if (!user.loot['🎁']) return message.reply('Нечего открывать ¯\\_(ツ)_/¯')
       user.removeLoot(['🎁'])
-      const userGames = useUserGames(message.author.id, games, lastGames)
+      const userGames = useUserGames(message.author.id, games, lastGames, 30)
       let number = randomInteger(0, 100)
-      if (userGames > 10) number -= (userGames / 1.5) % 30
+      if (userGames > 20) number -= ((userGames / 1.5) % 30) + 10
 
       let maxCost = 0
       if (number === 100) maxCost = 2e4

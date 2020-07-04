@@ -110,7 +110,7 @@ class Credit extends Deal {
     async function makeBancrot() {
       const db = new sqlite3.Database('./data.db')
       user.coins = 0
-      bankMember.bancrot = Date.now() + 7 * 24 * 3600 * 1000
+      bankMember.bancrot = Date.now() + 20 * 24 * 3600 * 1000
       if (!member) return
       const role = member.guild.roles.cache.find(r => r.name === 'Банкрот')
       member.roles.add(role)

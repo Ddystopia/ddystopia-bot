@@ -71,7 +71,7 @@ client.on('message', message => {
 })
 client.on('message', message => {
   if (imageChannels.includes(message.channel.id))
-    client.commands.get('increaseMoneyForImage').run(client, message)
+    client.commands.get('increaseMoneyForImage'.toLowerCase()).run(client, message)
 })
 
 client.on('message', async message => {

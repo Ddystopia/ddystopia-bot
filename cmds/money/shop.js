@@ -54,7 +54,10 @@ class RolesBoard {
     const db = new sqlite3.Database('./data.db')
     db.serialize(() => {
       db.run(`DELETE FROM roles WHERE id='${role.id}'`)
-      db.run(`INSERT INTO roles (id, cost) VALUES(${role.id},${+args[args.length - 1]})`)
+      db.run(
+        `INSERT INTO roles (id, cost) VALUES(${role.id},${+args[args.length - 1]})`,
+        err => err && console.error(err)
+      )
     })
     db.close()
   }

@@ -5,7 +5,7 @@ const games = new Map()
 const lastGames = new Map()
 
 module.exports.run = async (client, message) => {
-  const userGames = useUserGames(message.author.id, games, lastGames)
+  const userGames = useUserGames(message.author.id, games, lastGames, 240)
   if (userGames > 40) return
 
   const attachmentsNum = message.attachments.size

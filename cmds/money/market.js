@@ -41,7 +41,8 @@ class LootBoard {
     db.serialize(() => {
       db.run(`DELETE FROM loot WHERE loot='${args[1]}'`)
       db.run(
-        `INSERT INTO loot (loot, cost) VALUES ('${args[1]}',${+args[args.length - 1]})`
+        `INSERT INTO loot (loot, cost) VALUES ('${args[1]}',${+args[args.length - 1]})`,
+        err => err && console.error(err)
       )
     })
     db.close()
