@@ -1,6 +1,6 @@
 const User = require('../../classes/User')
 const useUserGames = require('../../utils/useUserGames')
-let cost = 100
+let COST = 30
 const games = new Map()
 const lastGames = new Map()
 
@@ -14,7 +14,7 @@ module.exports.run = async (client, message) => {
   const user = await User.getOrCreateUser(message.author.id)
   if (user.bancrot) return
 
-  user.coins += attachmentsNum * cost
+  user.coins += attachmentsNum * COST
   user.save()
 }
 
