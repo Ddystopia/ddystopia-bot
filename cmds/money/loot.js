@@ -67,8 +67,8 @@ module.exports.run = async (client, message, args, command) => {
 
       let maxCost = 0
       if (number === 100) maxCost = 2e4
-      else if (number > 95) maxCost = 9e6
-      else if (number > 85) maxCost = 1e6
+      else if (number > 98) maxCost = 9e6
+      else if (number > 93) maxCost = 1e6
       else if (number > 70) maxCost = 2e4
       else maxCost = MAX_DAILY_LOOT_COST
 

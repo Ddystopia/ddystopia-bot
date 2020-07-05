@@ -48,7 +48,7 @@ class ModerationCommands {
   static async calcPercents() {
     const profiles = await ModerationCommands.getBankProfiles()
     for (const userId in profiles) {
-      const element = profiles[userId]
+      const element = await profiles[userId]
       if (element.credit)
         element.credit.sum += (element.credit.sum * element.credit.percent) / 100
       if (element.deposit)
