@@ -20,9 +20,10 @@ module.exports.run = async (client, message, args) => {
     )
     .setFooter('Реакции нажимать чтоб листать')
 
-  const embedProfile = new EmbedInstance('Команды профиля').addField(
-    '\u200B',
-    `
+  const embedProfile = new EmbedInstance('Команды профиля')
+    .addField(
+      '\u200B',
+      `
 		Если вы имеете лут 🎟, то вы можете обратится к администратору, и в замен он саздаст роль специально для вас!!!
 	1. >profile [@упоминание] - показать профиль, если не будет аргумента, или он будет некоректен, покажет ваш
 	2. >birthday [YYYY-MM-DD] - установить день рождения
@@ -34,6 +35,15 @@ module.exports.run = async (client, message, args) => {
 	8. >lootBox - открыть лутбокс, который вы должны предварительно купить (🎁)
 	9. >ship [@упоминание]{2,} - шипперство, от 2х и более пингов
 	Пример: >ship @Right @Left
+	`
+    )
+    .setFooter('Реакции нажимать чтоб листать')
+
+  const embedGames = new EmbedInstance('Команды игр').addField(
+    '\u200B',
+    `
+		1. >ttt - крестики нолики, бот поставит реакцию, чтоб присоединиться, надо на неё нажать, играть просто отправляя числа
+		2. >cities getSymbol - узнать букву, с которой должно начинаться слово, полезно когда кто-то удалил или изменил своё сообщение
 	`
   )
 
@@ -161,7 +171,7 @@ http://yotx.ru/#!1/3_h/ubW/ugfSOG8L@2f7R/sH@w7yel1vY31tZPd9f3ti/2D/ZJNOwGjPG4dcp
 		`
   )
   // prettier-ignore
-  const embeds = [embedIntroduction, embedProfile, embedCasino, embedBank, embedPercents, embedShop, embedShop2, embedActions, embedHentai, embedModeration]
+  const embeds = [embedIntroduction, embedProfile, embedGames, embedCasino, embedBank, embedPercents, embedShop, embedShop2, embedActions, embedHentai, embedModeration]
   slider(embeds, message, args[0])
 }
 
