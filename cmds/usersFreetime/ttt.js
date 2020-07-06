@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const rainbow = require('../../utils/rainbow.js')
+const randomInteger = require('../../utils/randomInteger.js')
 const games = new Map()
 class TicTacToe {
   constructor(firstPlayer, secondPlayer) {
@@ -7,20 +8,21 @@ class TicTacToe {
     this.secondPlayer = secondPlayer
     this.squares = Array(9).fill(null)
     this.xIsNext = true
+    this.message = null
   }
   step(square, player) {
     if (player !== (this.xIsNext ? this.secondPlayer : this.firstPlayer)) return null
     if (this.squares[square - 1]) return null
 
     this.squares[square - 1] = this.xIsNext ? '❌' : '⭕'
-    this.xIsNext = !this.xIsNext
     let winner = null
-    if (this.calculateWinner(this.squares) === '❌') winner = this.firstPlayer
-    else if (this.calculateWinner(this.squares) === '⭕') winner = this.secondPlayer
+    if (this.calculateWinner(this.squares) === '❌') winner = this.secondPlayer
+    else if (this.calculateWinner(this.squares) === '⭕') winner = this.firstPlayer
+    this.xIsNext = !this.xIsNext
 
     return {
-      nextStep: this.xIsNext ? this.firstPlayer : this.secondPlayer,
-      nextSymbol: this.xIsNext ? '❌' : '⭕',
+      nextStep: this.xIsNext ? this.secondPlayer : this.firstPlayer,
+      nextSymbol: this.calculateWinner(this.squares) || this.xIsNext ? '❌' : '⭕',
       squares: this.squares,
       firstPlayer: this.firstPlayer,
       secondPlayer: this.secondPlayer,
@@ -48,16 +50,23 @@ class TicTacToe {
 }
 
 module.exports.run = async (client, message) => {
+  if (games.has(message.author.id)) return // return if already in game
   message.react('▶')
-  const reactionFilter = (res, user) => res.emoji.name === '▶' && !user.bot
+  const tillPlay = message.mentions.users.first()
+  const reactionFilter = (res, user) =>
+    res.emoji.name === '▶' && !user.bot && (!tillPlay || tillPlay.id === user.id)
 
   const startCollector = message.createReactionCollector(reactionFilter, {
     time: 30000,
     errors: ['time'],
   })
-  startCollector.on('collect', collected => {
-    const firstPlayer = message.author.id
-    const secondPlayer = [...collected.users.cache].find(user => !user[1].bot)[0]
+  startCollector.on('collect', async collected => {
+    const [firstPlayer, secondPlayer] = [
+      message.author.id,
+      [...collected.users.cache].find(
+        user => !user[1].bot && (!tillPlay || tillPlay.id === user[1].id)
+      )[0],
+    ].sort(() => randomInteger(-2, 1) || 1) //random sort
     const game = new TicTacToe(firstPlayer, secondPlayer)
 
     games.set(firstPlayer, game)
@@ -73,8 +82,8 @@ module.exports.run = async (client, message) => {
       },
       message
     )
-    message.channel.send(embed)
     startCollector.stop()
+    game.message = await message.channel.send(embed)
   })
 
   const stepCollector = message.channel.createMessageCollector(
@@ -84,11 +93,12 @@ module.exports.run = async (client, message) => {
   stepCollector.on('collect', m => {
     const game = games.get(m.author.id)
     if (!game) return
+    m.delete({ time: 0 })
     const response = game.step(m.content, m.author.id)
     if (!response) return
 
     const embed = createEmbed(response, m)
-    m.channel.send(embed)
+    game.message.edit(embed)
 
     if (response.winner || response.squares.find(square => !square) === undefined) {
       games.delete(response.firstPlayer)
