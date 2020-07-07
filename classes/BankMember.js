@@ -27,7 +27,7 @@ class BankMember {
       lEFT JOIN bancrots ON users.id = bancrots.id
       WHERE users.id = ?`,
         [id],
-        (err, us) => {
+        (err, us = { id }) => {
           const bankMember = new BankMember({
             id: us.id,
             credit: +us.crSum
