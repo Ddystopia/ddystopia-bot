@@ -20,6 +20,7 @@ class TicTacToe {
       this.winner = this.xIsNext ? this.firstPlayer : this.secondPlayer
       this.stop(collector)
       this.message.edit(
+        // this.message.channel.send(
         this.createEmbed(
           {
             ...this.getResponseForMessage(),
@@ -31,8 +32,8 @@ class TicTacToe {
     }, 30000)
   }
   step(square, player) {
-    if (player !== (this.xIsNext ? this.secondPlayer : this.firstPlayer)) return null
-    if (this.squares[square - 1]) return null
+    if (player !== (this.xIsNext ? this.secondPlayer : this.firstPlayer)) return
+    if (this.squares[square - 1]) return
 
     this.squares[square - 1] = this.xIsNext ? '❌' : '⭕'
     if (this.calculateWinner(this.squares) === '❌') this.winner = this.secondPlayer
@@ -64,10 +65,12 @@ class TicTacToe {
       )
       .setTitle(
         (() => {
+          const draw = response.squares.find(s => !s) === undefined
+          const word = response.winner ? 'Победитель' : draw ? 'Ничья' : 'Ход'
           const name = members.cache.get(response.winner || response.nextStep).displayName
-          return `${response.winner ? 'Победитель' : 'Ход'} ${name}, ${
-            response.nextSymbol
-          }`
+          const player = `${name}, ${response.nextSymbol}`
+
+          return `${word} ${draw && !this.winner ? '' : player}`
         })()
       )
   }
@@ -91,13 +94,14 @@ class TicTacToe {
   }
   async stop(stepCollector) {
     stepCollector.stop()
+    clearTimeout(this._timeout)
     const players = [
       await User.getOrCreateUser(this.firstPlayer),
       await User.getOrCreateUser(this.secondPlayer),
     ]
     players.forEach(({ id }) => games.delete(id))
 
-    if (players[0].id !== players[1].id) {
+    if (players[0].id !== players[1].id && this.winner) {
       players.sort(player => (player.id === this.winner ? -1 : 0))
       players[0].coins += this.bet
       players[1].coins -= this.bet
@@ -132,8 +136,8 @@ module.exports.run = async (client, message, args) => {
         )[0]
       ),
     ].sort(() => randomInteger(-2, 1) || 1) //random sort
-		if (games.has(firstPlayer.id) || games.has(secondPlayer.id)) return
-		
+    if (games.has(firstPlayer.id) || games.has(secondPlayer.id)) return
+
     const bet = +args[0] || +args[1] || 0
     if (firstPlayer.coins < bet || secondPlayer.coins < bet)
       return message.reply('У кого-то из вас не хватает')
@@ -146,21 +150,20 @@ module.exports.run = async (client, message, args) => {
     game.reloadTimeoutToStopGame(stepCollector)
 
     const embed = game.createEmbed(game.getResponseForMessage(), message.guild.members)
-    startCollector.stop()
+    startCollector.stop(['game is started'])
     game.message = await message.channel.send(embed)
   })
 
   stepCollector.on('collect', m => {
     const game = games.get(m.author.id)
     if (!game) return
-    m.delete({ time: 0 })
-
     game.step(m.content, m.author.id)
+    m.delete({ time: 0 })
     const response = game.getResponseForMessage()
-    if (!response) return
 
     const embed = game.createEmbed(game.getResponseForMessage(), message.guild.members)
     game.message.edit(embed)
+    // m.channel.send(embed)
     game.reloadTimeoutToStopGame(stepCollector)
 
     if (response.winner || response.squares.find(square => !square) === undefined)
@@ -168,6 +171,10 @@ module.exports.run = async (client, message, args) => {
   })
 
   stepCollector.on('end', () => message.channel.send('Игра окончена'))
+  startCollector.on(
+    'end',
+    (err, reason) => reason[0] !== 'game is started' && message.reply('Время вышло')
+  )
 }
 
 module.exports.help = {
