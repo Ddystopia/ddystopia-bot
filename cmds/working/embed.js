@@ -10,15 +10,15 @@ module.exports.run = async (message, args) => {
     const embedObj = JSON.parse(messageData)
 
     embedObj.author = {
-      name: message.author.username,
+      name: message.member.displayName,
       icon_url: message.author.avatarURL(),
       url: 'https://discord.js.org',
     }
 
     channel.send({
       embed: embedObj,
-		})
-		log(`${message.author.username}(${message.member}) send embed`)
+    })
+    log(`${message.author.username}(${message.member}) send embed`)
   } catch (err) {
     return message.reply(`${err.name}: ${err.message}`)
   }

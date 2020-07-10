@@ -1,8 +1,7 @@
 const { Client, Collection } = require('discord.js')
 const Leveling = require('./classes/Leveling.js')
 const client = new Client()
-const fs = require('fs')
-const readWrite = require('./utils/readWriteFile')
+const { readdirSync, statSync } = require('fs')
 const log = require('./utils/log.js')
 
 const nonGrata = ['464804290876145665', '266259546236911618']
@@ -15,24 +14,17 @@ global.currency = '🌱' //если язык русский, то в родит�
 
 client.commands = new Collection()
 
-const getDirs = p => {
-  return fs.readdirSync(p).filter(f => fs.statSync(`${p}${f}`).isDirectory())
-}
-
+const getDirs = p => readdirSync(p).filter(f => statSync(`${p}${f}`).isDirectory())
 getDirs('./cmds/').forEach(dir => {
-  fs.readdir(`./cmds/${dir}`, (err, files) => {
-    if (err) return console.error(err)
+  const jsFiles = readdirSync(`./cmds/${dir}`).filter(f => f.endsWith('.js'))
+  jsFiles.forEach((f, i) => {
+    const props = require(`./cmds/${dir}/${f}`)
+    if (props.help.aliases)
+      props.help.aliases = props.help.aliases.map(alias => alias.toLowerCase())
+    client.commands.set(props.help.name.toLowerCase(), props)
 
-    let jsFiles = files.filter(f => f.split('.').pop() === 'js')
-    if (!jsFiles.length) return console.error(`Ошибка загрузки модуля [${dir}]`)
-    console.log(`${jsFiles.length} files in module [${dir}] have been loaded`)
-
-    jsFiles.forEach(f => {
-      const props = require(`./cmds/${dir}/${f}`)
-      if (props.help.aliases)
-        props.help.aliases = props.help.aliases.map(alias => alias.toLowerCase())
-      client.commands.set(props.help.name.toLowerCase(), props)
-    })
+    if (jsFiles.length === i + 1)
+      console.log(`${jsFiles.length} files in module [${dir}] have been loaded`)
   })
 })
 
@@ -52,18 +44,15 @@ client.on('ready', async () => {
   })
 
   checkTrigger()
-
   function checkTrigger() {
-    const info = require('./workingInfo.json')
-    if (Date.now() - info.lastCalcDate > 24 * 3600 * 1000) {
-      client.commands.get('bank').run({ guild }, 'calcPercents')
-      info.lastCalcDate = Date.now()
-      readWrite('workingInfo.json', info)
+    if (new Date().getHours() === 11)
+      setTimeout(() => {
+        client.commands.get('bank').run({ guild }, 'calcPercents')
+        log('Percents have been calked')
+      }, new Date().setHours(12, 0, 0, 0) - Date.now())
 
-      log('Percents have been calked')
-    }
-    client.commands.get('bank').run({ guild }, 'setBancrots')
-    setTimeout(checkTrigger, 30 * 60 * 1000)
+    client.commands.get('bank').run({ guild }, 'closeDeals')
+    setTimeout(checkTrigger, 60 * 60 * 1000)
   }
 })
 
@@ -74,7 +63,6 @@ client.on('message', message => {
   if (imageChannels.includes(message.channel.id))
     client.commands.get('increaseMoneyForImage'.toLowerCase()).run(message)
 })
-
 client.on('message', async message => {
   if (bannedChannels.includes(message.channel.id)) return // do not listening commands from banned channels
   if (!message.content.startsWith(prefix)) return // filter simple text
@@ -88,7 +76,7 @@ client.on('message', async message => {
 
   if (command) {
     log(
-      `User ${message.member.displayName}(${message.member}) use command ${commandName} with args ${args}`
+      `User ${message.member.displayName}(${message.member}) use command [${commandName}] with args [${args}]`
     )
     command.run(message, args, commandName).catch(log)
   }

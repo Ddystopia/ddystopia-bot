@@ -14,31 +14,43 @@ class ModerationCommands {
       db.close()
     })
   }
-  static async setBancrots(guild) {
+  static async closeDeals(guild) {
     const profiles = await ModerationCommands.getBankProfiles()
     for (const userId in profiles) {
-      const element = await profiles[userId]
-      if (!!element.credit && element.credit.deadline <= Date.now()) {
-        element.credit.badUser(element, guild)
-        element.save()
-      }
-
-      if (!!element.deposit && element.deposit.deadline <= Date.now()) {
-        element.deposit.payDeposits(element)
-        element.save()
-      }
-
       const member = guild.members.cache.get(`${userId}`)
+      if (!member) continue
 
-      if (member) {
-        const role = member.guild.roles.cache.find(r => r.name === 'Банкрот')
-        if (element.bancrot < Date.now()) {
-          element.bancrot = null
-          member.roles.remove(role)
+      const bancrotRole = member.guild.roles.cache.find(r => r.name === 'Банкрот')
+      const element = await profiles[userId]
+
+      const [timeToCredit, timeToDeposit, timeToBancrot] = [
+        element.credit && element.credit.deadline - Date.now(),
+        element.deposit && element.deposit.deadline - Date.now(),
+        element.bancrot && element.bancrot - Date.now(),
+      ]
+
+      if (timeToCredit <= 60 * 60 * 1000) {
+        setTimeout(() => {
+          element.credit.badUser(element, guild)
           element.save()
-        } else if (element.bancrot && !member.roles.cache.has(role.id)) {
-          Credit.prototype.badUser(element, guild, true)
-        }
+        }, Math.max(timeToCredit, 0))
+      }
+
+      if (timeToDeposit <= 60 * 60 * 1000) {
+        setTimeout(() => {
+          element.deposit.payDeposits(element)
+          element.save()
+        }, Math.max(timeToDeposit, 0))
+      }
+
+      if (timeToBancrot <= 60 * 60 * 1000) {
+        setTimeout(() => {
+          element.bancrot = null
+          member.roles.remove(bancrotRole)
+          element.save()
+        }, Math.max(timeToBancrot, 0))
+      } else if (element.bancrot && !member.roles.cache.has(bancrotRole.id)) {
+        Credit.prototype.badUser(element, guild, true)
       }
     }
   }
@@ -92,7 +104,7 @@ class ModerationCommands {
 
 module.exports.run = async (message, args) => {
   if (args === 'calcPercents') return ModerationCommands.calcPercents() //inclusion
-  if (args === 'setBancrots') return ModerationCommands.setBancrots(message.guild) //inclusion
+  if (args === 'closeDeals') return ModerationCommands.closeDeals(message.guild) //inclusion
   if (message.channel.id !== '694199268847648813') return
   const userId = message.author.id
   const bankMember = await BankMember.getOrCreateBankMember(userId)

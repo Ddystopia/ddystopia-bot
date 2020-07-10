@@ -125,16 +125,18 @@ ON CONFLICT(id) DO UPDATE SET
     this.save()
     return true
   }
-  createDeposit(sum, days) {
+  async createDeposit(sum, days) {
     if (this.deposit) return 'You already have deposit.'
     if (this.credit) return "You have some credit, I can't make deposit."
     if (isNaN(+sum) || isNaN(+days)) return 'Invalid arguments'
     if (+sum < 500) return 'Too small sum'
     if (+days < 5) return 'Too few days'
     if (+days > 100) return 'Too many days'
+    const user = await User.getOrCreateUser(this.id)
+    if (user.coins < sum) return "You don't have this sum"
 
     const percent =
-      Math.min((Math.E ** 6) ** (days / 10) / 3, (days / 10 - 1) * 6.5 + 15, 20) / 2.35
+      Math.min((Math.E ** 6) ** (days / 10) / 3, (days / 10 - 1) * 6.5 + 15, 20) / 2.75
     this.deposit = new Deposit(sum, days, percent, this.id)
     this.save()
     return true

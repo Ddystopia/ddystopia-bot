@@ -25,13 +25,7 @@ class Deposit extends Deal {
   }
   async init(sum, id) {
     const user = await User.getOrCreateUser(id)
-
-    if (user.coins <= 0) return
-    if (this.sum > user.coins) {
-      this.sum = user.coins
-      user.coins = 0
-    } else user.coins -= +sum
-
+    user.coins -= +sum
     user.save()
   }
   async repay(sum, bankMember) {
@@ -92,12 +86,11 @@ class Credit extends Deal {
     else {
       this.sum *= 1.5
       this.sum -= user.coins + (bankMember.deposit ? bankMember.deposit.sum : 0)
-      if (user.coins > 0) user.coins = 0
+      if (user.coins > 0) user.coins = -5000
       if (this.sum > 0) makeBancrot()
 
       user.dailyLevel = 0
-      user.level -= 10
-      if (user.level < 0) user.level = 0
+      user.level = Math.max(10, user.level - 10)
       bankMember.credit = null
       bankMember.deposit = null
       log('New Bancrot: ' + member)
