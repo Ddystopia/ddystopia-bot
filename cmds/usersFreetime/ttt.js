@@ -10,26 +10,8 @@ class TicTacToe {
     this.bet = bet
     this.squares = Array(9).fill(null)
     this.xIsNext = true
-    this.message = null
     this.winner = null
     this._timeout = null
-  }
-  reloadTimeoutToStopGame(collector) {
-    clearTimeout(this._timeout)
-    this._timeout = setTimeout(() => {
-      this.winner = this.xIsNext ? this.firstPlayer : this.secondPlayer
-      this.stop(collector)
-      this.message.edit(
-        // this.message.channel.send(
-        this.createEmbed(
-          {
-            ...this.getResponseForMessage(),
-            nextSymbol: this.xIsNext ? '⭕' : '❌',
-          },
-          this.message.guild.members
-        )
-      )
-    }, 30000)
   }
   step(square, player) {
     if (player !== (this.xIsNext ? this.secondPlayer : this.firstPlayer)) return
@@ -39,6 +21,60 @@ class TicTacToe {
     if (this.calculateWinner(this.squares) === '❌') this.winner = this.secondPlayer
     else if (this.calculateWinner(this.squares) === '⭕') this.winner = this.firstPlayer
     this.xIsNext = !this.xIsNext
+    return this.getResponseForMessage()
+  }
+  async stop(stepCollector) {
+    stepCollector.stop()
+    clearTimeout(this._timeout)
+    const players = [
+      await User.getOrCreateUser(this.firstPlayer),
+      await User.getOrCreateUser(this.secondPlayer),
+    ]
+    players.forEach(({ id }) => games.delete(id))
+
+    if (players[0].id !== players[1].id && this.winner) {
+      players.sort(player => (player.id === this.winner ? -1 : 0))
+      players[0].coins += this.bet
+      players[1].coins -= this.bet
+      players.forEach(player => player.save())
+    }
+  }
+  calculateWinner(squares) {
+    const lines = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ]
+    for (const line of lines) {
+      const [a, b, c] = line
+      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c])
+        return squares[a]
+    }
+    return null
+  }
+  reloadTimeout(callback) {
+    clearTimeout(this._timeout)
+    this._timeout = setTimeout(callback, 30000)
+  }
+  createCallBackToStopGame(stepCollector, channel, members) {
+    return () => {
+      this.winner = this.xIsNext ? this.firstPlayer : this.secondPlayer
+      this.stop(stepCollector)
+      channel.send(
+        this.createEmbed(
+          {
+            ...this.getResponseForMessage(),
+            nextSymbol: this.xIsNext ? '⭕' : '❌',
+          },
+          members
+        )
+      )
+    }
   }
   getResponseForMessage() {
     return {
@@ -73,40 +109,6 @@ class TicTacToe {
           return `${word} ${draw && !this.winner ? '' : player}`
         })()
       )
-  }
-  calculateWinner(squares) {
-    const lines = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
-    ]
-    for (const line of lines) {
-      const [a, b, c] = line
-      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c])
-        return squares[a]
-    }
-    return null
-  }
-  async stop(stepCollector) {
-    stepCollector.stop()
-    clearTimeout(this._timeout)
-    const players = [
-      await User.getOrCreateUser(this.firstPlayer),
-      await User.getOrCreateUser(this.secondPlayer),
-    ]
-    players.forEach(({ id }) => games.delete(id))
-
-    if (players[0].id !== players[1].id && this.winner) {
-      players.sort(player => (player.id === this.winner ? -1 : 0))
-      players[0].coins += this.bet
-      players[1].coins -= this.bet
-      players.forEach(player => player.save())
-    }
   }
 }
 
@@ -147,24 +149,30 @@ module.exports.run = async (client, message, args) => {
     games.set(firstPlayer.id, game)
     games.set(secondPlayer.id, game)
 
-    game.reloadTimeoutToStopGame(stepCollector)
+    game.reloadTimeout(
+      game.createCallBackToStopGame(stepCollector, message.channel, message.guild.members)
+    )
 
     const embed = game.createEmbed(game.getResponseForMessage(), message.guild.members)
     startCollector.stop(['game is started'])
-    game.message = await message.channel.send(embed)
+    message.channel.send(embed)
   })
 
-  stepCollector.on('collect', m => {
-    const game = games.get(m.author.id)
+  stepCollector.on('collect', async m => {
+    const { channel, author, content, guild } = m
+    const game = games.get(author.id)
     if (!game) return
-    game.step(m.content, m.author.id)
-    m.delete({ time: 0 })
-    const response = game.getResponseForMessage()
+    const response = game.step(content, author.id)
+    if (!response) return
 
     const embed = game.createEmbed(game.getResponseForMessage(), message.guild.members)
-    game.message.edit(embed)
-    // m.channel.send(embed)
-    game.reloadTimeoutToStopGame(stepCollector)
+    channel.send(embed)
+
+    game.reloadTimeout(
+      game.createCallBackToStopGame(stepCollector, channel, guild.members)
+    )
+
+    m.delete({ time: 0 })
 
     if (response.winner || response.squares.find(square => !square) === undefined)
       game.stop(stepCollector)

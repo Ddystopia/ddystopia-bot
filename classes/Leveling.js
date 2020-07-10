@@ -38,7 +38,7 @@ class Leveling {
             member => !member.voice.mute && !member.voice.deaf
           )
           members.each(member => {
-            const newExp = 5 * (members.size - 1)
+            const newExp = 2 * (members.size - 1)
             Leveling._calcLeveling(newExp, member.id)
           })
         })
@@ -46,7 +46,7 @@ class Leveling {
   }
 }
 Leveling._XP_TIME = 2
-Leveling._XP_MUL = 10
+Leveling._XP_MUL = 9
 Leveling._users = new Collection()
 
 module.exports = Leveling

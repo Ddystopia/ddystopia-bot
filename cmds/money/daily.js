@@ -4,6 +4,7 @@ const rainbow = require('../../utils/rainbow')
 const formatDuration = require('../../utils/formatDuration')
 
 const SECONDS_COOLDOWN = 60 * 60 * 12
+const DAILY_UP_COST_MUL = 7
 
 module.exports.run = async (client, message, args) => {
   const user = await User.getOrCreateUser(message.author.id)
@@ -12,7 +13,7 @@ module.exports.run = async (client, message, args) => {
   switch (args[0]) {
     case 'up':
       for (let i = 0; i < (+args[1] || 1); i++) {
-        const nextLevelCost = calcLevelCost(user.dailyLevel) * 10 + 100
+        const nextLevelCost = calcLevelCost(user.dailyLevel) * DAILY_UP_COST_MUL + 100
         if (user.coins < nextLevelCost) continue
 
         user.coins -= nextLevelCost
@@ -36,7 +37,7 @@ module.exports.run = async (client, message, args) => {
           .addField('Сейчас ваш daily', calcLevelCost(user.dailyLevel) + currency)
           .addField(
             'Цена до следующего',
-            calcLevelCost(user.dailyLevel) * 15 + 100 + currency
+            calcLevelCost(user.dailyLevel) * DAILY_UP_COST_MUL + 100 + currency
           )
           .addField('Следующее daily', calcLevelCost(user.dailyLevel + 1) + currency)
       )
