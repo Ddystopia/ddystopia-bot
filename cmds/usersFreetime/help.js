@@ -12,7 +12,7 @@ class EmbedInstance extends MessageEmbed {
   }
 }
 
-module.exports.run = async (client, message, args) => {
+module.exports.run = async (message, args) => {
   const embedIntroduction = new EmbedInstance('Введение')
     .addField(
       '\u200B',

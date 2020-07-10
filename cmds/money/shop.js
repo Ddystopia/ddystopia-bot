@@ -128,7 +128,7 @@ class RolesBoard {
   }
 }
 
-module.exports.run = async (client, message, args) => {
+module.exports.run = async (message, args) => {
   RolesBoard.roles = await RolesBoard.getRoles(message)
   switch (args[0]) {
     case undefined:

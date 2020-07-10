@@ -6,7 +6,7 @@ const sqlite3 = require('sqlite3').verbose()
 const marryClipboard = new Map()
 const repClipboard = new Map()
 
-module.exports.run = async (client, message, args, command) => {
+module.exports.run = async (message, args, command) => {
   const loot = await new Promise(resolve => {
     const db = new sqlite3.Database('./data.db')
     db.all('SELECT * FROM loot', (err, rows) =>
@@ -21,6 +21,8 @@ module.exports.run = async (client, message, args, command) => {
   const profile = await User.getOrCreateUser(id)
   switch (command) {
     case 'profile':
+    case 'юзер':
+    case 'профиль':
       {
         const usersLoot = Object.entries(profile.loot)
           .sort((a, b) => loot[b[0]] - loot[a[0]])
@@ -128,6 +130,6 @@ module.exports.run = async (client, message, args, command) => {
 }
 
 module.exports.help = {
-  aliases: ['profile', 'birthday', 'about', 'marry', 'tear', 'rep'],
-  cmdList: true,
+  name: 'profile',
+  aliases: ['юзер', 'профиль', 'birthday', 'about', 'marry', 'tear', 'rep'],
 }

@@ -3,7 +3,7 @@ const Canvas = require('canvas')
 const User = require('../../classes/User')
 const Leveling = require('../../classes/Leveling')
 
-module.exports.run = async (client, message) => {
+module.exports.run = async message => {
   message.channel.startTyping()
   const member = message.mentions.members.first() || message.member
   const user = await User.getOrCreateUser(member.id)
@@ -93,6 +93,7 @@ module.exports.run = async (client, message) => {
 
 module.exports.help = {
   name: 'rank',
+  aliases: ['ранг'],
 }
 
 const pasteText = (textArray, dot, ctx) => {

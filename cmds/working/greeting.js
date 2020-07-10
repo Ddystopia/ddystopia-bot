@@ -19,7 +19,7 @@ const helloGifs = [
 
 let gifsCounter = randomInteger(1, 5)
 
-module.exports.run = async (client, member) => {
+module.exports.run = async ({ member }) => {
   if (gifsCounter >= helloGifs.length) gifsCounter = 0
 
   const channel = member.guild.channels.cache.find(ch => ch.id == '692796617656369292')

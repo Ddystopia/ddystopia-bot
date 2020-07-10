@@ -1,7 +1,7 @@
 const { MessageEmbed } = require('discord.js')
 const User = require('../../classes/User')
 
-module.exports.run = async (client, message, args) => {
+module.exports.run = async (message, args) => {
   let userId
   try {
     userId = args[0] ? message.mentions.users.first().id : message.author.id
@@ -19,4 +19,5 @@ module.exports.run = async (client, message, args) => {
 
 module.exports.help = {
   name: 'money',
+  aliases: ['$', 'balance'],
 }

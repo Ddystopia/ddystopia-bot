@@ -8,7 +8,7 @@ const lastGames = new Map()
 const SECONDS_COOLDOWN = 60 * 60 * 24
 const MAX_DAILY_LOOT_COST = 5000
 
-module.exports.run = async (client, message, args, command) => {
+module.exports.run = async (message, args, command) => {
   const loot = await new Promise(resolve => {
     const db = new sqlite3.Database('./data.db')
     db.all('SELECT * FROM loot', (err, rows) =>
@@ -89,6 +89,6 @@ function calcLoot(loot, maxCost = MAX_DAILY_LOOT_COST) {
 }
 
 module.exports.help = {
-  aliases: ['loot', 'giveloot', 'lootbox'],
-  cmdList: true,
+  name: 'loot',
+  aliases: ['giveloot', 'lootbox'],
 }

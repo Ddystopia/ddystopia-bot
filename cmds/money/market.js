@@ -99,7 +99,7 @@ class LootBoard {
   }
 }
 
-module.exports.run = async (client, message, args) => {
+module.exports.run = async (message, args) => {
   const loot = await new Promise(resolve => {
     const db = new sqlite3.Database('./data.db')
     db.all('SELECT * FROM loot', (err, rows) =>

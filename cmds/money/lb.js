@@ -6,7 +6,7 @@ const rainbow = require('../../utils/rainbow')
 const sqlite3 = require('sqlite3').verbose()
 const MAX_ROWS = 10
 
-module.exports.run = async (client, message, args, command) => {
+module.exports.run = async (message, args, command) => {
   let lb = []
   const db = new sqlite3.Database('./data.db')
 
@@ -65,6 +65,6 @@ module.exports.run = async (client, message, args, command) => {
   slider(embeds, message, args[0]).catch(console.error)
 }
 module.exports.help = {
-  aliases: ['lb', 'forbs'],
-  cmdList: true,
+  name: 'lb',
+  aliases: ['forbs'],
 }

@@ -1,5 +1,5 @@
 const log = require('../../utils/log.js')
-module.exports.run = async (client, message, args) => {
+module.exports.run = async (message, args) => {
   if (!message.member.hasPermission('MANAGE_MESSAGES')) return
   if (!args[0] || !args[1]) return
   if (!args[0].match(/(\d{15,})/)) return

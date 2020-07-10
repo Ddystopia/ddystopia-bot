@@ -14,12 +14,12 @@ class ModerationCommands {
       db.close()
     })
   }
-  static async setBancrots(client) {
+  static async setBancrots(guild) {
     const profiles = await ModerationCommands.getBankProfiles()
     for (const userId in profiles) {
       const element = await profiles[userId]
       if (!!element.credit && element.credit.deadline <= Date.now()) {
-        element.credit.badUser(element, client)
+        element.credit.badUser(element, guild)
         element.save()
       }
 
@@ -28,9 +28,7 @@ class ModerationCommands {
         element.save()
       }
 
-      const member = client.guilds.cache
-        .get('402105109653487627')
-        .members.cache.get(`${userId}`)
+      const member = guild.members.cache.get(`${userId}`)
 
       if (member) {
         const role = member.guild.roles.cache.find(r => r.name === 'Банкрот')
@@ -39,7 +37,7 @@ class ModerationCommands {
           member.roles.remove(role)
           element.save()
         } else if (element.bancrot && !member.roles.cache.has(role.id)) {
-          Credit.prototype.badUser(element, client, true)
+          Credit.prototype.badUser(element, guild, true)
         }
       }
     }
@@ -92,9 +90,9 @@ class ModerationCommands {
   }
 }
 
-module.exports.run = async (client, message, args) => {
+module.exports.run = async (message, args) => {
   if (args === 'calcPercents') return ModerationCommands.calcPercents() //inclusion
-  if (args === 'setBancrots') return ModerationCommands.setBancrots(client) //inclusion
+  if (args === 'setBancrots') return ModerationCommands.setBancrots(message.guild) //inclusion
   if (message.channel.id !== '694199268847648813') return
   const userId = message.author.id
   const bankMember = await BankMember.getOrCreateBankMember(userId)

@@ -4,7 +4,7 @@ let COST = 30
 const games = new Map()
 const lastGames = new Map()
 
-module.exports.run = async (client, message) => {
+module.exports.run = async (message) => {
   const userGames = useUserGames(message.author.id, games, lastGames, 240)
   if (userGames > 40) return
 

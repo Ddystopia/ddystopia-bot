@@ -17,7 +17,7 @@ const factorsTable = {
   3: '↘',
 }
 
-module.exports.run = async (bot, message, args) => {
+module.exports.run = async (message, args) => {
   if (message.channel.id !== '693487254911582259') return
   if (!args) return
   if (isNaN(+args[0]) && args[0] != 'all') return

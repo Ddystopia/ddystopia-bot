@@ -84,12 +84,10 @@ class Credit extends Deal {
     bankMember.save()
     return true
   }
-  async badUser(bankMember, client, rec) {
+  async badUser(bankMember, guild, rec) {
     const user = await User.getOrCreateUser(bankMember.id)
     //402105109653487627 - server id
-    const member = client.guilds.cache
-      .get('402105109653487627')
-      .members.cache.get(bankMember.id)
+    const member = guild.members.cache.get(bankMember.id)
     if (rec) makeBancrot()
     else {
       this.sum *= 1.5

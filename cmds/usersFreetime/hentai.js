@@ -25,7 +25,7 @@ const getImageURL = async genreProps => {
   }
 }
 
-module.exports.run = async (client, message, args) => {
+module.exports.run = async (message, args) => {
   if (!message.channel.nsfw) return
   let number = +args[1] || +args[0] || 1
   if (number > MAX_IMAGES_COUNT) number = MAX_IMAGES_COUNT

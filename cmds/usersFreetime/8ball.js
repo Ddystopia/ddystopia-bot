@@ -26,7 +26,7 @@ const answers = [
   'Весьма сомнительно',
 ]
 const colors = ['#65f70a', '#fcba03', '#0a5ccf', '#f01352']
-module.exports.run = async (client, message) => {
+module.exports.run = async message => {
   const indexOfRes = randomInteger(0, answers.length - 1)
   const embed = new MessageEmbed()
     .setColor(colors[Math.ceil(((indexOfRes + 1) / answers.length) * colors.length) - 1])
@@ -37,6 +37,5 @@ module.exports.run = async (client, message) => {
 }
 
 module.exports.help = {
-  aliases: ['8ball'],
-  cmdList: true,
+  name: '8ball',
 }

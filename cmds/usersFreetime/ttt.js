@@ -112,7 +112,7 @@ class TicTacToe {
   }
 }
 
-module.exports.run = async (client, message, args) => {
+module.exports.run = async (message, args) => {
   if (games.has(message.author.id)) return // return if already in game
   message.react('▶')
   const tillPlay = message.mentions.users.first()
@@ -187,4 +187,5 @@ module.exports.run = async (client, message, args) => {
 
 module.exports.help = {
   name: 'ttt',
+  aliases: ['ттт'],
 }

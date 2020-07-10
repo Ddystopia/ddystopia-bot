@@ -11,7 +11,7 @@ function getAction(actionProps, actions) {
   return sfw[action]()
 }
 
-module.exports.run = async (client, message, args, command) => {
+module.exports.run = async (message, args, command) => {
   const responseMessage = message.mentions.users.size
     ? `${message.member} ${command} ${message.mentions.users.first()}`
     : `${message.member} ${command}`
@@ -25,6 +25,6 @@ module.exports.run = async (client, message, args, command) => {
 }
 
 module.exports.help = {
+  name: 'hug',
   aliases: actions,
-  cmdList: true,
 }

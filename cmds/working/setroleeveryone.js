@@ -1,5 +1,5 @@
 const log = require('../../utils/log.js')
-module.exports.run = async (client, message, args) => {
+module.exports.run = async (message, args) => {
   if (!message.member.hasPermission('MANAGE_MESSAGES')) return
   if (!args[0]) return message.reply('Вы не указaли роль')
   let i = 0
@@ -10,12 +10,18 @@ module.exports.run = async (client, message, args) => {
 
   const isBasic = args[1] === 'basic' ? true : false
   const delIfAnother = args[2] === 'delIfAnother' ? true : false
-  const role = message.guild.roles.cache.find(r => r.name.toLowerCase() === nameFromArgs.toLowerCase())
+  const role = message.guild.roles.cache.find(
+    r => r.name.toLowerCase() === nameFromArgs.toLowerCase()
+  )
   if (!role) return message.reply(`Role ${nameFromArgs} is not found`)
 
   if (!isBasic)
     message.guild.members.cache
-      .filter(m => !m.user.bot && !m.roles.cache.find(r => r.name.toLowerCase() === nameFromArgs.toLowerCase()))
+      .filter(
+        m =>
+          !m.user.bot &&
+          !m.roles.cache.find(r => r.name.toLowerCase() === nameFromArgs.toLowerCase())
+      )
       .forEach(async member => {
         member.roles.add(role)
         i++
@@ -40,11 +46,11 @@ module.exports.run = async (client, message, args) => {
         i++
       })
 
-	message.reply(`${i} людям была выдана роль ${role.name}`)
-	log(`${message.author.username}(${message.member}) set role ${role.name} ${i} users`)
+  message.reply(`${i} людям была выдана роль ${role.name}`)
+  log(`${message.author.username}(${message.member}) set role ${role.name} ${i} users`)
   return i
 }
 
 module.exports.help = {
-  name: 'setroleeveryone',
+  name: 'setRoleEveryone',
 }

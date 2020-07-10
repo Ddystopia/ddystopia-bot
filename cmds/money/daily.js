@@ -6,7 +6,7 @@ const formatDuration = require('../../utils/formatDuration')
 const SECONDS_COOLDOWN = 60 * 60 * 12
 const DAILY_UP_COST_MUL = 7
 
-module.exports.run = async (client, message, args) => {
+module.exports.run = async (message, args) => {
   const user = await User.getOrCreateUser(message.author.id)
   if (user.bancrot) return
 
@@ -82,4 +82,5 @@ const calcLevelCost = level => {
 
 module.exports.help = {
   name: 'daily',
+  aliases: ['timely'],
 }

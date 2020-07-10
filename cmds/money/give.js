@@ -1,7 +1,7 @@
 const User = require('../../classes/User')
 const log = require('../../utils/log.js')
 
-module.exports.run = async (client, message, args) => {
+module.exports.run = async (message, args) => {
   if (!args) return
   if (isNaN(+args[0])) return
   if (+args[0] <= 0 || +args[0] > 1e4) return

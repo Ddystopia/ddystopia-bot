@@ -2,7 +2,7 @@ const { MessageEmbed } = require('discord.js')
 const randomInteger = require('../../utils/randomInteger')
 const rainbow = require('../../utils/rainbow.js')
 
-module.exports.run = async (client, message, args) => {
+module.exports.run = async (message, args) => {
   const underShipper = args.filter(
     item => !['и', 'and', '&', '|', '+', '=', '/', '-', '.'].includes(item.toLowerCase())
   )
@@ -28,4 +28,5 @@ module.exports.run = async (client, message, args) => {
 
 module.exports.help = {
   name: 'ship',
+  aliases: ['шип, шипперство'],
 }

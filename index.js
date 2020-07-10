@@ -29,25 +29,26 @@ getDirs('./cmds/').forEach(dir => {
 
     jsFiles.forEach(f => {
       const props = require(`./cmds/${dir}/${f}`)
-      if (props.help.cmdList)
-        for (let name of props.help.aliases)
-          client.commands.set(name.toLowerCase(), props)
-      else client.commands.set(props.help.name.toLowerCase(), props)
+      if (props.help.aliases)
+        props.help.aliases = props.help.aliases.map(alias => alias.toLowerCase())
+      client.commands.set(props.help.name.toLowerCase(), props)
     })
   })
 })
 
 client.on('ready', async () => {
   console.log(`Запустился бот ${client.user.username}`)
-  const channels = client.guilds.cache.get('402105109653487627').channels
+  const guild = client.guilds.cache.get('402105109653487627')
 
-  Leveling.voiceLeveling(channels)
+  Leveling.voiceLeveling(guild.channels)
 
   wordsGameChannels.forEach(async id => {
     const channel =
-      channels.cache.get(id) ||
-      (await channels.fetch(id).catch(() => log(`Can't fetch channel with id ${id}`)))
-    client.commands.get('cities').run(client, { channel, onReady: true }, ['start'])
+      guild.channels.cache.get(id) ||
+      (await guild.channels
+        .fetch(id)
+        .catch(() => log(`Can't fetch channel with id ${id}`)))
+    client.commands.get('cities').run({ channel, onReady: true }, ['start'])
   })
 
   checkTrigger()
@@ -55,13 +56,13 @@ client.on('ready', async () => {
   function checkTrigger() {
     const info = require('./workingInfo.json')
     if (Date.now() - info.lastCalcDate > 24 * 3600 * 1000) {
-      client.commands.get('bank').run(client, true, 'calcPercents')
+      client.commands.get('bank').run({ guild }, 'calcPercents')
       info.lastCalcDate = Date.now()
       readWrite('workingInfo.json', info)
 
       log('Percents have been calked')
     }
-    client.commands.get('bank').run(client, true, 'setBancrots')
+    client.commands.get('bank').run({ guild }, 'setBancrots')
     setTimeout(checkTrigger, 30 * 60 * 1000)
   }
 })
@@ -71,7 +72,7 @@ client.on('message', message => {
 })
 client.on('message', message => {
   if (imageChannels.includes(message.channel.id))
-    client.commands.get('increaseMoneyForImage'.toLowerCase()).run(client, message)
+    client.commands.get('increaseMoneyForImage'.toLowerCase()).run(message)
 })
 
 client.on('message', async message => {
@@ -81,17 +82,15 @@ client.on('message', async message => {
 
   const args = message.content.split(/\s+/g)
   const commandName = args.shift().toLowerCase().slice(prefix.length)
-  const command = client.commands.get(commandName)
+  const command =
+    client.commands.get(commandName) ||
+    client.commands.find(({ help }) => help.aliases && help.aliases.includes(commandName))
 
   if (command) {
     log(
       `User ${message.member.displayName}(${message.member}) use command ${commandName} with args ${args}`
     )
-    command.run(client, message, args, commandName).catch(err => {
-      console.log(new Date())
-      console.error(err)
-      log(err)
-    })
+    command.run(message, args, commandName).catch(log)
   }
 })
 
@@ -99,7 +98,7 @@ client.on('guildMemberAdd', member => {
   const role = member.guild.roles.cache.find(r => r.name === 'Яммик')
   if (!member || !role) return log('Role or member do not exist')
   member.roles.add(role)
-  client.commands.get('greeting').run(client, member)
+  client.commands.get('greeting').run({ member })
 })
 
 client.login(token)
