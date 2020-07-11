@@ -1,7 +1,7 @@
 const { MessageAttachment } = require('discord.js')
 const Canvas = require('canvas')
-const User = require('../../classes/User')
-const Leveling = require('../../classes/Leveling')
+const { User } = require('../../classes/User')
+const { Leveling } = require('../../classes/Leveling')
 
 module.exports.run = async message => {
   message.channel.startTyping()

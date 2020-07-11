@@ -1,6 +1,6 @@
 const { Collection } = require('discord.js')
-const User = require('./User.js')
-const randomInteger = require('../utils/randomInteger')
+const { User } = require('./User.js')
+const { randomInteger } = require('../utils/randomInteger')
 class Leveling {
   static calcXp(level) {
     return 5 * level ** 2 + 50 * level + 100
@@ -49,4 +49,4 @@ Leveling._XP_TIME = 2
 Leveling._XP_MUL = 9
 Leveling._users = new Collection()
 
-module.exports = Leveling
+module.exports.Leveling = Leveling

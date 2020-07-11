@@ -1,18 +1,16 @@
 const { MessageEmbed } = require('discord.js')
-const rainbow = require('../../utils/rainbow')
+const { rainbow } = require('../../utils/rainbow')
 
 module.exports.run = async (message, args) => {
   const embed = new MessageEmbed()
-    .setAuthor(
-      message.member.displayName,
-      message.author.avatarURL(),
-      'https://discord.js.org'
+    .setThumbnail(message.author.avatarURL())
+    .setTitle('Новая идея!')
+    .setDescription(args.join(' '))
+    .setFooter(
+      `${message.member.displayName}#${
+        message.author.discriminator
+      } • ${new Date().toLocaleDateString()}`
     )
-    .setThumbnail(
-      'https://cdn.discordapp.com/attachments/402109825896415232/692820764478668850/yummylogo.jpg'
-    )
-    .setTitle('Idea')
-    .addField('\u200B', args.join(' '))
     .setColor(rainbow())
   message.guild.channels.cache
     .get('703642165108146218')

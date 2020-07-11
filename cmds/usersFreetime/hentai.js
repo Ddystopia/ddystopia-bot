@@ -2,13 +2,12 @@ const { MessageEmbed } = require('discord.js')
 const client = require('nekos.life')
 const { nsfw } = new client()
 const { reddit } = require('../../utils/redditHentai')
-// prettier-ignore
-const generes = ["randomHentaiGif", "pussy", "nekoGif", "neko", "lesbian", "kuni", "cumsluts", "classic", "boobs", "bJ", "anal", "avatar", "yuri", "trap", "tits", "girlSoloGif", "girlSolo", "pussyWankGif", "pussyArt", "kemonomimi", "kitsune", "keta", "holo", "holoEro", "hentai", "futanari", "femdom", "feetGif", "eroFeet", "feet", "ero", "eroKitsune", "eroKemonomimi", "eroNeko", "eroYuri", "cumArts", "blowJob", "spank", "gasm"]
+const { rainbow } = require('../../utils/rainbow')
+const { randomInteger } = require('../../utils/randomInteger')
 
 const MAX_IMAGES_COUNT = 15
-
-const rainbow = require('../../utils/rainbow')
-const randomInteger = require('../../utils/randomInteger')
+// prettier-ignore
+const generes = ["randomHentaiGif", "pussy", "nekoGif", "neko", "lesbian", "kuni", "cumsluts", "classic", "boobs", "bJ", "anal", "avatar", "yuri", "trap", "tits", "girlSoloGif", "girlSolo", "pussyWankGif", "pussyArt", "kemonomimi", "kitsune", "keta", "holo", "holoEro", "hentai", "futanari", "femdom", "feetGif", "eroFeet", "feet", "ero", "eroKitsune", "eroKemonomimi", "eroNeko", "eroYuri", "cumArts", "blowJob", "spank", "gasm"]
 
 const getImageURL = async genreProps => {
   const randImage = () => nsfw[generes[randomInteger(0, generes.length - 1)]]()

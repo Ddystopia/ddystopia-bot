@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js')
-const User = require('../../classes/User')
+const { User } = require('../../classes/User')
 
 module.exports.run = async (message, args) => {
   let userId

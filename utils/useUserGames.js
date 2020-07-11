@@ -1,4 +1,4 @@
-module.exports = (id, games, lastGames, mins = 7) => {
+module.exports.useUserGames = (id, games, lastGames, mins = 7) => {
   if (games.has(id)) games.set(id, games.get(id) + 1)
   else games.set(id, 0)
 

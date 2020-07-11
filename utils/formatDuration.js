@@ -1,4 +1,4 @@
-module.exports = (seconds) => {
+module.exports.formatDuration = seconds => {
   let time = {
       year: 31536000,
       day: 86400,

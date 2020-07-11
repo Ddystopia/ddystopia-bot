@@ -1,8 +1,8 @@
 const { MessageEmbed } = require('discord.js')
-const User = require('../../classes/User')
-const useUserGames = require('../../utils/useUserGames')
-const randomInteger = require('../../utils/randomInteger')
-const rainbow = require('../../utils/rainbow.js')
+const { User } = require('../../classes/User')
+const { useUserGames } = require('../../utils/useUserGames')
+const { randomInteger } = require('../../utils/randomInteger')
+const { rainbow } = require('../../utils/rainbow.js')
 const games = new Map()
 const lastGames = new Map()
 
@@ -25,8 +25,8 @@ module.exports.run = async (message, args) => {
       ? randomInteger(0, 100)
       : randomInteger(0, 99) <= percent
       ? randomInteger(65, 99)
-			: randomInteger(0, 64)
-			
+      : randomInteger(0, 64)
+
   let jackpot = ''
 
   if (user.coins < bet) return message.reply(`Не хватает ${currency}`)

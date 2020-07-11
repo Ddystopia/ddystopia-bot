@@ -1,7 +1,7 @@
 const { MessageEmbed } = require('discord.js')
-const User = require('../../classes/User.js')
-const rainbow = require('../../utils/rainbow.js')
-const randomInteger = require('../../utils/randomInteger.js')
+const { User } = require('../../classes/User.js')
+const { rainbow } = require('../../utils/rainbow.js')
+const { randomInteger } = require('../../utils/randomInteger.js')
 const games = new Map()
 class TicTacToe {
   constructor(firstPlayer, secondPlayer, bet) {

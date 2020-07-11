@@ -1,7 +1,7 @@
 const { MessageEmbed } = require('discord.js')
-const User = require('../../classes/User')
-const rainbow = require('../../utils/rainbow')
-const formatDuration = require('../../utils/formatDuration')
+const { User } = require('../../classes/User')
+const { rainbow } = require('../../utils/rainbow')
+const { formatDuration } = require('../../utils/formatDuration')
 
 const SECONDS_COOLDOWN = 60 * 60 * 12
 const DAILY_UP_COST_MUL = 7

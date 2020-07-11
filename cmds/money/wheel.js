@@ -1,8 +1,8 @@
 const { MessageEmbed } = require('discord.js')
-const User = require('../../classes/User')
-const randomInteger = require('../../utils/randomInteger.js')
-const useUserGames = require('../../utils/useUserGames')
-const rainbow = require('../../utils/rainbow.js')
+const { User } = require('../../classes/User')
+const { randomInteger } = require('../../utils/randomInteger.js')
+const { useUserGames } = require('../../utils/useUserGames')
+const { rainbow } = require('../../utils/rainbow.js')
 const games = new Map()
 const lastGames = new Map()
 

@@ -1,11 +1,12 @@
-const User = require('../../classes/User')
-const useUserGames = require('../../utils/useUserGames')
-let COST = 30
+const { User } = require('../../classes/User')
+const { useUserGames } = require('../../utils/useUserGames')
+const COST_FOR_IMAGE = 30
+const MINS_COOLDOWN = 240
 const games = new Map()
 const lastGames = new Map()
 
-module.exports.run = async (message) => {
-  const userGames = useUserGames(message.author.id, games, lastGames, 240)
+module.exports.run = async message => {
+  const userGames = useUserGames(message.author.id, games, lastGames, MINS_COOLDOWN)
   if (userGames > 40) return
 
   const attachmentsNum = message.attachments.size
@@ -14,7 +15,7 @@ module.exports.run = async (message) => {
   const user = await User.getOrCreateUser(message.author.id)
   if (user.bancrot) return
 
-  user.coins += attachmentsNum * COST
+  user.coins += attachmentsNum * COST_FOR_IMAGE
   user.save()
 }
 

@@ -1,16 +1,16 @@
-const fs = require('fs')
-const path = require('path')
+const { writeFileSync } = require('fs')
+const { join: joinPath } = require('path')
 
 const write = (path, file) =>
-  fs.writeFileSync(
+  writeFileSync(
     path,
     JSON.stringify(file).replace(/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3})Z/, '$1'),
     err => err && console.error(err)
   )
 
-module.exports = (filePathProp, file, initial) => {
+module.exports.readWrite = (filePathProp, file, initial) => {
   let response = null
-  const filePath = path.join(__dirname, '..', filePathProp)
+  const filePath = joinPath(__dirname, '..', filePathProp)
   try {
     response = require(filePath)
     if (file) write(filePath, file)

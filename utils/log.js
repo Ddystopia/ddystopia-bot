@@ -1,8 +1,8 @@
 const { appendFile } = require('fs')
-const path = require('path')
-module.exports = log => {
+const { join: joinPath } = require('path')
+module.exports.log = log => {
   appendFile(
-    path.join(__dirname, '..', 'logs.log'),
+    joinPath(__dirname, '..', 'logs.log'),
     `${log} at ${new Date().toJSON()} \n`,
     err => err && console.error(err)
   )

@@ -1,10 +1,11 @@
-const User = require('../../classes/User')
-const randomInteger = require('../../utils/randomInteger')
-const formatDuration = require('../../utils/formatDuration')
-const useUserGames = require('../../utils/useUserGames')
+const { User } = require('../../classes/User')
+const { randomInteger } = require('../../utils/randomInteger')
+const { formatDuration } = require('../../utils/formatDuration')
+const { useUserGames } = require('../../utils/useUserGames')
 const sqlite3 = require('sqlite3').verbose()
 const games = new Map()
 const lastGames = new Map()
+
 const SECONDS_COOLDOWN = 60 * 60 * 24
 const MAX_DAILY_LOOT_COST = 5000
 

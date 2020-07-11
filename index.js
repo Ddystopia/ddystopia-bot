@@ -1,8 +1,8 @@
 const { Client, Collection } = require('discord.js')
-const Leveling = require('./classes/Leveling.js')
+const { Leveling } =require('./classes/Leveling.js')
 const client = new Client()
 const { readdirSync, statSync } = require('fs')
-const log = require('./utils/log.js')
+const { log } = require('./utils/log.js')
 
 const nonGrata = ['464804290876145665', '266259546236911618']
 const imageChannels = ['402109720833425408', '402114219438374913']

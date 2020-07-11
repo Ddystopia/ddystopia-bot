@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js')
-const randomInteger = require('../../utils/randomInteger')
+const { randomInteger } = require('../../utils/randomInteger')
 const answers = [
   'Бесспорно',
   'Предрешено',

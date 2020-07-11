@@ -1,6 +1,6 @@
 const { MessageEmbed } = require('discord.js')
-const rainbow = require('../../utils/rainbow.js')
-const randomInteger = require('../../utils/randomInteger.js')
+const { rainbow } = require('../../utils/rainbow.js')
+const { randomInteger } = require('../../utils/randomInteger.js')
 
 const helloGifs = [
   'https://i.ibb.co/mCsGdhF/209127.gif',
@@ -20,8 +20,6 @@ const helloGifs = [
 let gifsCounter = randomInteger(1, 5)
 
 module.exports.run = async ({ member }) => {
-  if (gifsCounter >= helloGifs.length) gifsCounter = 0
-
   const channel = member.guild.channels.cache.find(ch => ch.id == '692796617656369292')
 
   const embed = new MessageEmbed()
@@ -47,7 +45,7 @@ module.exports.run = async ({ member }) => {
 		Для тех, кто любит игры, создан отдельный раздел "игровая", в котором вы найдете голосовые каналы с ограниченным числом вступающих, чтобы вас не отвлекали посторонние.
 		Надеемся, что вы хорошо проведёте время!`
     )
-    .setImage(helloGifs[gifsCounter++])
+    .setImage(helloGifs[++gifsCounter % helloGifs.length])
     .setTimestamp()
 
   channel.send(`${member}`, embed)

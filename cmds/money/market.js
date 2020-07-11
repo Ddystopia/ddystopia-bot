@@ -1,8 +1,8 @@
 const { MessageEmbed } = require('discord.js')
-const User = require('../../classes/User')
+const { User } = require('../../classes/User')
 const { onlyEmoji } = require('emoji-aware')
-const slider = require('../../utils/slider')
-const log = require('../../utils/log.js')
+const { slider } = require('../../utils/slider')
+const { log } = require('../../utils/log.js')
 const sqlite3 = require('sqlite3').verbose()
 const MAX_FIELDS = 25
 

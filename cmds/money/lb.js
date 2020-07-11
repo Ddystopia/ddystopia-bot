@@ -1,8 +1,8 @@
 const { MessageEmbed } = require('discord.js')
-const User = require('../../classes/User')
+const { User } = require('../../classes/User')
 const { BankMember } = require('../../classes/BankMember')
-const slider = require('../../utils/slider')
-const rainbow = require('../../utils/rainbow')
+const { slider } = require('../../utils/slider')
+const { rainbow } = require('../../utils/rainbow')
 const sqlite3 = require('sqlite3').verbose()
 const MAX_ROWS = 10
 

@@ -1,8 +1,8 @@
 const { MessageEmbed } = require('discord.js')
-const User = require('../../classes/User')
-const useUserGames = require('../../utils/useUserGames')
-const randomInteger = require('../../utils/randomInteger.js')
-const rainbow = require('../../utils/rainbow.js')
+const { User } = require('../../classes/User')
+const { useUserGames } = require('../../utils/useUserGames')
+const { randomInteger } = require('../../utils/randomInteger.js')
+const { rainbow } = require('../../utils/rainbow.js')
 
 const sides = ['h', 't']
 const sidesImages = {
@@ -21,8 +21,8 @@ module.exports.run = async (message, args) => {
 
   const userGames = useUserGames(message.author.id, games, lastGames)
 
-	const user = await User.getOrCreateUser(message.author.id)
-	
+  const user = await User.getOrCreateUser(message.author.id)
+
   const bet = args[0] == 'all' ? user.coins : +args[0]
   const bettedSide = args[1]
   let percent = 50 - (userGames * 1.2 - 12)

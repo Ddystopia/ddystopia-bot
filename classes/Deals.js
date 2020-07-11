@@ -1,6 +1,6 @@
-const User = require('./User')
+const { User } = require('./User')
 const sqlite3 = require('sqlite3').verbose()
-const log = require('../utils/log')
+const { log } = require('../utils/log')
 const latestCredits = new Map()
 module.exports.latestCredits = latestCredits
 

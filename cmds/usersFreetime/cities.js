@@ -1,4 +1,4 @@
-const readWrite = require('../../utils/readWriteFile')
+const { readWrite } = require('../../utils/readWriteFile')
 let words = readWrite('words.json', null, [])
 
 module.exports.run = async (message, args) => {

@@ -1,5 +1,5 @@
 const redditConfig = require('../redditConfig.json')
-const randomInteger = require('./randomInteger')
+const { randomInteger } = require('./randomInteger')
 const { RandomReddit } = require('random-reddit')
 const generesControl = {
   getGenre: genre => {

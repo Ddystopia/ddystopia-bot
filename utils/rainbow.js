@@ -1,6 +1,6 @@
 const COLOR_SIZE = 60
-const COLOR_STEP = 4
-const rainbow = new Array(COLOR_SIZE)
+const COLOR_STEP = 3
+const { rainbow } = new Array(COLOR_SIZE)
 
 for (let i = 0, sinI = 0; i < COLOR_SIZE; i++, sinI += COLOR_STEP) {
   const red = sin_to_hex(sinI, (0 * Math.PI * 2) / 3) // 0 deg
@@ -10,7 +10,7 @@ for (let i = 0, sinI = 0; i < COLOR_SIZE; i++, sinI += COLOR_STEP) {
   rainbow[i] = '#' + red + green + blue
 }
 
-module.exports = (() => {
+module.exports.rainbow = (() => {
   let counter = 0
   return () => {
     const color = rainbow[counter]

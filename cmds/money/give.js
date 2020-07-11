@@ -1,5 +1,5 @@
-const User = require('../../classes/User')
-const log = require('../../utils/log.js')
+const { User } = require('../../classes/User')
+const { log } = require('../../utils/log.js')
 
 module.exports.run = async (message, args) => {
   if (!args) return

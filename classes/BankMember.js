@@ -1,4 +1,4 @@
-const User = require('./User')
+const { User } = require('./User')
 const sqlite3 = require('sqlite3').verbose()
 const { Credit, Deposit, latestCredits } = require('./Deals')
 class BankMember {

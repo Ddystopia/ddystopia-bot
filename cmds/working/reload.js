@@ -1,5 +1,5 @@
 const { readdirSync } = require('fs')
-const path = require('path')
+const { join: joinPath } = require('path')
 
 module.exports.run = async (message, args) => {
   if (!message.member.hasPermission('MANAGE_MESSAGES')) return
@@ -19,7 +19,7 @@ module.exports.run = async (message, args) => {
       `There is no command with name or alias \`${commandName}\`, ${message.author}!`
     )
 
-  const dir = readdirSync(path.join(__dirname, '../')).find(dir => {
+  const dir = readdirSync(joinPath(__dirname, '../')).find(dir => {
     try {
       require.cache[require.resolve(`../${dir}/${command.help.name}.js`)]
       return true
@@ -38,7 +38,7 @@ module.exports.run = async (message, args) => {
     console.error(error)
     message.channel.send(
       `There was an error while reloading a command \`${command.help.name}\`:
-			\`${error.message}\``
+      \`${error.message}\``
     )
   }
 }

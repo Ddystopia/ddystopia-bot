@@ -2,7 +2,7 @@ const { MessageEmbed } = require('discord.js')
 const { BankMember } = require('../../classes/BankMember')
 const { Credit } = require('../../classes/Deals')
 const sqlite3 = require('sqlite3').verbose()
-const log = require('../../utils/log.js')
+const { log } = require('../../utils/log.js')
 
 class ModerationCommands {
   static async getBankProfiles() {

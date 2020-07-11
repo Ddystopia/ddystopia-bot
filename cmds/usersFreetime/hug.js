@@ -4,7 +4,7 @@ const { sfw } = new client()
 // prettier-ignore
 const actions = ['smug','baka','tickle','slap','poke','pat','neko','nekoGif','meow','lizard','kiss','hug','foxGirl','feed','cuddle','kemonomimi','holo','woof','wallpaper','goose','gecg','avatar','waifu']
 
-const rainbow = require('../../utils/rainbow')
+const { rainbow } = require('../../utils/rainbow')
 
 function getAction(actionProps, actions) {
   const action = actions.find(el => el.toLowerCase() === actionProps.toLowerCase())
