@@ -18,7 +18,7 @@ module.exports.run = async (message, args) => {
     channel.send({
       embed: embedObj,
     })
-    log(`${message.author.username}(${message.member}) send embed`)
+    log(`${message.author.tag} send embed`)
   } catch (err) {
     return message.reply(`${err.name}: ${err.message}`)
   }

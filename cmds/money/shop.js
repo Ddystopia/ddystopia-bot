@@ -48,7 +48,7 @@ class RolesBoard {
     RolesBoard.roles[role.id] = +args[args.length - 1]
 
     log(
-      `${message.author.username}(${message.member}) add role to shop ${role.name}(${role})`
+      `${message.author.tag} add role to shop ${role.name}(${role})`
     )
     RolesBoard.shopList(message)
     const db = new sqlite3.Database('./data.db')
@@ -79,7 +79,7 @@ class RolesBoard {
     db.close()
 
     log(
-      `${message.author.username}(${message.member}) remove role from shop ${role.name}(${role})`
+      `${message.author.tag} remove role from shop ${role.name}(${role})`
     )
     RolesBoard.shopList(message)
   }
@@ -101,7 +101,7 @@ class RolesBoard {
     user.coins -= cost
     message.member.roles.add(role)
     message.react('✅')
-    log(`${message.author.username}(${message.member}) buy role ${role.name}(${role})`)
+    log(`${message.author.tag} buy role ${role.name}(${role})`)
     user.save()
   }
   static async sell(message, args) {
@@ -122,7 +122,7 @@ class RolesBoard {
     user.coins += cost * 0.9
     message.member.roles.remove(role)
 
-    log(`${message.author.username}(${message.member}) sell role ${role.name}(${role})`)
+    log(`${message.author.tag} sell role ${role.name}(${role})`)
     message.reply(`Успех, вы получили ${cost * 0.9} ${currency}`)
     user.save()
   }

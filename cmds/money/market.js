@@ -47,7 +47,7 @@ class LootBoard {
     })
     db.close()
 
-    log(`${message.author.username}(${message.member}) add loot ${loot}`)
+    log(`${message.author.tag} add loot ${loot}`)
     LootBoard.shopList(message, loot)
   }
   static remove(message, args, loot) {
@@ -58,7 +58,7 @@ class LootBoard {
     db.run(`DELETE FROM loot WHERE loot='${args[1]}'`)
     db.close()
 
-    log(`${message.author.username}(${message.member}) remove loot ${loot}`)
+    log(`${message.author.tag} remove loot ${loot}`)
     LootBoard.shopList(message, loot)
   }
   static async buy(message, args, loot) {
@@ -73,7 +73,7 @@ class LootBoard {
 
     user.addLoot(lootArray)
 
-    log(`${message.author.username}(${message.member}) buy loot ${loot}`)
+    log(`${message.author.tag} buy loot ${loot}`)
     message.react('✅')
 
     user.save()
@@ -93,7 +93,7 @@ class LootBoard {
     user.coins += cost * 0.9
     user.removeLoot(lootArray)
 
-    log(`${message.author.username}(${message.member}) sell loot ${loot}`)
+    log(`${message.author.tag} sell loot ${loot}`)
     message.reply(`Успех, вы получили ${cost * 0.9} ${currency}`)
     user.save()
   }

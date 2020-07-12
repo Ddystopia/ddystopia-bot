@@ -1,5 +1,5 @@
 const { Client, Collection } = require('discord.js')
-const { Leveling } =require('./classes/Leveling.js')
+const { Leveling } = require('./classes/Leveling.js')
 const client = new Client()
 const { readdirSync, statSync } = require('fs')
 const { log } = require('./utils/log.js')
@@ -75,9 +75,7 @@ client.on('message', async message => {
     client.commands.find(({ help }) => help.aliases && help.aliases.includes(commandName))
 
   if (command) {
-    log(
-      `User ${message.member.displayName}(${message.member}) use command [${commandName}] with args [${args}]`
-    )
+    log(`User ${message.author.tag} use command [${commandName}] with args [${args}]`)
     command.run(message, args, commandName).catch(log)
   }
 })

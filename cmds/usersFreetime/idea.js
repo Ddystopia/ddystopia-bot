@@ -6,11 +6,7 @@ module.exports.run = async (message, args) => {
     .setThumbnail(message.author.avatarURL())
     .setTitle('Новая идея!')
     .setDescription(args.join(' '))
-    .setFooter(
-      `${message.member.displayName}#${
-        message.author.discriminator
-      } • ${new Date().toLocaleDateString()}`
-    )
+    .setFooter(`${message.author.tag} • ${new Date().toLocaleDateString()}`)
     .setColor(rainbow())
   message.guild.channels.cache
     .get('703642165108146218')

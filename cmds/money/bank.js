@@ -75,23 +75,17 @@ class ModerationCommands {
     switch (args[1]) {
       case 'credit':
         bankMember.credit = null
-        log(
-          `${message.author.username}(${message.member}) remove credit ${user.username}`
-        )
+        log(`${message.author.tag} remove credit ${user.username}`)
         break
       case 'deposit':
         bankMember.deposit = null
-        log(
-          `${message.author.username}(${message.member}) remove deposit ${user.username}`
-        )
+        log(`${message.author.tag} remove deposit ${user.username}`)
         break
       case 'bancrot': {
         bankMember.bancrot = null
         const role = message.guild.roles.cache.find(r => r.name === 'Банкрот')
         message.guild.members.cache.get(user.id).roles.remove(role)
-        log(
-          `${message.author.username}(${message.member}) remove bancrot ${user.username}`
-        )
+        log(`${message.author.tag} remove bancrot ${user.username}`)
         break
       }
       default:

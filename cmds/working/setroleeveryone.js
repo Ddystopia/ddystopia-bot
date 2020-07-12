@@ -47,7 +47,7 @@ module.exports.run = async (message, args) => {
       })
 
   message.reply(`${i} людям была выдана роль ${role.name}`)
-  log(`${message.author.username}(${message.member}) set role ${role.name} ${i} users`)
+  log(`${message.author.tag} set role ${role.name} ${i} users`)
   return i
 }
 

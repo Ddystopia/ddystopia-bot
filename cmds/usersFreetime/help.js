@@ -171,8 +171,19 @@ http://yotx.ru/#!1/3_h/ubW/ugfSOG8L@2f7R/sH@w7yel1vY31tZPd9f3ti/2D/ZJNOwGjPG4dcp
 12. >level [level] [@упоминание] - установить уровень пользователю
 		`
   )
-  // prettier-ignore
-  const embeds = [embedIntroduction, embedProfile, embedGames, embedCasino, embedBank, embedPercents, embedShop, embedShop2, embedActions, embedHentai, embedModeration]
+  const embeds = [
+    embedIntroduction,
+    embedProfile,
+    embedGames,
+    embedCasino,
+    embedBank,
+    embedPercents,
+    embedShop,
+    embedShop2,
+    embedActions,
+    embedHentai,
+    embedModeration,
+  ]
   slider(embeds, message, args[0])
 }
 
