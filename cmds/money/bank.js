@@ -29,21 +29,21 @@ class ModerationCommands {
         element.bancrot && element.bancrot - Date.now(),
       ]
 
-      if (timeToCredit <= 60 * 60 * 1000) {
+      if (timeToCredit && timeToCredit <= 60 * 60 * 1000) {
         setTimeout(() => {
           element.credit.badUser(element, guild)
           element.save()
         }, Math.max(timeToCredit, 0))
       }
 
-      if (timeToDeposit <= 60 * 60 * 1000) {
+      if (timeToDeposit && timeToDeposit <= 60 * 60 * 1000) {
         setTimeout(() => {
           element.deposit.payDeposits(element)
           element.save()
         }, Math.max(timeToDeposit, 0))
       }
 
-      if (timeToBancrot <= 60 * 60 * 1000) {
+      if (timeToBancrot && timeToBancrot <= 60 * 60 * 1000) {
         setTimeout(() => {
           element.bancrot = null
           member.roles.remove(bancrotRole)
