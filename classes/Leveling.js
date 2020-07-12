@@ -7,18 +7,18 @@ class Leveling {
     return 5 * level ** 2 + 50 * level + 100
   }
 
-  static _roleLeveling(member) {
-    let roleIndex =
-      Object.keys(levelingRoles).findIndex(level => level > member.level) - 1
-    if (roleIndex === -2) roleIndex = Object.keys(levelingRoles).length - 1
-    if (roleIndex < 0) return
+  static _roleLeveling(member, user) {
+    const levels = Object.keys(levelingRoles)
+    const ids = Object.values(levelingRoles)
+    let roleIndex = levels.findIndex(level => level > user.level) - 1
+    if (roleIndex === -2) roleIndex = levels.length - 1
 
-    Object.values(levelingRoles)
+    ids
       .filter(id => member.roles.cache.has(id))
-      .filter(id => id !== Object.keys(levelingRoles)[roleIndex])
+      .filter(id => id !== ids[roleIndex])
       .forEach(id => member.roles.remove(id))
 
-    member.roles.add(Object.values(levelingRoles)[roleIndex], 'New level')
+    if (roleIndex >= 0) member.roles.add(ids[roleIndex], 'New level')
   }
 
   static async _doLeveling(newExp, member) {
@@ -31,7 +31,7 @@ class Leveling {
       user.level++
       xp = Leveling.calcXp(user.level) // xp for up
     }
-    // this._roleLeveling(member)
+    this._roleLeveling(member, user)
     user.save()
   }
 
