@@ -4,12 +4,14 @@ const client = new Client()
 const { readdirSync, statSync } = require('fs')
 const { log } = require('./utils/log.js')
 
-const nonGrata = ['464804290876145665', '266259546236911618']
-const imageChannels = ['402109720833425408', '402114219438374913']
-const bannedChannels = ['649336430350303243', '501430596971790346', '402105109653487629']
-const wordsGameChannels = ['714961392427466763']
-
-const { token, prefix } = require('./config.json')
+const {
+  token,
+  prefix,
+  nonGrata,
+  imageChannels,
+  bannedChannels,
+  wordsGameChannels,
+} = require('./config.json')
 global.currency = '🌱' //если язык русский, то в родительском падеже(кого? чего?)
 
 client.commands = new Collection()
@@ -57,7 +59,7 @@ client.on('ready', async () => {
 })
 
 client.on('message', message => {
-  Leveling.textLeveling(message.author.id)
+  Leveling.textLeveling(message.member)
 })
 client.on('message', message => {
   if (imageChannels.includes(message.channel.id))

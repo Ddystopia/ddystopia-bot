@@ -16,12 +16,12 @@ class ModerationCommands {
   }
   static async closeDeals(guild) {
     const profiles = await ModerationCommands.getBankProfiles()
-    for (const userId in profiles) {
-      const member = guild.members.cache.get(`${userId}`)
+    for (const elemPromise of profiles) {
+      const element = await elemPromise
+      const member = guild.members.cache.get(`${element.id}`)
       if (!member) continue
 
       const bancrotRole = member.guild.roles.cache.find(r => r.name === 'Банкрот')
-      const element = await profiles[userId]
 
       const [timeToCredit, timeToDeposit, timeToBancrot] = [
         element.credit && element.credit.deadline - Date.now(),
@@ -57,8 +57,8 @@ class ModerationCommands {
 
   static async calcPercents() {
     const profiles = await ModerationCommands.getBankProfiles()
-    for (const userId in profiles) {
-      const element = await profiles[userId]
+    for (const elemPromise of profiles) {
+      const element = await elemPromise
       if (element.credit)
         element.credit.sum += (element.credit.sum * element.credit.percent) / 100
       if (element.deposit)

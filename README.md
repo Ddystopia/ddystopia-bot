@@ -7,7 +7,15 @@
 ```json
 {
   "token": "token",
-  "prefix": "prefix"
+  "prefix": "prefix",
+  "bannedChannels": ["id", "id"],// Channels, where bot not listening commands
+  "imageChannels": ["id", "id"],// Channels, where bot give money for images
+  "nonGrata": ["id", "id"],// Users ignored by the bot
+  "wordsGameChannels": ["id", "id"],// Channels to play in words
+  "levelingRoles": { // Roles by level
+		"level":"roleId",
+		"level2":"roleId",
+	}
 }
 ```
 
