@@ -1,13 +1,28 @@
 const { Collection } = require('discord.js')
 const { User } = require('./User.js')
 const { randomInteger } = require('../utils/randomInteger')
+const { levelingRoles } = require('../config.json')
 class Leveling {
   static calcXp(level) {
     return 5 * level ** 2 + 50 * level + 100
   }
 
-  static async _calcLeveling(newExp, id) {
-    const user = await User.getOrCreateUser(id)
+  static _roleLeveling(member) {
+    let roleIndex =
+      Object.keys(levelingRoles).findIndex(level => level > member.level) - 1
+    if (roleIndex === -2) roleIndex = Object.keys(levelingRoles).length - 1
+    if (roleIndex < 0) return
+
+    Object.values(levelingRoles)
+      .filter(id => member.roles.cache.has(id))
+      .filter(id => id !== Object.keys(levelingRoles)[roleIndex])
+      .forEach(id => member.roles.remove(id))
+
+    member.roles.add(Object.values(levelingRoles)[roleIndex], 'New level')
+  }
+
+  static async _doLeveling(newExp, member) {
+    const user = await User.getOrCreateUser(member.id)
     if (!user.xp) user.xp = 0
     user.xp += randomInteger(newExp, newExp + 7 * Leveling._XP_TIME)
     let xp = Leveling.calcXp(user.level) // xp for up
@@ -16,17 +31,18 @@ class Leveling {
       user.level++
       xp = Leveling.calcXp(user.level) // xp for up
     }
+    // this._roleLeveling(member)
     user.save()
   }
 
-  static textLeveling(id) {
-    if (!Leveling._users.has(id)) Leveling._users.set(id, Date.now())
-    let userTime = (Date.now() - Leveling._users.get(id)) / 1000 / 60 // To minutes
+  static textLeveling(member) {
+    if (!Leveling._users.has(member.id)) Leveling._users.set(member.id, Date.now())
+    let userTime = (Date.now() - Leveling._users.get(member.id)) / 1000 / 60 // To minutes
     if (userTime < Leveling._XP_TIME) return
 
     const newExp = Math.floor(Leveling._XP_TIME * Leveling._XP_MUL)
-    Leveling._calcLeveling(newExp, id)
-    Leveling._users.set(id, Date.now())
+    Leveling._doLeveling(newExp, member)
+    Leveling._users.set(member.id, Date.now())
   }
 
   static voiceLeveling(channels) {
@@ -39,7 +55,7 @@ class Leveling {
           )
           members.each(member => {
             const newExp = 2 * (members.size - 1)
-            Leveling._calcLeveling(newExp, member.id)
+            Leveling._doLeveling(newExp, member)
           })
         })
     }, 60 * 1000)
