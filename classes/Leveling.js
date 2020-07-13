@@ -1,7 +1,7 @@
 const { Collection } = require('discord.js')
 const { User } = require('./User.js')
-const { randomInteger } = require('../utils/randomInteger')
 const { RolesLeveling } = require('./RolesLeveling')
+const { randomInteger } = require('../utils/randomInteger')
 class Leveling {
   static calcXp(level) {
     return 5 * level ** 2 + 50 * level + 100

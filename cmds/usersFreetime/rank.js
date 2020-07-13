@@ -35,23 +35,12 @@ module.exports.run = async message => {
 
   ctx.beginPath()
   ctx.arc(125, 125, 100, 0, Math.PI * 2, true)
-  // ctx.moveTo(305, 185)
-  // ctx.arc(305, 185, 25, Math.PI / 2, Math.PI * 1.5)
-  // ctx.moveTo(755, 185)
-  // ctx.arc(755, 185, 25, Math.PI / 2, Math.PI * 1.5, true)
-  // ctx.rect(305, 160, 450, 50)
-
   ctx.rect(280 - 2, 160 - 2, 500 + 4, 50 + 4)
   ctx.closePath()
   ctx.clip()
 
   const avatar = await Canvas.loadImage(member.user.displayAvatarURL({ format: 'jpg' }))
   ctx.drawImage(avatar, 25, 25, 200, 200)
-
-  // ctx.fillStyle = '#74037b'
-  // ctx.fillRect(280, 160, 500, 50)
-  // ctx.fillStyle = '#843ddb'
-  // ctx.fillRect(278, 160, 500 * progress, 50)
 
   //container
   ctx.fillStyle = '#ffffff'
