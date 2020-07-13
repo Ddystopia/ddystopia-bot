@@ -13,7 +13,7 @@ module.exports.run = async message => {
   const ctx = canvas.getContext('2d')
 
   const background = await Canvas.loadImage(
-    'https://thumbor.forbes.com/thumbor/960x0/https%3A%2F%2Fspecials-images.forbesimg.com%2Fdam%2Fimageserve%2F1018473934%2F960x0.jpg%3Ffit%3Dscale'
+    'https://i.ibb.co/NpYHgk6/1580410612-24-p-foni-perekhodami-tsvetov-61.jpg'
   )
   ctx.drawImage(background, 0, 0, canvas.width, canvas.height)
 
@@ -54,7 +54,7 @@ module.exports.run = async message => {
   // ctx.fillRect(278, 160, 500 * progress, 50)
 
   //container
-  ctx.fillStyle = '#74037b'
+  ctx.fillStyle = '#ffffff'
   ctx.beginPath()
   ctx.moveTo(305, 185)
   ctx.arc(305, 185, 25, Math.PI / 2, Math.PI * 1.5)
@@ -71,7 +71,7 @@ module.exports.run = async message => {
   //progressBar
   const startDot = 303
   const width = startDot + 450 * progress
-  ctx.fillStyle = '#843ddb'
+  ctx.fillStyle = '#e6a5d9'
   ctx.beginPath()
   ctx.moveTo(startDot, 185)
   ctx.arc(startDot, 185, 25, Math.PI / 2, Math.PI * 1.5)
