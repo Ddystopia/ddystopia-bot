@@ -59,10 +59,10 @@ client.on('ready', async () => {
 })
 
 client.on('message', message => {
-  Leveling.textLeveling(message.member)
+  !message.author.bot && Leveling.textLeveling(message.member)
 })
 client.on('message', message => {
-  if (imageChannels.includes(message.channel.id))
+  if (imageChannels.includes(message.channel.id) && !message.author.bot)
     client.commands.get('increaseMoneyForImage'.toLowerCase()).run(message)
 })
 client.on('message', async message => {

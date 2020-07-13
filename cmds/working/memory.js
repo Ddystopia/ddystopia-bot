@@ -8,7 +8,7 @@ module.exports.run = async message => {
     .setTitle('Memory Usage')
     .setTimestamp()
   for (const item in memoryUsage)
-    embed.addField(item, `${memoryUsage[item] / 1024 / 1024}mb`)
+    embed.addField(item, `${(memoryUsage[item] / 1024 / 1024).toFixed(3)}mb`)
   message.reply(embed)
 }
 

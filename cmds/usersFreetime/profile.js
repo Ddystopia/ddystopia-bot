@@ -51,6 +51,7 @@ module.exports.run = async (message, args, command) => {
       }
       break
 
+    case 'др':
     case 'birthday': {
       if (member.user.id !== message.author.id) return
       if (!args[0]) return
@@ -63,6 +64,7 @@ module.exports.run = async (message, args, command) => {
       break
     }
 
+    case 'осебе':
     case 'about': {
       const ownProfile = await User.getOrCreateUser(message.author.id)
       ownProfile.about = args.slice(0, 100).join(' ').replace(/\\n/g, '\n')
@@ -71,6 +73,7 @@ module.exports.run = async (message, args, command) => {
       break
     }
 
+    case 'реп':
     case 'rep': {
       if (member.user.id === message.author.id) return
       const time = repClipboard.get(`${message.author.id}->${member.user.id}`)
@@ -131,5 +134,16 @@ module.exports.run = async (message, args, command) => {
 
 module.exports.help = {
   name: 'profile',
-  aliases: ['юзер', 'профиль', 'birthday', 'about', 'marry', 'tear', 'rep'],
+  aliases: [
+    'юзер',
+    'профиль',
+    'birthday',
+    'about',
+    'marry',
+    'tear',
+    'rep',
+    'др',
+    'осебе',
+    'реп',
+  ],
 }
