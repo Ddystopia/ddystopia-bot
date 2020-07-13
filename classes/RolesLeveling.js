@@ -2,11 +2,8 @@ const sqlite3 = require('sqlite3').verbose()
 
 class RolesLeveling {
   static async roleControls(member, user) {
-    const levelingRoles = await this.getLevelingRoles()
-    const levels = Object.values(levelingRoles)
-    const ids = Object.keys(levelingRoles)
-    const roleIndex = levels.sort((a, b) => b - a).findIndex(level => level <= user.level)
-
+    const [ids, levels] = await this.getLevelingRoles()
+    const roleIndex = levels.findIndex(level => level <= user.level)
     ids
       .filter(id => member.roles.cache.has(id))
       .filter(id => id !== ids[roleIndex])
@@ -23,9 +20,15 @@ class RolesLeveling {
         err => err && console.error(err)
       )
       response = new Promise(resolve =>
-        db.all('SELECT * FROM levelingRoles', (err, rows) =>
-          resolve(Object.fromEntries(rows.map(({ id, level }) => [id, level])))
-        )
+        db.all('SELECT * FROM levelingRoles ORDER BY level DESC', (err, rows) => {
+          const ids = []
+          const levels = []
+          rows.forEach(row => {
+            ids.push(row.id)
+            levels.push(row.level)
+          })
+          resolve([ids, levels])
+        })
       )
     })
     db.close()
