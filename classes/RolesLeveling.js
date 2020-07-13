@@ -5,7 +5,8 @@ class RolesLeveling {
     const levelingRoles = await this.getLevelingRoles()
     const levels = Object.values(levelingRoles)
     const ids = Object.keys(levelingRoles)
-    const roleIndex = levels.findIndex(level => +level <= +user.level)
+    let roleIndex = levels.findIndex(level => level > user.level) - 1
+    if (roleIndex === -2) roleIndex = levels.length - 1
 
     ids
       .filter(id => member.roles.cache.has(id))
