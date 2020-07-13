@@ -5,15 +5,14 @@ class RolesLeveling {
     const levelingRoles = await this.getLevelingRoles()
     const levels = Object.values(levelingRoles)
     const ids = Object.keys(levelingRoles)
-    let roleIndex = levels.findIndex(level => level > user.level) - 1
-    if (roleIndex === -2) roleIndex = levels.length - 1
+    const roleIndex = levels.sort((a, b) => b - a).findIndex(level => level <= user.level)
 
     ids
       .filter(id => member.roles.cache.has(id))
       .filter(id => id !== ids[roleIndex])
       .forEach(id => member.roles.remove(id))
 
-		if (roleIndex >= 0) member.roles.add(ids[roleIndex], 'New level')
+    if (roleIndex >= 0) member.roles.add(ids[roleIndex], 'New level')
   }
   static async getLevelingRoles() {
     const db = new sqlite3.Database('./data.db')
