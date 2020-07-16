@@ -11,9 +11,10 @@ module.exports.slider = async (embeds, message, start) => {
   const filter = (reaction, user) => {
     return ['⬅', '✖', '➡'].includes(reaction.emoji.name) && user.id === message.author.id
   }
+  const collector = msg.createReactionCollector(filter, { dispose: true, time: 5 * 60 * 1000 })
   const step = reaction => {
     let embed
-    if (reaction.emoji.name === '✖') msg.delete({ time: 0 }).catch(() => {})
+    if (reaction.emoji.name === '✖') collector.stop()
     else if (reaction.emoji.name === '⬅') embed = i > 0 ? embeds[--i] : null
     else if (reaction.emoji.name === '➡')
       embed = i < embeds.length - 1 ? embeds[++i] : null
@@ -22,7 +23,6 @@ module.exports.slider = async (embeds, message, start) => {
     msg.edit(embed.setDescription(`${i + 1} / ${embeds.length}`))
   }
 
-  const collector = msg.createReactionCollector(filter, { dispose: true })
   collector.on('collect', step)
   collector.on('remove', step)
   collector.on('end', () => {
