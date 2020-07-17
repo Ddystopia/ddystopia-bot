@@ -143,9 +143,7 @@ module.exports.run = async (message, args) => {
       const embed = new MessageEmbed()
         .setColor('#84ed39')
         .setTitle('Банковский профиль')
-        .setThumbnail(
-          'https://cdn.discordapp.com/attachments/402109825896415232/692820764478668850/yummylogo.jpg'
-        )
+        .setThumbnail(message.author.avatarURL())
         .addField(
           'Кредит',
           `${

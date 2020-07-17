@@ -26,9 +26,7 @@ module.exports.run = async ({ member }) => {
     .setColor(rainbow())
     .setTitle('Приветствие')
     .setDescription('')
-    .setThumbnail(
-      'https://cdn.discordapp.com/attachments/402109825896415232/692820764478668850/yummylogo.jpg'
-    )
+    .setThumbnail(member.user.avatarURL())
     .addField(
       'Здраствуйте!',
       'Добро пожаловать на официальный Discord сервер YummyAnime!'

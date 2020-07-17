@@ -29,9 +29,7 @@ module.exports.run = async (message, args) => {
         new MessageEmbed()
           .setColor(rainbow())
           .setTitle('daily')
-          .setThumbnail(
-            'https://cdn.discordapp.com/attachments/402109825896415232/692820764478668850/yummylogo.jpg'
-          )
+          .setThumbnail(message.author.avatarURL())
           .setTimestamp()
           .addField('Уровень', user.dailyLevel)
           .addField('Сейчас ваш daily', calcLevelCost(user.dailyLevel) + currency)

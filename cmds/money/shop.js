@@ -18,9 +18,7 @@ class RolesBoard {
     const shopList = new MessageEmbed()
       .setColor('#0099ff')
       .setTitle('Роли')
-      .setThumbnail(
-        'https://cdn.discordapp.com/attachments/402109825896415232/692820764478668850/yummylogo.jpg'
-      )
+      .setThumbnail(message.author.avatarURL())
       .setTimestamp()
     RolesBoard.roles = sortAndCleanRoles(RolesBoard.roles, message)
     let i = 0
@@ -47,9 +45,7 @@ class RolesBoard {
     const role = message.member.guild.roles.cache.get(roleId)
     RolesBoard.roles[role.id] = +args[args.length - 1]
 
-    log(
-      `${message.author.tag} add role to shop ${role.name}(${role})`
-    )
+    log(`${message.author.tag} add role to shop ${role.name}(${role})`)
     RolesBoard.shopList(message)
     const db = new sqlite3.Database('./data.db')
     db.serialize(() => {
@@ -78,9 +74,7 @@ class RolesBoard {
     db.run(`DELETE FROM roles WHERE id='${role.id}'`)
     db.close()
 
-    log(
-      `${message.author.tag} remove role from shop ${role.name}(${role})`
-    )
+    log(`${message.author.tag} remove role from shop ${role.name}(${role})`)
     RolesBoard.shopList(message)
   }
   static async buy(message, args) {

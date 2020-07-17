@@ -48,9 +48,7 @@ module.exports.run = async (message, args, command) => {
     const embed = new MessageEmbed()
       .setColor(rainbow())
       .setTitle('Leader board')
-      .setThumbnail(
-        'https://cdn.discordapp.com/attachments/402109825896415232/692820764478668850/yummylogo.jpg'
-      )
+      .setThumbnail(message.author.avatarURL())
       .setTimestamp()
     const lbChunk = lb.slice(page * MAX_ROWS, (page + 1) * MAX_ROWS)
     for (let item of lbChunk) {

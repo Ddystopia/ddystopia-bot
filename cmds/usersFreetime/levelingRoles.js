@@ -7,9 +7,7 @@ class RolesBoard {
     const shopList = new MessageEmbed()
       .setColor('#0099ff')
       .setTitle('Роли')
-      .setThumbnail(
-        'https://cdn.discordapp.com/attachments/402109825896415232/692820764478668850/yummylogo.jpg'
-      )
+      .setThumbnail(message.author.avatarURL())
       .setTimestamp()
     RolesBoard.roles = sortAndCleanRoles(RolesBoard.roles, message)
     let i = 0

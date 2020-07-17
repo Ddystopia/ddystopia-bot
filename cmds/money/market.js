@@ -7,14 +7,9 @@ const sqlite3 = require('sqlite3').verbose()
 const MAX_FIELDS = 25
 
 class EmbedInstance extends MessageEmbed {
-  constructor() {
+  constructor(avatarUrl) {
     super()
-    this.setColor('#0099ff')
-      .setTitle('Market')
-      .setThumbnail(
-        'https://cdn.discordapp.com/attachments/402109825896415232/692820764478668850/yummylogo.jpg'
-      )
-      .setTimestamp()
+    this.setColor('#0099ff').setTitle('Market').setThumbnail(avatarUrl).setTimestamp()
   }
 }
 
@@ -24,7 +19,7 @@ class LootBoard {
     const embeds = []
     for (let i = 0; i < Math.ceil(lootEntries.length / MAX_FIELDS); i++) {
       const lootChunk = lootEntries.slice(i * MAX_FIELDS, (i + 1) * MAX_FIELDS)
-      const shopList = new EmbedInstance()
+      const shopList = new EmbedInstance(message.author.avatarURL())
       for (let item of lootChunk)
         shopList.addField('\u200B', `${item[0]} - ${item[1]}${currency}`, true)
       embeds.push(shopList)
