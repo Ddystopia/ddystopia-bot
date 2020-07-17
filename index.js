@@ -1,7 +1,7 @@
 const { Client, Collection } = require('discord.js')
 const { Leveling } = require('./classes/Leveling.js')
 const client = new Client()
-const { readdirSync, statSync } = require('fs')
+const { readdirSync, statSync, writeSync } = require('fs')
 const { log } = require('./utils/log.js')
 
 const {
@@ -88,5 +88,12 @@ client.on('guildMemberAdd', member => {
   member.roles.add(role)
   client.commands.get('greeting').run({ member })
 })
+
+process.on('uncaughtException', (err, origin) => {
+  const errContent = `Caught exception: ${err}\nException origin: ${origin}`
+  writeSync(process.stderr.fd, errContent);
+  log(errContent)
+  console.log(errContent)
+});
 
 client.login(token)
