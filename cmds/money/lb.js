@@ -33,9 +33,7 @@ module.exports.run = async (message, args, command) => {
             return sum + usersLoot.cost
           }, 0)
         } else actives = user.level
-        const member =
-          message.guild.members.cache.get(user.id) ||
-          (await message.guild.members.fetch(user.id).catch(() => {}))
+        const member = message.guild.member(user.id)
         if (!member || member.user.bot) return
         lb.push([member, Math.floor(actives)])
         if (ids.length - 1 === i) resolve()

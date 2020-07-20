@@ -80,7 +80,7 @@ class Credit extends Deal {
   }
   async badUser(bankMember, guild, rec) {
     const user = await User.getOrCreateUser(bankMember.id)
-    const member = guild.members.cache.get(bankMember.id)
+    const member = guild.member(bankMember.id)
     if (rec) makeBancrot()
     else {
       this.sum *= 1.5

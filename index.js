@@ -7,10 +7,12 @@ const { log } = require('./utils/log.js')
 const {
   token,
   prefix,
+  guildId,
   nonGrata,
   imageChannels,
   bannedChannels,
   wordsGameChannels,
+  greetingChannel,
 } = require('./config.json')
 global.currency = '🌱' //если язык русский, то в родительском падеже(кого? чего?)
 
@@ -32,7 +34,7 @@ getDirs('./cmds/').forEach(dir => {
 
 client.on('ready', async () => {
   console.log(`Запустился бот ${client.user.username}`)
-  const guild = client.guilds.cache.get('402105109653487627')
+  const guild = client.guilds.cache.get(guildId)
 
   Leveling.voiceLeveling(guild.channels)
 
@@ -83,17 +85,18 @@ client.on('message', async message => {
 })
 
 client.on('guildMemberAdd', member => {
+  if (!greetingChannel) return
   const role = member.guild.roles.cache.find(r => r.name === 'Яммик')
   if (!member || !role) return log('Role or member do not exist')
   member.roles.add(role)
-  client.commands.get('greeting').run({ member })
+  client.commands.get('greeting').run({ member }, [greetingChannel])
 })
 
 process.on('uncaughtException', (err, origin) => {
   const errContent = `Caught exception: ${err}\nException origin: ${origin}`
-  writeSync(process.stderr.fd, errContent);
+  writeSync(process.stderr.fd, errContent)
   log(errContent)
   console.log(errContent)
-});
+})
 
 client.login(token)

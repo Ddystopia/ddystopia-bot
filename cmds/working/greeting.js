@@ -19,8 +19,8 @@ const helloGifs = [
 
 let gifsCounter = randomInteger(1, 5)
 
-module.exports.run = async ({ member }) => {
-  const channel = member.guild.channels.cache.find(ch => ch.id == '692796617656369292')
+module.exports.run = async ({ member }, [channelId]) => {
+  const channel = member.guild.channels.cache.find(ch => ch.id == channelId)
 
   const embed = new MessageEmbed()
     .setColor(rainbow())

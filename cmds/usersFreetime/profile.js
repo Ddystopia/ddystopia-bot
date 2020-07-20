@@ -14,11 +14,9 @@ module.exports.run = async (message, args, command) => {
     )
     db.close()
   })
-  const id =
-    (message.mentions.users.first() && message.mentions.users.first().id) ||
-    message.author.id
-  const member = await message.guild.members.fetch(id)
-  const profile = await User.getOrCreateUser(id)
+  const user = message.mentions.users.first() || message.author
+  const member = message.guild.member(user.id)
+  const profile = await User.getOrCreateUser(user.id)
   switch (command) {
     case 'profile':
     case 'юзер':

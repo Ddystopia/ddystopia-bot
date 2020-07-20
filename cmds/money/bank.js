@@ -18,7 +18,7 @@ class ModerationCommands {
     const profiles = await ModerationCommands.getBankProfiles()
     for (const elemPromise of profiles) {
       const element = await elemPromise
-      const member = guild.members.cache.get(`${element.id}`)
+      const member = guild.member(`${element.id}`)
       if (!member) continue
 
       const bancrotRole = member.guild.roles.cache.find(r => r.name === 'Банкрот')
@@ -84,7 +84,7 @@ class ModerationCommands {
       case 'bancrot': {
         bankMember.bancrot = null
         const role = message.guild.roles.cache.find(r => r.name === 'Банкрот')
-        message.guild.members.cache.get(user.id).roles.remove(role)
+        message.guild.member(user.id).roles.remove(role)
         log(`${message.author.tag} remove bancrot ${user.username}`)
         break
       }
@@ -99,7 +99,6 @@ class ModerationCommands {
 module.exports.run = async (message, args) => {
   if (args === 'calcPercents') return ModerationCommands.calcPercents() //inclusion
   if (args === 'closeDeals') return ModerationCommands.closeDeals(message.guild) //inclusion
-  if (message.channel.id !== '694199268847648813') return
   const userId = message.author.id
   const bankMember = await BankMember.getOrCreateBankMember(userId)
 

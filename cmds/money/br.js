@@ -7,7 +7,6 @@ const games = new Map()
 const lastGames = new Map()
 
 module.exports.run = async (message, args) => {
-  if (message.channel.id !== '693487254911582259') return
   if (!args) return
   if (isNaN(+args[0]) && args[0] != 'all') return
   if (+args[0] <= 0) return

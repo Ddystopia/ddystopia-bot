@@ -8,10 +8,12 @@
 {
   "token": "token",
   "prefix": "prefix",
-  "bannedChannels": ["id", "id"],// Channels, where bot not listening commands
-  "imageChannels": ["id", "id"],// Channels, where bot give money for images
-  "nonGrata": ["id", "id"],// Users ignored by the bot
-  "wordsGameChannels": ["id", "id"],// Channels to play in words
+  "guildId": "id", // Id of server
+  "bannedChannels": ["id", "id"], // Channels, where bot not listening commands
+  "imageChannels": ["id", "id"], // Channels, where bot give money for images
+  "nonGrata": ["id", "id"], // Users ignored by the bot
+  "wordsGameChannels": ["id", "id"], // Channels to play in words
+  "greetingChannel": "id" // (or null)  Id of channel to send greetings
 }
 ```
 
