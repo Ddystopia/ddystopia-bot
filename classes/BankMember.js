@@ -111,9 +111,9 @@ ON CONFLICT(id) DO UPDATE SET
     const user = await User.getOrCreateUser(this.id)
     if (sum < 1000) 'Invalid argument sum(so few)'
     if (sum / user.coins > 15 && user.coins > 200)
-      return `Для этой суммы, вы должны иметь больше, чем ${+(sum / 15).toFixed(
-        3
-      )} ${currency}`
+      return `Для этой суммы, вы должны иметь больше, чем ${+(sum / 15).toFixed(3)} ${
+        global.currency
+      }`
 
     latestCredits.set(this.id, Date.now() + 3 * 3600 * 1000)
     const percent = Math.max(

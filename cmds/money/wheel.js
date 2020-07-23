@@ -41,7 +41,7 @@ module.exports.run = async (message, args) => {
   const factor = factors[rand]
   const arrow = factorsTable[factor.toString()]
 
-  if (user.coins < bet) return message.reply(`Не хватает ${currency}`)
+  if (user.coins < bet) return message.reply(`Не хватает ${global.currency}`)
   user.coins -= bet
 
   const embed = new MessageEmbed().setColor(rainbow())
@@ -56,9 +56,9 @@ module.exports.run = async (message, args) => {
   user.coins += Math.floor(bet * factor)
   embed.addField(
     'Расчёт',
-    `Вы выиграли ${Math.floor(bet * factor)} ${currency}\nНа вашем счету теперь ${
+    `Вы выиграли ${Math.floor(bet * factor)} ${global.currency}\nНа вашем счету теперь ${
       user.coins
-    } ${currency}\n`
+    } ${global.currency}\n`
   )
   user.save()
   message.reply('\n' + response, embed)

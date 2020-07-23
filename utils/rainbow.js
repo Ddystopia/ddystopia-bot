@@ -12,11 +12,7 @@ for (let i = 0, sinI = 0; i < COLOR_SIZE; i++, sinI += COLOR_STEP) {
 
 module.exports.rainbow = (() => {
   let counter = 0
-  return () => {
-    const color = rainbow[counter]
-    counter = (counter + 1) % COLOR_SIZE
-    return color
-  }
+  return () => rainbow[counter++ % COLOR_SIZE]
 })()
 
 function sin_to_hex(i, phase) {

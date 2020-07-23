@@ -13,7 +13,7 @@ module.exports.run = async (message, args) => {
 
   const embed = new MessageEmbed()
     .setColor('#0099ff')
-    .addField('Расчёт', `На счету ${Math.floor(user.coins)} ${currency}`)
+    .addField('Расчёт', `На счету ${Math.floor(user.coins)} ${global.currency}`)
   message.reply(embed)
 }
 

@@ -11,7 +11,10 @@ module.exports.slider = async (embeds, message, start) => {
   const filter = (reaction, user) => {
     return ['⬅', '✖', '➡'].includes(reaction.emoji.name) && user.id === message.author.id
   }
-  const collector = msg.createReactionCollector(filter, { dispose: true, time: 5 * 60 * 1000 })
+  const collector = msg.createReactionCollector(filter, {
+    dispose: true,
+    time: 5 * 60 * 1000,
+  })
   const step = reaction => {
     let embed
     if (reaction.emoji.name === '✖') collector.stop()

@@ -26,7 +26,7 @@ class RolesBoard {
       if (!RolesBoard.roles[roleId]) continue
       const role = message.member.guild.roles.cache.get(roleId)
       const cost = RolesBoard.roles[roleId]
-      shopList.addField(++i, `${role} - ${cost} ${currency}`)
+      shopList.addField(++i, `${role} - ${cost} ${global.currency}`)
     }
     return message.reply(shopList)
   }
@@ -89,7 +89,7 @@ class RolesBoard {
     const id = message.author.id
     const user = await User.getOrCreateUser(id)
 
-    if (user.coins < cost) return message.reply(`Не хватает ${currency}`)
+    if (user.coins < cost) return message.reply(`Не хватает ${global.currency}`)
     if (message.member.roles.cache.has(role.id))
       return message.reply('У вас уже есть эта роль')
     user.coins -= cost
@@ -117,7 +117,7 @@ class RolesBoard {
     message.member.roles.remove(role)
 
     log(`${message.author.tag} sell role ${role.name}(${role})`)
-    message.reply(`Успех, вы получили ${cost * 0.9} ${currency}`)
+    message.reply(`Успех, вы получили ${cost * 0.9} ${global.currency}`)
     user.save()
   }
 }

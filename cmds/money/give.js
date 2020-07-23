@@ -17,7 +17,8 @@ module.exports.run = async (message, args) => {
 
   const transaction = args[0] == 'all' ? profileFrom.coins : +args[0]
 
-  if (profileFrom.coins < transaction) return message.reply(`Не хватает ${currency}`)
+  if (profileFrom.coins < transaction)
+    return message.reply(`Не хватает ${global.currency}`)
 
   profileFrom.coins -= transaction
   profileTill.coins += transaction
@@ -31,7 +32,7 @@ module.exports.run = async (message, args) => {
     } - ${transaction} coins`
   )
 
-  message.reply(`Было успешно переведено ${transaction} ${currency}`)
+  message.reply(`Было успешно переведено ${transaction} ${global.currency}`)
 }
 
 module.exports.help = {

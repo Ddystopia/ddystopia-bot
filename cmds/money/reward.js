@@ -22,7 +22,7 @@ module.exports.run = async (message, args) => {
     } - ${transaction} coins`
   )
 
-  message.reply(`Было успешно переведено ${transaction} ${currency}`)
+  message.reply(`Было успешно переведено ${transaction} ${global.currency}`)
 }
 
 module.exports.help = {

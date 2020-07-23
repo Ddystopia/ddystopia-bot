@@ -53,7 +53,9 @@ module.exports.run = async (message, args, command) => {
       const [member, actives] = item
       embed.addField(
         ++i,
-        `${member.displayName} - ${actives}${command === 'forbs' ? currency : ' level'}`
+        `${member.displayName} - ${actives}${
+          command === 'forbs' ? global.currency : ' level'
+        }`
       )
     }
     embeds.push(embed)

@@ -28,7 +28,7 @@ module.exports.run = async (message, args) => {
 
   let jackpot = ''
 
-  if (user.coins < bet) return message.reply(`Не хватает ${currency}`)
+  if (user.coins < bet) return message.reply(`Не хватает ${global.currency}`)
 
   if (betNum == realNum && randomInteger(0, 1) && games.get(message.author.id) < 20)
     jackpot =
@@ -46,16 +46,16 @@ module.exports.run = async (message, args) => {
     user.coins += bet * factor - bet
     embed.addField(
       'Расчёт',
-      `Вам выпало число ${realNum}, и вы выиграли ${
-        bet * factor
-      } ${currency}${jackpot}\nНа вашем счету теперь ${user.coins} ${currency}\n`
+      `Вам выпало число ${realNum}, и вы выиграли ${bet * factor} ${
+        global.currency
+      }${jackpot}\nНа вашем счету теперь ${user.coins} ${global.currency}\n`
     )
   } else {
     user.coins -= bet
     if (jackpot) user.coins += 10000
     embed.addField(
       'Расчёт',
-      `Вам выпало число ${realNum}, и вы потеряли ${bet} ${currency}${jackpot}\nНа вашем счету теперь ${user.coins} ${currency}\n`
+      `Вам выпало число ${realNum}, и вы потеряли ${bet} ${global.currency}${jackpot}\nНа вашем счету теперь ${user.coins} ${global.currency}\n`
     )
   }
   user.save()

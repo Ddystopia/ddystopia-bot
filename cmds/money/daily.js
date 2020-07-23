@@ -32,12 +32,15 @@ module.exports.run = async (message, args) => {
           .setThumbnail(message.author.avatarURL())
           .setTimestamp()
           .addField('Уровень', user.dailyLevel)
-          .addField('Сейчас ваш daily', calcLevelCost(user.dailyLevel) + currency)
+          .addField('Сейчас ваш daily', calcLevelCost(user.dailyLevel) + global.currency)
           .addField(
             'Цена до следующего',
-            calcLevelCost(user.dailyLevel) * DAILY_UP_COST_MUL + 100 + currency
+            calcLevelCost(user.dailyLevel) * DAILY_UP_COST_MUL + 100 + global.currency
           )
-          .addField('Следующее daily', calcLevelCost(user.dailyLevel + 1) + currency)
+          .addField(
+            'Следующее daily',
+            calcLevelCost(user.dailyLevel + 1) + global.currency
+          )
       )
     default: {
       if (Date.now() - user.timers.daily < 1000 * SECONDS_COOLDOWN)
@@ -52,7 +55,7 @@ module.exports.run = async (message, args) => {
 
       user.save()
       message.reply(
-        `Вы получили ${sum}${currency}, следующий раз получить можно через 12 часов`
+        `Вы получили ${sum}${global.currency}, следующий раз получить можно через 12 часов`
       )
       break
     }

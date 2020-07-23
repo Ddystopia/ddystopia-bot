@@ -21,7 +21,7 @@ class LootBoard {
       const lootChunk = lootEntries.slice(i * MAX_FIELDS, (i + 1) * MAX_FIELDS)
       const shopList = new EmbedInstance(message.author.avatarURL())
       for (let item of lootChunk)
-        shopList.addField('\u200B', `${item[0]} - ${item[1]}${currency}`, true)
+        shopList.addField('\u200B', `${item[0]} - ${item[1]}${global.currency}`, true)
       embeds.push(shopList)
     }
     slider(embeds, message)
@@ -63,7 +63,7 @@ class LootBoard {
     const cost = lootArray.reduce((sum, lootItem) => sum + loot[lootItem], 0)
     const user = await User.getOrCreateUser(message.author.id)
 
-    if (user.coins < cost) return message.reply(`Не хватает ${currency}`)
+    if (user.coins < cost) return message.reply(`Не хватает ${global.currency}`)
     user.coins -= cost
 
     user.addLoot(lootArray)
@@ -89,7 +89,7 @@ class LootBoard {
     user.removeLoot(lootArray)
 
     log(`${message.author.tag} sell loot ${loot}`)
-    message.reply(`Успех, вы получили ${cost * 0.9} ${currency}`)
+    message.reply(`Успех, вы получили ${cost * 0.9} ${global.currency}`)
     user.save()
   }
 }

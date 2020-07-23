@@ -36,7 +36,7 @@ module.exports.run = async (message, args, command) => {
             'https://discord.js.org'
           )
           .setThumbnail(member.user.avatarURL())
-          .addField('🎩 Actives', Math.floor(profile.coins) + currency, true)
+          .addField('🎩 Actives', Math.floor(profile.coins) + global.currency, true)
           .addField('👑 Level', profile.level, true)
           .addField('⚔ xp', `${profile.xp} / ${Leveling.calcXp(profile.level)}`, true)
           .addField('😎 Reputation', profile.rep, true)
