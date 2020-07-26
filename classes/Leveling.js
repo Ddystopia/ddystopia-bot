@@ -1,5 +1,5 @@
 const { Collection } = require('discord.js')
-const { User } = require('./User.js')
+const { User } = require('../models/User.js')
 const { RolesLeveling } = require('./RolesLeveling')
 const { randomInteger } = require('../utils/randomInteger')
 class Leveling {
@@ -8,9 +8,9 @@ class Leveling {
   }
 
   static async _doLeveling(newExp, member) {
-    const user = await User.getOrCreateUser(member.id)
+    const user = await User.getOrCreate(member.id)
     if (!user.xp) user.xp = 0
-    user.xp += randomInteger(newExp - 7, newExp + 7 * this._XP_TIME)
+    user.xp += randomInteger(newExp - 7, newExp + 7)
     let xp = this.calcXp(user.level) // xp for up
     while (user.xp >= xp) {
       user.xp -= xp

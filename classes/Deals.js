@@ -1,5 +1,5 @@
-const { User } = require('./User')
-const sqlite3 = require('sqlite3').verbose()
+const { User } = require('../models/User')
+const { RoleForShop } = require('../models/RoleForShop.js')
 const { log } = require('../utils/log')
 const latestCredits = new Map()
 module.exports.latestCredits = latestCredits
@@ -19,17 +19,13 @@ class Deal {
 }
 
 class Deposit extends Deal {
-  constructor(sum, days, percent, id) {
+  constructor({ sum, days, percent, user }) {
     super(sum, days, percent)
-    this.init(sum, id)
-  }
-  async init(sum, id) {
-    const user = await User.getOrCreateUser(id)
     user.coins -= +sum
     user.save()
   }
   async repay(sum, bankMember) {
-    const user = await User.getOrCreateUser(bankMember.id)
+    const user = await User.getOrCreate(bankMember.id, bankMember.guildId)
     if (bankMember.credit) return 'You already have a credit.'
     if (isNaN(+sum)) return
 
@@ -43,7 +39,7 @@ class Deposit extends Deal {
     return true
   }
   async payDeposits(bankMember) {
-    const user = await User.getOrCreateUser(bankMember.id)
+    const user = await User.getOrCreate(bankMember.id, bankMember.guildId)
     user.coins += Math.floor(+this.sum)
     bankMember.deposit = null
     user.save()
@@ -52,17 +48,13 @@ class Deposit extends Deal {
 }
 
 class Credit extends Deal {
-  constructor(sum, days, percent, id) {
+  constructor({ sum, days, percent, user }) {
     super(sum, days, percent)
-    this.init(sum, id)
-  }
-  async init(sum, id) {
-    const user = await User.getOrCreateUser(id)
     user.coins += +sum
     user.save()
   }
   async repay(sum, bankMember) {
-    const user = await User.getOrCreateUser(bankMember.id)
+    const user = await User.getOrCreate(bankMember.id, bankMember.guildId)
     if (isNaN(+sum)) return
     if (latestCredits.has(bankMember.id)) {
       if (latestCredits.get(bankMember.id) < Date.now())
@@ -78,40 +70,36 @@ class Credit extends Deal {
     bankMember.save()
     return true
   }
-  async badUser(bankMember, guild, rec) {
-    const user = await User.getOrCreateUser(bankMember.id)
+  async badUser(bankMember, guild, bancrotRole, rec) {
+    const user = await User.getOrCreate(bankMember.id, bankMember.guildId)
     const member = guild.member(bankMember.id)
-    if (rec) makeBancrot()
+    if (rec) makeBancrot(member, user)
     else {
       this.sum *= 1.5
       this.sum -= user.coins + (bankMember.deposit ? bankMember.deposit.sum : 0)
       if (user.coins > 0) user.coins = -5000
-      if (this.sum > 0) makeBancrot()
+      if (this.sum > 0) makeBancrot(member, user)
 
       user.dailyLevel = 0
-      user.level = Math.max(10, user.level - 10)
+      user.level = Math.max(0, user.level - 10)
       bankMember.credit = null
       bankMember.deposit = null
       log('New Bancrot: ' + member)
     }
+
     bankMember.save()
     user.save()
 
-    async function makeBancrot() {
-      const db = new sqlite3.Database('./data.db')
+    async function makeBancrot(member, user) {
       user.coins = 0
       bankMember.bancrot = Date.now() + 20 * 24 * 3600 * 1000
       if (!member) return
-      const role = member.guild.roles.cache.find(r => r.name === 'Банкрот')
-      member.roles.add(role)
-      const roles = await new Promise(resolve =>
-        db.run('SELECT * FROM roles', (err, roles) => resolve(roles))
-      )
+      member.roles.add(bancrotRole)
+      const roles = await RoleForShop.find({ guildId: guild.id })
       for (const roleData of roles) {
         const role = member.guild.roles.cache.get(roleData.id)
         if (member.roles.cache.has(role.id)) member.roles.remove(role)
       }
-      db.close()
     }
   }
 }

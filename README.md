@@ -2,18 +2,13 @@
 
 ### `You must create these files:`
 
-- config.json
+- .env
 
-```json
+```text
 {
-  "token": "token",
-  "prefix": "prefix",
-  "guildId": "id", // Id of server
-  "bannedChannels": ["id", "id"], // Channels, where bot not listening commands
-  "imageChannels": ["id", "id"], // Channels, where bot give money for images
-  "nonGrata": ["id", "id"], // Users ignored by the bot
-  "wordsGameChannels": ["id", "id"], // Channels to play in words
-  "greetingChannel": "id" // (or null)  Id of channel to send greetings
+	TOKEN=token
+	PREFIX=prefix
+	MONGO_URI=uri to mongoDB
 }
 ```
 

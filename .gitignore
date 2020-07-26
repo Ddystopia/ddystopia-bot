@@ -2,5 +2,6 @@
 *.db
 *.log
 *.json
+.env
 !package.json
 !package-lock.json
