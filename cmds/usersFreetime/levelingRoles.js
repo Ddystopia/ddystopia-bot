@@ -1,7 +1,8 @@
 const { MessageEmbed } = require('discord.js')
 const { RolesLeveling } = require('../../classes/RolesLeveling')
+const { RoleForLeveling } = require('../../models/RoleForLeveling')
 const { log } = require('../../utils/log.js')
-const sqlite3 = require('sqlite3').verbose()
+
 class RolesBoard {
   static shopList(message) {
     const shopList = new MessageEmbed()
@@ -9,12 +10,12 @@ class RolesBoard {
       .setTitle('Роли')
       .setThumbnail(message.author.avatarURL())
       .setTimestamp()
-    RolesBoard.roles = sortAndCleanRoles(RolesBoard.roles, message)
+    const roles = sortAndClean(RoleForLeveling.find({ guildId: message.guild.id }))
     let i = 0
-    for (const roleId in RolesBoard.roles) {
-      if (!RolesBoard.roles[roleId]) continue
+    for (const roleId in roles) {
+      if (!roles[roleId]) continue
       const role = message.member.guild.roles.cache.get(roleId)
-      const level = RolesBoard.roles[roleId]
+      const level = roles[roleId]
       shopList.addField(++i, `${role} - ${level}`)
     }
     return message.reply(shopList)
@@ -27,22 +28,14 @@ class RolesBoard {
       r => roleNameMath && r.name.toLowerCase() === roleNameMath[1].toLowerCase()
     )
     if (!role) return
-
-    RolesBoard.roles[role.id] = +args[args.length - 1]
+    new RoleForLeveling({
+      id: role.id,
+      level: +args[args.length - 1],
+      guildId: message.guild.id,
+    }).save()
 
     log(`${message.author.tag} add role to shop ${role.name}(${role})`)
     RolesBoard.shopList(message)
-    const db = new sqlite3.Database('./data.db')
-    db.serialize(() => {
-      db.run(`DELETE FROM levelingRoles WHERE id='${role.id}'`)
-      db.run(
-        `INSERT INTO levelingRoles (id, level) VALUES(${role.id}, ${+args[
-          args.length - 1
-        ]})`,
-        err => err && console.error(err)
-      )
-    })
-    db.close()
   }
   static remove(message) {
     if (!message.member.hasPermission('MANAGE_MESSAGES')) return
@@ -51,11 +44,10 @@ class RolesBoard {
       r => roleNameMath && r.name.toLowerCase() === roleNameMath[1].toLowerCase()
     )
     if (!role) return
-
-    delete RolesBoard.roles[role.id]
-    const db = new sqlite3.Database('./data.db')
-    db.run(`DELETE FROM levelingRoles WHERE id='${role.id}'`)
-    db.close()
+    RoleForLeveling.deleteOne({
+      id: role.id,
+      guildId: message.guild.id,
+    })
 
     log(`${message.author.tag} remove role from shop ${role.name}(${role})`)
     RolesBoard.shopList(message)
@@ -81,12 +73,12 @@ module.exports.run = async (message, args) => {
   }
 }
 
-function sortAndCleanRoles(roles, message) {
+function sortAndClean(roles) {
   const rolesClone = {}
   Object.entries(roles)
     .sort((a, b) => +b[1] - +a[1])
     .forEach(e => {
-      if (!message.member.guild.roles.cache.has(e[0]) || e[1] == null) return
+      if (e[1] == null) return
       rolesClone[e[0]] = e[1]
     })
   return rolesClone

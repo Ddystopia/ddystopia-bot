@@ -1,43 +1,35 @@
 const { MessageEmbed } = require('discord.js')
-const { User } = require('../../classes/User')
-const { BankMember } = require('../../classes/BankMember')
+const { User } = require('../../models/User')
+const { Loot } = require('../../models/Loot')
+const { BankMember } = require('../../models/BankMember')
 const { slider } = require('../../utils/slider')
 const { rainbow } = require('../../utils/rainbow')
-const sqlite3 = require('sqlite3').verbose()
-const MAX_ROWS = 10
+const MAX_ROWS = 10 // 25 is max because discord provide only 25 field for one embed
 
-module.exports.run = async (message, args, command) => {
+module.exports.run = async (message, [page], command) => {
   let lb = []
-  const db = new sqlite3.Database('./data.db')
-
-  const loot = await new Promise(resolve =>
-    db.all('SELECT * FROM loot', (err, rows) => resolve(rows))
-  )
-  const ids = await new Promise(resolve =>
-    db.all('SELECT id FROM users', (err, rows) => resolve(rows.map(el => el.id)))
-  )
-  db.close()
+  const loot = await Loot.find({ guildId: message.guild.id })
+  const users = await User.find({ guildId: message.guild.id })
+  // wait for lb become full
   await new Promise(resolve => {
-    ids
-      .map(async id => User.getOrCreateUser(id))
-      .forEach(async (user, i) => {
-        user = await user
-        let actives
-        if (command === 'forbs') {
-          const bankMember = await BankMember.getOrCreateBankMember(user.id)
-          actives = user.coins
-          if (bankMember.deposit) actives += bankMember.deposit.sum
-          if (bankMember.credit) actives -= bankMember.credit.sum
-          actives += Object.entries(user.loot).reduce((sum, lootArray) => {
-            const usersLoot = loot.find(loot => loot.loot === lootArray[0]) || { cost: 0 }
-            return sum + usersLoot.cost
-          }, 0)
-        } else actives = user.level
-        const member = message.guild.member(user.id)
-        if (!member || member.user.bot) return
-        lb.push([member, Math.floor(actives)])
-        if (ids.length - 1 === i) resolve()
-      })
+    users.forEach(async (user, i) => {
+      let actives
+      if (command === 'forbs') {
+        const bankMember = await BankMember.getOrCreate(user.id, message.guild.id)
+        actives = user.coins
+        if (bankMember.deposit) actives += bankMember.deposit.sum
+        if (bankMember.credit) actives -= bankMember.credit.sum
+        actives += Object.entries(user.loot).reduce((sum, lootArray) => {
+          const usersLoot = loot.find(loot => loot.loot === lootArray[0]) || { cost: 0 }
+          return sum + usersLoot.cost
+        }, 0)
+      } else actives = user.level
+
+      const member = message.guild.member(user.id)
+      if (!member || member.user.bot) return
+      lb.push([member, Math.floor(actives)])
+      if (users.length - 1 === i) resolve()
+    })
   })
 
   lb = lb.filter(a => !isNaN(+a[1])).sort((a, b) => b[1] - a[1])
@@ -60,7 +52,7 @@ module.exports.run = async (message, args, command) => {
     }
     embeds.push(embed)
   }
-  slider(embeds, message, args[0]).catch(console.error)
+  slider(embeds, message, page).catch(console.error)
 }
 module.exports.help = {
   name: 'lb',

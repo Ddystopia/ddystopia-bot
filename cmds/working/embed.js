@@ -20,7 +20,7 @@ module.exports.run = async (message, args) => {
     })
     log(`${message.author.tag} send embed`)
   } catch (err) {
-    return message.reply(`${err.name}: ${err.message}`)
+    return message.reply(`${err.name}: ${err.message}`, { code: 'bash' })
   }
 }
 

@@ -4,4 +4,5 @@ module.exports.run = async message => {
 
 module.exports.help = {
   name: 'ping',
+  aliases: ['пинг'],
 }

@@ -1,22 +1,16 @@
 const { MessageEmbed } = require('discord.js')
-const { User } = require('../../classes/User')
+const { User } = require('../../models/User')
+const { Loot } = require('../../models/Loot')
 const { Leveling } = require('../../classes/Leveling.js')
 const { rainbow } = require('../../utils/rainbow.js')
-const sqlite3 = require('sqlite3').verbose()
 const marryClipboard = new Map()
 const repClipboard = new Map()
 
 module.exports.run = async (message, args, command) => {
-  const loot = await new Promise(resolve => {
-    const db = new sqlite3.Database('./data.db')
-    db.all('SELECT * FROM loot', (err, rows) =>
-      resolve(rows.reduce((loot, row) => ({ ...loot, [row.loot]: row.cost }), {}))
-    )
-    db.close()
-  })
+  const loot = await Loot.find({ guildId: message.guild.id })
   const user = message.mentions.users.first() || message.author
   const member = message.guild.member(user.id)
-  const profile = await User.getOrCreateUser(user.id)
+  const profile = await User.getOrCreate(user.id, message.guild.id)
   switch (command) {
     case 'profile':
     case 'юзер':
@@ -64,7 +58,7 @@ module.exports.run = async (message, args, command) => {
 
     case 'осебе':
     case 'about': {
-      const ownProfile = await User.getOrCreateUser(message.author.id)
+      const ownProfile = await User.getOrCreate(message.author.id, message.guild.id)
       ownProfile.about = args.slice(0, 100).join(' ').replace(/\\n/g, '\n')
       ownProfile.save()
       message.react('✅')
@@ -86,7 +80,7 @@ module.exports.run = async (message, args, command) => {
 
     case 'marry': {
       if (member.user.id === message.author.id) return
-      const firstProfile = await User.getOrCreateUser(message.author.id)
+      const firstProfile = await User.getOrCreate(message.author.id, message.guild.id)
       const secondProfile = profile
 
       if (!!firstProfile.marry || !!secondProfile.marry)
@@ -116,8 +110,9 @@ module.exports.run = async (message, args, command) => {
     case 'tear': {
       if (member.user.id !== message.author.id || !profile.marry) return
       const firstProfile = profile
-      const secondProfile = await User.getOrCreateUser(
-        profile.marry.match(/(\d{15,})/)[1]
+      const secondProfile = await User.getOrCreate(
+        profile.marry.match(/(\d{15,})/)[1],
+        message.guild.id
       )
       profile.marry = null
       secondProfile.marry = null

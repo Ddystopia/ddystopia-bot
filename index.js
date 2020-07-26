@@ -28,7 +28,7 @@ getDirs('./cmds/').forEach(dir => {
 
 client.on('ready', async () => {
   console.log(`Запустился бот ${client.user.username}`)
-  const guilds = await Guild.find()
+  const guilds = await Guild.find({})
   guilds.forEach(guildDB => {
     const guild = client.guilds.cache.get(guildDB.id)
     if (!guild) Guild.deleteOne({ id: guildDB.id })

@@ -1,17 +1,17 @@
-const { User } = require('../../classes/User')
+const { User } = require('../../models/User')
 const { log } = require('../../utils/log.js')
 
-module.exports.run = async (message, args) => {
+module.exports.run = async (message, [newLevel]) => {
   if (!message.member.hasPermission('MANAGE_MESSAGES')) return
   if (!message.mentions.users.first()) return
-  if (isNaN(+args[0]) || +args[0] < 0) return
-  const user = await User.getOrCreateUser(message.mentions.users.first().id)
-  user.level = +args[0]
+  if (isNaN(+newLevel) || +newLevel < 0) return
+  const user = await User.getOrCreate(message.mentions.users.first().id, message.guild.id)
+  user.level = +newLevel
   user.xp = 0
   user.save()
   log(
-    `${message.member.displayName}(${message.member}) set ${args[0]} level for user ${
-      message.mentions.members.first().displayName
+    `${message.member.tag}set ${newLevel} level for user ${
+      message.mentions.members.first().tag
     }`
   )
 

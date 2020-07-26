@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js')
-const { User } = require('../../classes/User')
+const { User } = require('../../models/User')
 const { randomInteger } = require('../../utils/randomInteger.js')
 const { useUserGames } = require('../../utils/useUserGames')
 const { rainbow } = require('../../utils/rainbow.js')
@@ -17,16 +17,13 @@ const factorsTable = {
   3: '↘',
 }
 
-module.exports.run = async (message, args) => {
-  if (!args) return
-  if (isNaN(+args[0]) && args[0] != 'all') return
-  if (+args[0] <= 0) return
+module.exports.run = async (message, [propBet]) => {
+  if (isNaN(+propBet) && propBet !== 'all') return
+  if (+propBet <= 0) return
 
   const userGames = useUserGames(message.author.id, games, lastGames)
-
-  const user = await User.getOrCreateUser(message.author.id)
-
-  const bet = args[0] == 'all' ? user.coins : +args[0]
+  const user = await User.getOrCreate(message.author.id, message.guild.id)
+  const bet = propBet === 'all' ? user.coins : +propBet
 
   let percent = 50 - (userGames * 1.2 - 12)
   if (percent < 10) percent = 10

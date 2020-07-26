@@ -1,18 +1,17 @@
 const { MessageEmbed } = require('discord.js')
-const { User } = require('../../classes/User')
+const { User } = require('../../models/User')
 const { rainbow } = require('../../utils/rainbow')
 const { formatDuration } = require('../../utils/formatDuration')
 
-const SECONDS_COOLDOWN = 60 * 60 * 12
+const SECONDS_COOLDOWN = 12 * 60 * 60
 const DAILY_UP_COST_MUL = 7
 
-module.exports.run = async (message, args) => {
-  const user = await User.getOrCreateUser(message.author.id)
-  if (user.bancrot) return
+module.exports.run = async (message, [command, times]) => {
+  const user = await User.getOrCreate(message.author.id, message.guild.id)
 
-  switch (args[0]) {
+  switch (command) {
     case 'up':
-      for (let i = 0; i < (+args[1] || 1); i++) {
+      for (let i = 0; i < (+times || 1); i++) {
         const nextLevelCost = calcLevelCost(user.dailyLevel) * DAILY_UP_COST_MUL + 100
         if (user.coins < nextLevelCost) continue
 

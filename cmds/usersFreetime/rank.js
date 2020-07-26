@@ -1,12 +1,12 @@
 const { MessageAttachment } = require('discord.js')
 const Canvas = require('canvas')
-const { User } = require('../../classes/User')
+const { User } = require('../../models/User')
 const { Leveling } = require('../../classes/Leveling')
 
 module.exports.run = async message => {
   message.channel.startTyping()
   const member = message.mentions.members.first() || message.member
-  const user = await User.getOrCreateUser(member.id)
+  const user = await User.getOrCreate(member.id, message.guild.id)
   const progress = user.xp / Leveling.calcXp(user.level)
 
   const canvas = Canvas.createCanvas(800, 250)

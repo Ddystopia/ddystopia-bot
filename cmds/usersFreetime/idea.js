@@ -1,9 +1,11 @@
 const { MessageEmbed } = require('discord.js')
 const { rainbow } = require('../../utils/rainbow')
-const CHANNEL_ID = '703642165108146218'
+const { Guild } = require('../../models/Guild')
 
 module.exports.run = async (message, args) => {
-  const ideaChannel = message.guild.channels.cache.get(CHANNEL_ID)
+  const { ideaChannelId } = await Guild.findOne({ id: message.guild.id })
+  const ideaChannel = message.guild.channels.cache.get(ideaChannelId)
+
   if (!ideaChannel) return
   const embed = new MessageEmbed()
     .setThumbnail(message.author.avatarURL())

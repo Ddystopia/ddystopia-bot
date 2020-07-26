@@ -1,25 +1,19 @@
-const { User } = require('../../classes/User')
+const { User } = require('../../models/User')
+const { Loot } = require('../../models/Loot')
 const { randomInteger } = require('../../utils/randomInteger')
 const { formatDuration } = require('../../utils/formatDuration')
 const { useUserGames } = require('../../utils/useUserGames')
-const sqlite3 = require('sqlite3').verbose()
 const games = new Map()
 const lastGames = new Map()
 
-const SECONDS_COOLDOWN = 60 * 60 * 24
+const SECONDS_COOLDOWN = 24 * 60 * 60
 const MAX_DAILY_LOOT_COST = 5000
 
 module.exports.run = async (message, args, command) => {
-  const loot = await new Promise(resolve => {
-    const db = new sqlite3.Database('./data.db')
-    db.all('SELECT * FROM loot', (err, rows) =>
-      resolve(rows.reduce((loot, row) => ({ ...loot, [row.loot]: row.cost }), {}))
-    )
-    db.close()
-  })
+  const loot = await Loot.find({ guildId: message.guild.id })
   switch (command) {
     case 'loot': {
-      const user = await User.getOrCreateUser(message.author.id)
+      const user = await User.getOrCreate(message.author.id, message.guild.id)
       if (Date.now() - user.timers.loot < 1000 * SECONDS_COOLDOWN)
         return message.reply(
           `Вы уже получили свою долю, следующий раз получить можно через ${formatDuration(
@@ -38,10 +32,11 @@ module.exports.run = async (message, args, command) => {
     }
 
     case 'giveloot': {
-      if (!message.mentions.users.first()) return
+      const userTillMention = message.mentions.users.first()
+      if (!userTillMention) return
 
-      const userFrom = await User.getOrCreateUser(message.author.id)
-      const userTill = await User.getOrCreateUser(message.mentions.users.first().id)
+      const userFrom = await User.getOrCreate(message.author.id, message.guild.id)
+      const userTill = await User.getOrCreate(userTillMention.id, message.guild.id)
       let lootArray = []
       if (args[1] === 'all')
         for (const loot in userFrom.loot)
@@ -59,7 +54,7 @@ module.exports.run = async (message, args, command) => {
       break
     }
     case 'lootbox': {
-      const user = await User.getOrCreateUser(message.author.id)
+      const user = await User.getOrCreate(message.author.id, message.guild.id)
       if (!user.loot['🎁']) return message.reply('Нечего открывать ¯\\_(ツ)_/¯')
       user.removeLoot(['🎁'])
       const userGames = useUserGames(message.author.id, games, lastGames, 30)

@@ -4,10 +4,11 @@ const Guild = mongoose.model(
   'Guild',
   mongoose.Schema({
     id: String,
+    prefix: { type: String, default: process.env.PREFIX },
     logChannelId: { type: String, default: '' },
+    ideaChannelId: { type: String, default: '' },
     baseRoleId: { type: String, default: '' },
     bancrotRoleId: { type: String, default: '' },
-    prefix: { type: String, default: process.env.PREFIX },
     greetingChannel: { type: String, default: '' },
     blacklist: { type: [String], default: [] },
     imageChannels: { type: [String], default: [] },

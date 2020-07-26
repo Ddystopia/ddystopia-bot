@@ -1,91 +1,80 @@
 const { MessageEmbed } = require('discord.js')
-const { BankMember } = require('../../classes/BankMember')
+const { Guild } = require('../../models/Guild')
+const { BankMember } = require('../../models/BankMember')
 const { Credit } = require('../../classes/Deals')
-const sqlite3 = require('sqlite3').verbose()
 const { log } = require('../../utils/log.js')
 
 class ModerationCommands {
-  static async getBankProfiles() {
-    return new Promise(resolve => {
-      const db = new sqlite3.Database('./data.db')
-      db.all(`SELECT id FROM users`, (err, p) =>
-        resolve(p.map(us => BankMember.getOrCreateBankMember(us.id)))
-      )
-      db.close()
-    })
-  }
-  static async closeDeals(guild) {
-    const profiles = await ModerationCommands.getBankProfiles()
-    for (const elemPromise of profiles) {
-      const element = await elemPromise
-      const member = guild.member(`${element.id}`)
+  static async closeDeals(guild, bancrotRoleId) {
+    const bankMembers = await BankMember.find({ guildId: guild.id })
+    for (const bankMember of bankMembers) {
+      const member = guild.member(bankMember.id)
       if (!member) continue
-
-      const bancrotRole = member.guild.roles.cache.find(r => r.name === 'Банкрот')
+      const bancrotRole = guild.roles.cache.get(bancrotRoleId)
 
       const [timeToCredit, timeToDeposit, timeToBancrot] = [
-        element.credit && element.credit.deadline - Date.now(),
-        element.deposit && element.deposit.deadline - Date.now(),
-        element.bancrot && element.bancrot - Date.now(),
+        bankMember.credit && bankMember.credit.deadline - Date.now(),
+        bankMember.deposit && bankMember.deposit.deadline - Date.now(),
+        bankMember.bancrot && bankMember.bancrot - Date.now(),
       ]
 
       if (timeToCredit && timeToCredit <= 60 * 60 * 1000) {
         setTimeout(() => {
-          element.credit.badUser(element, guild)
-          element.save()
+          bankMember.credit.badUser(bankMember, guild, bancrotRole, false)
+          bankMember.save()
         }, Math.max(timeToCredit, 0))
       }
 
       if (timeToDeposit && timeToDeposit <= 60 * 60 * 1000) {
         setTimeout(() => {
-          element.deposit.payDeposits(element)
-          element.save()
+          bankMember.deposit.payDeposits(bankMember)
+          bankMember.save()
         }, Math.max(timeToDeposit, 0))
       }
 
       if (timeToBancrot && timeToBancrot <= 60 * 60 * 1000) {
         setTimeout(() => {
-          element.bancrot = null
+          bankMember.bancrot = null
           member.roles.remove(bancrotRole)
-          element.save()
+          bankMember.save()
         }, Math.max(timeToBancrot, 0))
-      } else if (element.bancrot && !member.roles.cache.has(bancrotRole.id)) {
-        Credit.prototype.badUser(element, guild, true)
+      } else if (bankMember.bancrot && !member.roles.cache.has(bancrotRole.id)) {
+        Credit.prototype.badUser(bankMember, guild, bancrotRole, true)
       }
     }
   }
 
-  static async calcPercents() {
-    const profiles = await ModerationCommands.getBankProfiles()
-    for (const elemPromise of profiles) {
-      const element = await elemPromise
-      if (element.credit)
-        element.credit.sum += (element.credit.sum * element.credit.percent) / 100
-      if (element.deposit)
-        element.deposit.sum += (element.deposit.sum * element.deposit.percent) / 100
-      if (element.credit || element.deposit) element.save()
+  static async calcPercents(guildId) {
+    const bankMembers = await BankMember.find({ guildId })
+    for (const bankMember of bankMembers) {
+      if (bankMember.credit)
+        bankMember.credit.sum += (bankMember.credit.sum * bankMember.credit.percent) / 100
+      if (bankMember.deposit)
+        bankMember.deposit.sum +=
+          (bankMember.deposit.sum * bankMember.deposit.percent) / 100
+      if (bankMember.credit || bankMember.deposit) bankMember.save()
     }
   }
 
-  static async remove(message, args) {
+  static async remove(message, args, bancrotRoleId) {
     if (!message.member.hasPermission('MANAGE_MESSAGES')) return
     const user = message.mentions.users.first()
     if (!user) return "I don't know who is it"
-    const bankMember = await BankMember.getOrCreateBankMember(user.id)
+    const bankMember = await BankMember.getOrCreate(user.id, message.guild.id)
     switch (args[1]) {
       case 'credit':
         bankMember.credit = null
-        log(`${message.author.tag} remove credit ${user.username}`)
+        log(`${message.author.tag} remove credit ${user.tag}`)
         break
       case 'deposit':
         bankMember.deposit = null
-        log(`${message.author.tag} remove deposit ${user.username}`)
+        log(`${message.author.tag} remove deposit ${user.tag}`)
         break
       case 'bancrot': {
         bankMember.bancrot = null
-        const role = message.guild.roles.cache.find(r => r.name === 'Банкрот')
-        message.guild.member(user.id).roles.remove(role)
-        log(`${message.author.tag} remove bancrot ${user.username}`)
+        const role = message.guild.roles.cache.get(bancrotRoleId)
+        message.guild.member(user).roles.remove(role)
+        log(`${message.author.tag} remove bancrot ${user.tag}`)
         break
       }
       default:
@@ -97,10 +86,13 @@ class ModerationCommands {
 }
 
 module.exports.run = async (message, args) => {
-  if (args === 'calcPercents') return ModerationCommands.calcPercents() //inclusion
-  if (args === 'closeDeals') return ModerationCommands.closeDeals(message.guild) //inclusion
-  const userId = message.author.id
-  const bankMember = await BankMember.getOrCreateBankMember(userId)
+  const { bancrotRoleId } = await Guild.getOrCreate(message.guild.id)
+  if (!bancrotRoleId) return
+
+  if (args === 'calcPercents') return ModerationCommands.calcPercents(message.guild.id) //inclusion
+  if (args === 'closeDeals')
+    return ModerationCommands.closeDeals(message.guild, bancrotRoleId) //inclusion
+  const bankMember = await BankMember.getOrCreate(message.author.id, message.guild.id)
 
   let response
   switch (args[0]) {
@@ -129,15 +121,21 @@ module.exports.run = async (message, args) => {
       break
 
     case 'remove':
-      response = await ModerationCommands.remove(message, args)
+    case 'delete':
+      response = await ModerationCommands.remove(message, args, bancrotRoleId)
       if (typeof response === 'string') message.reply(response)
       else if (response) message.react('✅')
       else message.react('❌')
       break
 
+    case 'инфо':
+    case 'i':
     case 'info': {
       const user = message.mentions.users.first()
-        ? await BankMember.getOrCreateBankMember(message.mentions.users.first().id)
+        ? await BankMember.getOrCreate(
+            message.mentions.users.first().id,
+            message.guild.id
+          )
         : bankMember
       const embed = new MessageEmbed()
         .setColor('#84ed39')
@@ -174,4 +172,5 @@ module.exports.run = async (message, args) => {
 
 module.exports.help = {
   name: 'bank',
+  aliases: ['банк'],
 }

@@ -1,12 +1,13 @@
 const { MessageEmbed } = require('discord.js')
-const { User } = require('../../classes/User.js')
+const { User } = require('../../models/User.js')
 const { rainbow } = require('../../utils/rainbow.js')
 const { randomInteger } = require('../../utils/randomInteger.js')
 const games = new Map()
 class TicTacToe {
-  constructor(firstPlayer, secondPlayer, bet) {
+  constructor(guildId, firstPlayer, secondPlayer, bet) {
     this.firstPlayer = firstPlayer
     this.secondPlayer = secondPlayer
+    this.guildId = guildId
     this.bet = bet
     this.squares = Array(9).fill(null)
     this.xIsNext = true
@@ -27,8 +28,8 @@ class TicTacToe {
     stepCollector.stop()
     clearTimeout(this._timeout)
     const players = [
-      await User.getOrCreateUser(this.firstPlayer),
-      await User.getOrCreateUser(this.secondPlayer),
+      await User.getOrCreate(this.firstPlayer, this.guildId),
+      await User.getOrCreate(this.secondPlayer, this.guildId),
     ]
     players.forEach(({ id }) => games.delete(id))
 
@@ -131,11 +132,12 @@ module.exports.run = async (message, args) => {
 
   startCollector.on('collect', async collected => {
     const [firstPlayer, secondPlayer] = [
-      await User.getOrCreateUser(message.author.id),
-      await User.getOrCreateUser(
+      await User.getOrCreate(message.author.id, message.guild.id),
+      await User.getOrCreate(
         [...collected.users.cache].find(
           user => !user[1].bot && (!tillPlay || tillPlay.id === user[1].id)
-        )[0]
+        )[0],
+        message.guild.id
       ),
     ].sort(() => randomInteger(-2, 1) || 1) //random sort
     if (games.has(firstPlayer.id) || games.has(secondPlayer.id)) return
@@ -144,7 +146,7 @@ module.exports.run = async (message, args) => {
     if (firstPlayer.coins < bet || secondPlayer.coins < bet)
       return message.reply('У кого-то из вас не хватает')
 
-    const game = new TicTacToe(firstPlayer.id, secondPlayer.id, bet)
+    const game = new TicTacToe(message.guild.id, firstPlayer.id, secondPlayer.id, bet)
 
     games.set(firstPlayer.id, game)
     games.set(secondPlayer.id, game)

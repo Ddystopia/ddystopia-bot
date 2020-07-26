@@ -1,4 +1,4 @@
-const { User } = require('../../classes/User')
+const { User } = require('../../models/User')
 const { useUserGames } = require('../../utils/useUserGames')
 const COST_FOR_IMAGE = 30
 const MINS_COOLDOWN = 240
@@ -12,8 +12,7 @@ module.exports.run = async message => {
   const attachmentsNum = message.attachments.size
   if (!attachmentsNum) return
 
-  const user = await User.getOrCreateUser(message.author.id)
-  if (user.bancrot) return
+  const user = await User.getOrCreate(message.author.id, message.guild.id)
 
   user.coins += attachmentsNum * COST_FOR_IMAGE
   user.save()

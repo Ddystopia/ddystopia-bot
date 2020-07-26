@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js')
-const { User } = require('../../classes/User')
+const { User } = require('../../models/User')
 const { useUserGames } = require('../../utils/useUserGames')
 const { randomInteger } = require('../../utils/randomInteger.js')
 const { rainbow } = require('../../utils/rainbow.js')
@@ -12,21 +12,20 @@ const sidesImages = {
 const games = new Map()
 const lastGames = new Map()
 
-module.exports.run = async (message, args) => {
-  if (!args) return
-  if (isNaN(+args[0]) && args[0] != 'all') return
-  if (+args[0] <= 0) return
-  if (args[1] != sides[0] && args[1] != sides[1]) return
+module.exports.run = async (message, [propBet, propSide]) => {
+  if (isNaN(+propBet) && propBet !== 'all') return
+  if (+propBet <= 0) return
+  if (propSide != sides[0] && propSide != sides[1]) return
 
   const userGames = useUserGames(message.author.id, games, lastGames)
 
-  const user = await User.getOrCreateUser(message.author.id)
+  const user = await User.getOrCreate(message.author.id, message.guild.id)
 
-  const bet = args[0] == 'all' ? user.coins : +args[0]
-  const bettedSide = args[1]
+  const bet = propBet === 'all' ? user.coins : +propBet
+  const bettedSide = propSide
   let percent = 50 - (userGames * 1.2 - 12)
   if (percent < 10) percent = 10
-  const loseSide = sides.join('').replace(args[0], '')
+  const loseSide = sides.join('').replace(propBet, '')
   const side =
     userGames < 11
       ? sides[randomInteger(0, 1)]
@@ -56,4 +55,5 @@ module.exports.run = async (message, args) => {
 
 module.exports.help = {
   name: 'cf',
+  aliases: ['bf', 'монетка'],
 }

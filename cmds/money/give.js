@@ -1,21 +1,20 @@
-const { User } = require('../../classes/User')
+const { User } = require('../../models/User')
 const { log } = require('../../utils/log.js')
+const MAX_GIVE_SUM_ONE_TIMES = 1e4
 
-module.exports.run = async (message, args) => {
-  if (!args) return
-  if (isNaN(+args[0])) return
-  if (+args[0] <= 0 || +args[0] > 1e4) return
-  if (!args[1]) return
-  if (!args[1].match(/(\d{15,})/)) return
+module.exports.run = async (message, [sum, memberString]) => {
+  if (isNaN(+sum)) return
+  if (+sum <= 0 || +sum > MAX_GIVE_SUM_ONE_TIMES) return
+  if (memberString && !memberString.match(/(\d{15,})/)) return
 
   const fromId = message.author.id
-  const tillId = message.mentions.users.first().id
+  const tillId = memberString.match(/(\d{15,})/)
   if (!tillId) return
-  const profileFrom = await User.getOrCreateUser(fromId)
-  const profileTill = await User.getOrCreateUser(tillId)
+  const profileFrom = await User.getOrCreate(fromId, message.guild.id)
+  const profileTill = await User.getOrCreate(tillId, message.guild.id)
   if (profileTill.bancrot) return
 
-  const transaction = args[0] == 'all' ? profileFrom.coins : +args[0]
+  const transaction = sum === 'all' ? profileFrom.coins : +sum
 
   if (profileFrom.coins < transaction)
     return message.reply(`Не хватает ${global.currency}`)
@@ -27,9 +26,9 @@ module.exports.run = async (message, args) => {
   profileTill.save()
 
   log(
-    `GIVE from ${message.author.username} till ${
-      message.mentions.users.first().username
-    } - ${transaction} coins`
+    `GIVE from ${message.author.tag} till ${
+      message.guild.member(tillId).user.tag
+    } - ${transaction} ${global.currency}`
   )
 
   message.reply(`Было успешно переведено ${transaction} ${global.currency}`)

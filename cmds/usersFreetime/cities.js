@@ -1,25 +1,25 @@
-const { readWrite } = require('../../utils/readWriteFile')
-let words = readWrite('words.json', null, [])
+const { CitiesGameWord } = require('../../models/CitiesGameWord')
 
 module.exports.run = async (message, args) => {
+  let words = await CitiesGameWord.find({ guildId: message.guild.id })
+  words = words.sort((a, b) => a.date - b.date)
   switch (args[0]) {
+    case 'очистить':
     case 'clear':
       if (!message.member.hasPermission('MANAGE_MESSAGES')) return
-      words = []
-      readWrite('words.json', words)
+      CitiesGameWord.deleteMany({})
       message.react('✅')
       break
+    case 'старт': 
     case 'start': {
       if (!message.onReady) return
-      const filter = m => !m.content.includes(' ')
+      const filter = m => !m.content.includes(' ') && !message.author.bot
       const collector = message.channel.createMessageCollector(filter)
 
       collector.on('collect', msg => {
         const word = toFormat(msg.content)
-        if (msg.author.bot) return
         if (isCorrect(word, words)) {
-          words.push(word)
-          readWrite('words.json', words)
+          new CitiesGameWord({ word, guildId: message.guild.id }).save()
           msg.react('✅')
         } else {
           msg.react('❌')
@@ -43,7 +43,9 @@ module.exports.run = async (message, args) => {
         const newWords = JSON.parse(json)
         if (!Array.isArray(newWords)) throw new Error()
         words = words.concat(newWords)
-        readWrite('words.json', words)
+        newWords.forEach(word =>
+          new CitiesGameWord({ guildId: message.guild.id, word }).save()
+        )
       } catch (e) {
         return message.react('❌')
       }
@@ -57,20 +59,20 @@ module.exports.run = async (message, args) => {
 
 function toFormat(word) {
   if (!word) return null
-  word = word
+  return word
     .toLowerCase()
     .replace(/[ьъы]$/g, '')
     .replace(/ё/g, 'е')
-  return word
 }
 
 function isCorrect(word, words) {
   const correctLastSymbol =
     !words.length || word[0] === words[words.length - 1].split('').pop()
-  const simpleLanguage = /^[a-z]+$/.test(word) || /^[а-я]+$/.test(word)
+  const simpleLanguage = /^[-a-z]+$/.test(word) || /^[-а-я]+$/.test(word)
   return !words.includes(word) && correctLastSymbol && word.length > 1 && simpleLanguage
 }
 
 module.exports.help = {
-  name: 'cities',
+	name: 'cities',
+	aliases: ['words', 'слова','города']
 }

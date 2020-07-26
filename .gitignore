@@ -1,7 +1,5 @@
 /node_modules
 *.db
 *.log
-*.json
 .env
-!package.json
-!package-lock.json
+redditConfig.json
