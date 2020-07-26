@@ -3,13 +3,12 @@ const { Leveling } = require('./classes/Leveling.js')
 const { Guild } = require('./models/Guild.js')
 const { readdirSync, statSync, writeSync } = require('fs')
 const { log } = require('./utils/log.js')
+require('dotenv').config()
 require('./utils/mongoose.js').init()
 const client = new Client()
 
 global.currency = '🌱' //если язык русский, то в родительском падеже(кого? чего?)
-
 client.commands = new Collection()
-
 client.login(process.env.TOKEN)
 
 const getDirs = p => readdirSync(p).filter(f => statSync(`${p}${f}`).isDirectory())

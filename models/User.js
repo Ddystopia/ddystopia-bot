@@ -1,35 +1,31 @@
 const mongoose = require('mongoose')
 const { onlyEmoji } = require('emoji-aware')
 
-const User = mongoose.model(
-  'User',
-  mongoose.Schema({
-    id: String,
-    guildId: String,
-    coins: { type: Number, default: 0 },
-    xp: { type: Number, default: 0 },
-    level: { type: Number, default: 0 },
-    rep: { type: Number, default: 0 },
-    birthday: { type: String, default: '' },
-    marry: { type: String, default: '' },
-    dailyLevel: { type: Number, default: 0 },
-    about: { type: String, default: '' },
-    loot: { type: Object, default: {} },
-    timers: {
-      daily: Number,
-      loot: Number,
-    },
-  })
-)
+const userSchema = mongoose.Schema({
+  id: String,
+  guildId: String,
+  coins: { type: Number, default: 0 },
+  xp: { type: Number, default: 0 },
+  level: { type: Number, default: 0 },
+  rep: { type: Number, default: 0 },
+  birthday: { type: String, default: '' },
+  marry: { type: String, default: '' },
+  dailyLevel: { type: Number, default: 0 },
+  about: { type: String, default: '' },
+  loot: { type: Object, default: {} },
+  timers: {
+    daily: Number,
+    loot: Number,
+  },
+})
 // not arrow func
-User.statics.getOrCreate = async function (id, guildId) {
+userSchema.statics.getOrCreate = async function (id, guildId) {
   let user = await this.findOne({ id, guildId })
   if (!user) user = new User({ id, guildId })
   user.coins = Math.floor(user.coins)
   return user
 }
-
-User.methods.getLootArray = function (args, loot) {
+userSchema.methods.getLootArray = function (args, loot) {
   const lootIndexes = {}
   const lootArray = []
   onlyEmoji(args.join(''))
@@ -42,19 +38,18 @@ User.methods.getLootArray = function (args, loot) {
   }
   return lootArray
 }
-
-User.methods.addLoot = function (lootArray) {
+userSchema.methods.addLoot = function (lootArray) {
   lootArray.forEach(loot => {
     if (this.loot[loot]) this.loot[loot]++
     else this.loot[loot] = 1
   })
 }
-
-User.methods.removeLoot = function (lootArray) {
+userSchema.methods.removeLoot = function (lootArray) {
   lootArray.forEach(loot => {
     if (this.loot[loot] < 2) delete this.loot[loot]
     else this.loot[loot]--
   })
 }
 
+const User = mongoose.model('User', userSchema)
 module.exports.User = User

@@ -7,7 +7,7 @@ const CitiesGameWord = mongoose.model(
     guildId: String,
     date: {
       type: Number,
-      default: global.performance.timeOrigin + global.performance.now(),
+      default: () => global.performance.timeOrigin + global.performance.now(),
     },
   })
 )

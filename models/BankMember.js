@@ -2,32 +2,29 @@ const { User } = require('./User')
 const mongoose = require('mongoose')
 const { Credit, Deposit, latestCredits } = require('../classes/Deals')
 
-const BankMember = mongoose.model(
-  'BankMember',
-  mongoose.Schema({
-    id: String,
-    guildId: String,
-    credit: {
-      sum: Number,
-      percent: Number,
-      deadline: Number,
-    },
-    deposit: {
-      sum: Number,
-      percent: Number,
-      deadline: Number,
-    },
-    bancrot: Number,
-  })
-)
+const bankMemberSchema = mongoose.Schema({
+  id: String,
+  guildId: String,
+  credit: {
+    sum: Number,
+    percent: Number,
+    deadline: Number,
+  },
+  deposit: {
+    sum: Number,
+    percent: Number,
+    deadline: Number,
+  },
+  bancrot: Number,
+})
+
 // not arrow func
-BankMember.statics.getOrCreate = async function (id, guildId) {
+bankMemberSchema.statics.getOrCreate = async function (id, guildId) {
   let bankMember = await this.findOne({ id, guildId })
   if (!bankMember) bankMember = new BankMember({ id, guildId })
   return bankMember
 }
-
-BankMember.statics.createCredit = async function createCredit(sum, days) {
+bankMemberSchema.statics.createCredit = async function createCredit(sum, days) {
   if (this.credit) return 'You already have credit.'
   if (isNaN(+sum) || isNaN(+days)) return 'Invalid arguments'
   if (+sum > 1e5) return 'Invalid argument sum(so many)'
@@ -51,7 +48,7 @@ BankMember.statics.createCredit = async function createCredit(sum, days) {
   this.save()
   return true
 }
-BankMember.statics.createDeposit = async function createDeposit(sum, days) {
+bankMemberSchema.statics.createDeposit = async function createDeposit(sum, days) {
   if (this.deposit) return 'You already have deposit.'
   if (this.credit) return "You have some credit, I can't make deposit."
   if (isNaN(+sum) || isNaN(+days)) return 'Invalid arguments'
@@ -68,4 +65,5 @@ BankMember.statics.createDeposit = async function createDeposit(sum, days) {
   return true
 }
 
+const BankMember = mongoose.model('BankMember', bankMemberSchema)
 exports.BankMember = BankMember
