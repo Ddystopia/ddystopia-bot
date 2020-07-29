@@ -39,9 +39,9 @@ module.exports.run = async (message, args, command) => {
       const userTill = await User.getOrCreate(userTillMention.id, message.guild.id)
       let lootArray = []
       if (args[1] === 'all')
-        for (const loot in userFrom.loot)
-          for (let i = 0; i < userFrom.loot[loot]; i++) lootArray.push(loot)
-      else lootArray = userFrom.getLootArray(args.slice(1), loot)
+        for (const ownLoot of userFrom.loot)
+          for (let i = 0; i < ownLoot.number; i++) lootArray.push(ownLoot.loot)
+      else lootArray = userFrom.getLootArray(args.slice(1).join(''), loot)
 
       if (lootArray.length < 1) return message.reply('Не продаётся')
 
@@ -55,17 +55,18 @@ module.exports.run = async (message, args, command) => {
     }
     case 'lootbox': {
       const user = await User.getOrCreate(message.author.id, message.guild.id)
-      if (!user.loot['🎁']) return message.reply('Нечего открывать ¯\\_(ツ)_/¯')
-      user.removeLoot(['🎁'])
+      if (!user.findOwnLoot(':gift:'))
+        return message.reply('Нечего открывать ¯\\_(ツ)_/¯')
+      user.removeLoot([':gift:'])
       const userGames = useUserGames(message.author.id, games, lastGames, 30)
-      let number = randomInteger(0, 100)
-      if (userGames > 20) number -= ((userGames / 1.5) % 30) + 10
+      let percent = randomInteger(0, 100)
+      if (userGames > 20) percent -= ((userGames / 1.5) % 30) + 10
 
       let maxCost = 0
-      if (number === 100) maxCost = 2e4
-      else if (number > 98) maxCost = 9e6
-      else if (number > 93) maxCost = 1e6
-      else if (number > 70) maxCost = 2e4
+      if (percent === 100) maxCost = 2e4
+      else if (percent > 98) maxCost = 9e6
+      else if (percent > 93) maxCost = 1e6
+      else if (percent > 70) maxCost = 2e4
       else maxCost = MAX_DAILY_LOOT_COST
 
       const winnedLoot = calcLoot(loot, maxCost)
@@ -77,9 +78,7 @@ module.exports.run = async (message, args, command) => {
 }
 
 function calcLoot(loot, maxCost = MAX_DAILY_LOOT_COST) {
-  const loots = Object.entries(loot)
-    .filter(line => line[1] <= maxCost)
-    .map(item => item[0])
+  const loots = loot.filter(line => line.cost <= maxCost).map(item => item.loot)
   const winnedLoot = loots[randomInteger(0, loots.length - 1)]
   return winnedLoot
 }

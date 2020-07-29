@@ -1,16 +1,16 @@
 const { CitiesGameWord } = require('../../models/CitiesGameWord')
 
 module.exports.run = async (message, args) => {
-  let words = await CitiesGameWord.find({ guildId: message.guild.id })
+  let words = await CitiesGameWord.find({ channelId: message.channel.id })
   words = words.sort((a, b) => a.date - b.date)
   switch (args[0]) {
     case 'очистить':
     case 'clear':
       if (!message.member.hasPermission('MANAGE_MESSAGES')) return
-      CitiesGameWord.deleteMany({})
+      CitiesGameWord.deleteMany({ channelId: message.channel.id })
       message.react('✅')
       break
-    case 'старт': 
+    case 'старт':
     case 'start': {
       if (!message.onReady) return
       const filter = m => !m.content.includes(' ') && !message.author.bot
@@ -19,7 +19,7 @@ module.exports.run = async (message, args) => {
       collector.on('collect', msg => {
         const word = toFormat(msg.content)
         if (isCorrect(word, words)) {
-          new CitiesGameWord({ word, guildId: message.guild.id }).save()
+          new CitiesGameWord({ word, channelId: message.channel.id }).save()
           msg.react('✅')
         } else {
           msg.react('❌')
@@ -44,7 +44,7 @@ module.exports.run = async (message, args) => {
         if (!Array.isArray(newWords)) throw new Error()
         words = words.concat(newWords)
         newWords.forEach(word =>
-          new CitiesGameWord({ guildId: message.guild.id, word }).save()
+          new CitiesGameWord({ channelId: message.channel.id, word }).save()
         )
       } catch (e) {
         return message.react('❌')
@@ -73,6 +73,6 @@ function isCorrect(word, words) {
 }
 
 module.exports.help = {
-	name: 'cities',
-	aliases: ['words', 'слова','города']
+  name: 'cities',
+  aliases: ['words', 'слова', 'города'],
 }

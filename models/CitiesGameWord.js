@@ -4,7 +4,7 @@ const CitiesGameWord = mongoose.model(
   'CitiesGameWord',
   mongoose.Schema({
     word: String,
-    guildId: String,
+    channelId: String,
     date: {
       type: Number,
       default: () => global.performance.timeOrigin + global.performance.now(),

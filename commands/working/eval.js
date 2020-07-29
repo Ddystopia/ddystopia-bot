@@ -1,14 +1,13 @@
 module.exports.run = async message => {
-  if (
-    !message.member.hasPermission('ADMINISTRATOR') &&
-    message.author.id !== '630767319257317378'
-  )
-    return
-  if (['token', 'process'].some(elem => message.content.includes(elem)))
-    return message.channel.sand('Это слишком личное >///<')
+  if (message.author.id !== '630767319257317378') return
+  if (['token'].some(elem => message.content.includes(elem)))
+    return message.channel.send('Это слишком личное >///<')
 
   const code = `(async () => {
-		${message.content.match(/(?<=.+?eval)(.+)/)[1]}
+		${
+      (message.content.match(/```js(.+)```/ms) ||
+        message.content.match(/(?<=.+?eval)(.+)/ms))[1]
+    }
 	})()`
 
   eval(code).catch(error => {

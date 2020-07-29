@@ -13,12 +13,13 @@ module.exports.run = async (message, args, command) => {
   const profile = await User.getOrCreate(user.id, message.guild.id)
   switch (command) {
     case 'profile':
+    case 'user':
     case 'юзер':
     case 'профиль':
       {
-        const usersLoot = Object.entries(profile.loot)
-          .sort((a, b) => loot[b[0]] - loot[a[0]])
-          .map(line => `${line[0]} ${line[1]}`)
+        const usersLoot = profile.loot
+          .sort((a, b) => loot[b.loot] - loot[a.loot])
+          .map(line => `${line.loot} ${line.number}`)
           .join(' | ')
 
         const embed = new MessageEmbed()
@@ -93,8 +94,8 @@ module.exports.run = async (message, args, command) => {
         firstProfile.marry = member.toString()
         secondProfile.marry = message.member.toString()
 
-        firstProfile.removeLoot(['💍'])
-        secondProfile.removeLoot(['💍'])
+        firstProfile.removeLoot(['ring'])
+        secondProfile.removeLoot(['ring'])
 
         firstProfile.save()
         secondProfile.save()

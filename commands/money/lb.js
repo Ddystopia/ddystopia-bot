@@ -19,8 +19,8 @@ module.exports.run = async (message, [page], command) => {
         actives = user.coins
         if (bankMember.deposit) actives += bankMember.deposit.sum
         if (bankMember.credit) actives -= bankMember.credit.sum
-        actives += Object.entries(user.loot).reduce((sum, lootArray) => {
-          const usersLoot = loot.find(loot => loot.loot === lootArray[0]) || { cost: 0 }
+        actives += user.loot.reduce((sum, ownLoot) => {
+          const usersLoot = loot.find(loot => loot.loot === ownLoot.loot) || { cost: 0 }
           return sum + usersLoot.cost
         }, 0)
       } else actives = user.level

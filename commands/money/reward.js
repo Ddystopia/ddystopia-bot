@@ -1,5 +1,4 @@
 const { User } = require('../../models/User')
-const { log } = require('../../utils/log.js')
 
 module.exports.run = async (message, [propSum]) => {
   if (!message.member.hasPermission('MANAGE_MESSAGES')) return
@@ -14,13 +13,6 @@ module.exports.run = async (message, [propSum]) => {
   user.coins += transaction
 
   user.save()
-
-  log(
-    `REWARD from${message.author.username} till ${
-      message.mentions.users.first().username
-    } - ${transaction} ${global.currency}`
-  )
-
   message.reply(`Было успешно переведено ${transaction} ${global.currency}`)
 }
 

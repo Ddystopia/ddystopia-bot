@@ -19,6 +19,7 @@ class RolesLeveling {
       ids.push(row.id)
       levels.push(row.level)
     })
+    return [ids, levels]
   }
 }
 module.exports.RolesLeveling = RolesLeveling

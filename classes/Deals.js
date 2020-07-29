@@ -1,6 +1,5 @@
 const { User } = require('../models/User')
 const { RoleForShop } = require('../models/RoleForShop.js')
-const { log } = require('../utils/log')
 const latestCredits = new Map()
 module.exports.latestCredits = latestCredits
 
@@ -84,7 +83,6 @@ class Credit extends Deal {
       user.level = Math.max(0, user.level - 10)
       bankMember.credit = null
       bankMember.deposit = null
-      log('New Bancrot: ' + member)
     }
 
     bankMember.save()

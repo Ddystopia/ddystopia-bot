@@ -1,13 +1,13 @@
+require('dotenv').config()
 const { Client, Collection } = require('discord.js')
 const { Leveling } = require('./classes/Leveling.js')
 const { Guild } = require('./models/Guild.js')
 const { Temp, TempTypes } = require('./models/Temp.js')
 const { readdirSync, statSync, writeSync } = require('fs')
 const { log } = require('./utils/log.js')
-require('dotenv').config()
+const { User } = require('./models/User.js')
 require('./utils/checkTemps.js').start()
 require('./utils/mongoose.js').init()
-
 const MAX_GUILD_MEMBERS_COUNT_TO_IMMEDIATELY_DELETE_ON_LEAVE = 100
 const HOURS_TO_CALC_PERCENTS = 12
 
@@ -44,11 +44,10 @@ client.on('ready', async () => {
       client.commands.get('cities').run({ channel, onReady: true }, ['start'])
     })
 
-    guild.setInterval(() => {
+    setInterval(() => {
       if (new Date().getHours() === HOURS_TO_CALC_PERCENTS - 1)
-        guild.setTimeout(() => {
+        setTimeout(() => {
           client.commands.get('bank').run({ guild }, 'calcPercents')
-          log('Percents have been calked')
         }, new Date().setHours(HOURS_TO_CALC_PERCENTS, 0, 0, 0) - Date.now())
 
       client.commands.get('bank').run({ guild }, 'closeDeals')
@@ -57,8 +56,10 @@ client.on('ready', async () => {
 })
 
 client.on('guildDelete', async guild => {
-  if (guild.memberCount < MAX_GUILD_MEMBERS_COUNT_TO_IMMEDIATELY_DELETE_ON_LEAVE)
+  if (guild.memberCount < MAX_GUILD_MEMBERS_COUNT_TO_IMMEDIATELY_DELETE_ON_LEAVE) {
+    User.deleteMany({ guildId: guild.id })
     return Guild.deleteOne({ id: guild.id })
+  }
   new Temp({ type: TempTypes.GUILD_DELETE, options: { id: guild.id } }).save()
 })
 
@@ -66,7 +67,7 @@ client.on('guildMemberAdd', async member => {
   const { greetingChannel, baseRoleId } = await Guild.getOrCreate(member.guild.id)
   if (!greetingChannel || member.user.bot) return
   const role = member.guild.roles.cache.get(baseRoleId)
-  if (!member || !role) return log('Role or member do not exist')
+  if (!member || !role) return 
   member.roles.add(role)
   client.commands.get('greeting').run({ member }, [greetingChannel])
 })
@@ -76,6 +77,16 @@ client.on('guildMemberRemove', async member => {
     type: TempTypes.USER_DELETE,
     options: { id: member.id, guildId: member.guild.id, deadline: 5 * 24 * 3600 * 1000 },
   }).save()
+})
+
+client.on('roleDelete', async role => {
+  const guildDB = await Guild.getOrCreate(role.guild.id)
+  for (const prop in guildDB) {
+    if (guildDB[prop] === role.id) guildDB[prop] = null
+    if (Array.isArray(guildDB[prop]))
+      guildDB[prop] = guildDB[prop].filter(el => el !== role.id)
+  }
+  guildDB.save()
 })
 
 client.on('message', message => {
@@ -91,7 +102,6 @@ client.on('message', async message => {
   if (guildDB.noCommandsChannels.includes(message.channel.id)) return // do not listening commands from banned channels
   if (!message.content.startsWith(guildDB.prefix)) return // filter simple text
   if (guildDB.blacklist.includes(message.author.id) || message.author.bot) return
-
   const args = message.content.split(/\s+/g)
   const commandName = args.shift().toLowerCase().slice(guildDB.prefix.length)
   const command =
@@ -99,7 +109,6 @@ client.on('message', async message => {
     client.commands.find(({ help }) => help.aliases && help.aliases.includes(commandName))
 
   if (command) {
-    log(`User ${message.author.tag} use command [${commandName}] with args [${args}]`)
     command.run(message, args, commandName).catch(log)
   }
 })

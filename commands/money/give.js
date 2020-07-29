@@ -1,5 +1,4 @@
 const { User } = require('../../models/User')
-const { log } = require('../../utils/log.js')
 const MAX_GIVE_SUM_ONE_TIMES = 1e4
 
 module.exports.run = async (message, [sum, memberString]) => {
@@ -24,12 +23,6 @@ module.exports.run = async (message, [sum, memberString]) => {
 
   profileFrom.save()
   profileTill.save()
-
-  log(
-    `GIVE from ${message.author.tag} till ${
-      message.guild.member(tillId).user.tag
-    } - ${transaction} ${global.currency}`
-  )
 
   message.reply(`Было успешно переведено ${transaction} ${global.currency}`)
 }

@@ -2,7 +2,6 @@ const { MessageEmbed } = require('discord.js')
 const { Guild } = require('../../models/Guild')
 const { BankMember } = require('../../models/BankMember')
 const { Credit } = require('../../classes/Deals')
-const { log } = require('../../utils/log.js')
 
 class ModerationCommands {
   static async closeDeals(guild, bancrotRoleId) {
@@ -64,17 +63,14 @@ class ModerationCommands {
     switch (args[1]) {
       case 'credit':
         bankMember.credit = null
-        log(`${message.author.tag} remove credit ${user.tag}`)
         break
       case 'deposit':
         bankMember.deposit = null
-        log(`${message.author.tag} remove deposit ${user.tag}`)
         break
       case 'bancrot': {
         bankMember.bancrot = null
         const role = message.guild.roles.cache.get(bancrotRoleId)
         message.guild.member(user).roles.remove(role)
-        log(`${message.author.tag} remove bancrot ${user.tag}`)
         break
       }
       default:

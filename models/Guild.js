@@ -16,7 +16,10 @@ const guildSchema = mongoose.Schema({
 // not arrow func because context 'this' is important
 guildSchema.statics.getOrCreate = async function (id) {
   let guild = await this.findOne({ id })
-  if (!guild) guild = new Guild({ id })
+  if (!guild) {
+    guild = new Guild({ id })
+    guild.save()
+  }
   return guild
 }
 

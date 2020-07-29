@@ -8,7 +8,7 @@ class Leveling {
   }
 
   static async _doLeveling(newExp, member) {
-    const user = await User.getOrCreate(member.id)
+    const user = await User.getOrCreate(member.id, member.guild.id)
     if (!user.xp) user.xp = 0
     user.xp += randomInteger(newExp - 7, newExp + 7)
     let xp = this.calcXp(user.level) // xp for up

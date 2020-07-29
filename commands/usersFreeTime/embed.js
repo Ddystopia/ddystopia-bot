@@ -1,4 +1,3 @@
-const { log } = require('../../utils/log.js')
 module.exports.run = async (message, args) => {
   if (!message.member.hasPermission('MANAGE_MESSAGES')) return
   if (!args[0] || !args[1]) return
@@ -18,7 +17,6 @@ module.exports.run = async (message, args) => {
     channel.send({
       embed: embedObj,
     })
-    log(`${message.author.tag} send embed`)
   } catch (err) {
     return message.reply(`${err.name}: ${err.message}`, { code: 'bash' })
   }

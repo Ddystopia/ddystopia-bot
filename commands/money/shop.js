@@ -1,23 +1,34 @@
 const { MessageEmbed } = require('discord.js')
 const { User } = require('../../models/User')
 const { RoleForShop } = require('../../models/RoleForShop')
-const { log } = require('../../utils/log.js')
+const { slider } = require('../../utils/slider')
+const MAX_FIELDS = 25
+class EmbedInstance extends MessageEmbed {
+  constructor(avatarUrl) {
+    super()
+    this.setColor('#0099ff').setTitle('Market').setThumbnail(avatarUrl).setTimestamp()
+  }
+}
 class RolesBoard {
   static async shopList(message) {
-    const shopList = new MessageEmbed()
-      .setColor('#0099ff')
-      .setTitle('Роли')
-      .setThumbnail(message.author.avatarURL())
-      .setTimestamp()
-    const roles = sortAndClean(await RoleForShop.find({ guildId: message.guild.id }))
-    let i = 0
-    for (const roleId in roles) {
-      if (!roles[roleId]) continue
-      const role = message.member.guild.roles.cache.get(roleId)
-      const cost = roles[roleId]
-      shopList.addField(++i, `${role} - ${cost} ${global.currency}`)
+    const roles = await RoleForShop.find({ guildId: message.guild.id })
+    const rolesEntries = Object.entries(sortAndClean(roles))
+    const embeds = []
+    if (rolesEntries.length === 0)
+      embeds.push(
+        new EmbedInstance(message.author.avatarURL()).addField(`Пусто`, '\u200B')
+      )
+    for (let i = 0; i < Math.ceil(rolesEntries.length / MAX_FIELDS); i++) {
+      const rolesChunk = rolesEntries.slice(i * MAX_FIELDS, (i + 1) * MAX_FIELDS)
+      const shopList = new EmbedInstance(message.author.avatarURL())
+      for (let j = 1; j <= rolesChunk.length; j++)
+        shopList.addField(
+          j,
+          `${rolesChunk[j][0]} - ${rolesChunk[j][1]}${global.currency}`
+        )
+      embeds.push(shopList)
     }
-    return message.reply(shopList)
+    slider(embeds, message)
   }
   static add(message, args) {
     if (!message.member.hasPermission('MANAGE_MESSAGES')) return
@@ -27,10 +38,7 @@ class RolesBoard {
     let roleId = args[1].match(/(\d{15,})/) && args[1].match(/(\d{15,})/)[1]
     if (!roleId) return message.reply("I don't know what is it")
 
-    const role = message.member.guild.roles.cache.get(roleId)
     new RoleForShop({ id: roleId, guildId: message.guild.id }).save()
-
-    log(`${message.author.tag} add role to shop ${role.name}(${role})`)
     RolesBoard.shopList(message)
   }
   static remove(message, args) {
@@ -40,10 +48,7 @@ class RolesBoard {
     let roleId = args[1].match(/(\d{15,})/) && args[1].match(/(\d{15,})/)[1]
     if (!roleId) return message.reply("I don't know what is it")
 
-    const role = message.member.guild.roles.cache.get(roleId)
     RoleForShop.deleteOne({ id: roleId, guildId: message.guild.id })
-
-    log(`${message.author.tag} remove role from shop ${role.name}(${role})`)
     RolesBoard.shopList(message)
   }
   static async buy(message, args) {
@@ -64,7 +69,6 @@ class RolesBoard {
     user.coins -= cost
     message.member.roles.add(role)
     message.react('✅')
-    log(`${message.author.tag} buy role ${role.name}(${role})`)
     user.save()
   }
   static async sell(message, args) {
@@ -85,7 +89,6 @@ class RolesBoard {
     user.coins += cost * 0.9
     message.member.roles.remove(role)
 
-    log(`${message.author.tag} sell role ${role.name}(${role})`)
     message.reply(`Успех, вы получили ${cost * 0.9} ${global.currency}`)
     user.save()
   }

@@ -1,16 +1,22 @@
 const { MessageEmbed } = require('discord.js')
 const { RolesLeveling } = require('../../classes/RolesLeveling')
 const { RoleForLeveling } = require('../../models/RoleForLeveling')
-const { log } = require('../../utils/log.js')
-
+const { slider } = require('../../utils/slider')
+const MAX_FIELDS = 25
+class EmbedInstance extends MessageEmbed {
+  constructor(avatarUrl) {
+    super()
+    this.setColor('#0099ff').setTitle('Market').setThumbnail(avatarUrl).setTimestamp()
+  }
+}
 class RolesBoard {
-  static shopList(message) {
+  static async shopListOld(message) {
     const shopList = new MessageEmbed()
       .setColor('#0099ff')
       .setTitle('Роли')
       .setThumbnail(message.author.avatarURL())
       .setTimestamp()
-    const roles = sortAndClean(RoleForLeveling.find({ guildId: message.guild.id }))
+    const roles = sortAndClean(await RoleForLeveling.find({ guildId: message.guild.id }))
     let i = 0
     for (const roleId in roles) {
       if (!roles[roleId]) continue
@@ -19,6 +25,26 @@ class RolesBoard {
       shopList.addField(++i, `${role} - ${level}`)
     }
     return message.reply(shopList)
+  }
+  static async shopList(message) {
+    const roles = await RoleForLeveling.find({ guildId: message.guild.id })
+    const rolesEntries = Object.entries(sortAndClean(roles))
+    const embeds = []
+    if (rolesEntries.length === 0)
+      embeds.push(
+        new EmbedInstance(message.author.avatarURL()).addField(`Пусто`, '\u200B')
+      )
+    for (let i = 0; i < Math.ceil(rolesEntries.length / MAX_FIELDS); i++) {
+      const rolesChunk = rolesEntries.slice(i * MAX_FIELDS, (i + 1) * MAX_FIELDS)
+      const shopList = new EmbedInstance(message.author.avatarURL())
+      for (let j = 1; j <= rolesChunk.length; j++) {
+        const role = message.member.guild.roles.cache.get(rolesChunk[j][0])
+        const level = rolesChunk[j][1]
+        shopList.addField(++j, `${role} - ${level}`)
+      }
+      embeds.push(shopList)
+    }
+    slider(embeds, message)
   }
   static add(message, args) {
     if (!message.member.hasPermission('MANAGE_MESSAGES')) return
@@ -34,7 +60,6 @@ class RolesBoard {
       guildId: message.guild.id,
     }).save()
 
-    log(`${message.author.tag} add role to shop ${role.name}(${role})`)
     RolesBoard.shopList(message)
   }
   static remove(message) {
@@ -49,7 +74,6 @@ class RolesBoard {
       guildId: message.guild.id,
     })
 
-    log(`${message.author.tag} remove role from shop ${role.name}(${role})`)
     RolesBoard.shopList(message)
   }
 }

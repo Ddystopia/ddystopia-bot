@@ -21,7 +21,10 @@ const bankMemberSchema = mongoose.Schema({
 // not arrow func
 bankMemberSchema.statics.getOrCreate = async function (id, guildId) {
   let bankMember = await this.findOne({ id, guildId })
-  if (!bankMember) bankMember = new BankMember({ id, guildId })
+  if (!bankMember) {
+    bankMember = new BankMember({ id, guildId })
+    bankMember.save()
+  }
   return bankMember
 }
 bankMemberSchema.statics.createCredit = async function createCredit(sum, days) {
