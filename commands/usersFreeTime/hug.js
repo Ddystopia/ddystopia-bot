@@ -26,5 +26,6 @@ module.exports.run = async (message, args, command) => {
 
 module.exports.help = {
   name: 'hug',
+	cooldown: 2,
   aliases: actions,
 }

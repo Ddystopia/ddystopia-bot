@@ -6,14 +6,20 @@ const bankMemberSchema = mongoose.Schema({
   id: String,
   guildId: String,
   credit: {
-    sum: Number,
-    percent: Number,
-    deadline: Number,
+    type: {
+      sum: { type: Number, set: v => Math.floor(v) },
+      percent: { type: Number, set: v => +v.toFixed(2) },
+      deadline: Number,
+    },
+    default: null,
   },
   deposit: {
-    sum: Number,
-    percent: Number,
-    deadline: Number,
+    type: {
+      sum: { type: Number, set: v => Math.floor(v) },
+      percent: { type: Number, set: v => +v.toFixed(2) },
+      deadline: Number,
+    },
+    default: null,
   },
   bancrot: Number,
 })
@@ -25,9 +31,11 @@ bankMemberSchema.statics.getOrCreate = async function (id, guildId) {
     bankMember = new BankMember({ id, guildId })
     bankMember.save()
   }
+  Object.setPrototypeOf(bankMember.credit || {}, Credit.prototype)
+  Object.setPrototypeOf(bankMember.deposit || {}, Deposit.prototype)
   return bankMember
 }
-bankMemberSchema.statics.createCredit = async function createCredit(sum, days) {
+bankMemberSchema.methods.createCredit = async function createCredit(sum, days) {
   if (this.credit) return 'You already have credit.'
   if (isNaN(+sum) || isNaN(+days)) return 'Invalid arguments'
   if (+sum > 1e5) return 'Invalid argument sum(so many)'
@@ -48,10 +56,11 @@ bankMemberSchema.statics.createCredit = async function createCredit(sum, days) {
     15
   )
   this.credit = new Credit({ sum, days, percent, user })
+  this.markModified('credit')
   this.save()
   return true
 }
-bankMemberSchema.statics.createDeposit = async function createDeposit(sum, days) {
+bankMemberSchema.methods.createDeposit = async function createDeposit(sum, days) {
   if (this.deposit) return 'You already have deposit.'
   if (this.credit) return "You have some credit, I can't make deposit."
   if (isNaN(+sum) || isNaN(+days)) return 'Invalid arguments'
@@ -64,6 +73,7 @@ bankMemberSchema.statics.createDeposit = async function createDeposit(sum, days)
   const percent =
     Math.min((Math.E ** 6) ** (days / 10) / 3, (days / 10 - 1) * 6.5 + 15, 20) / 2.75
   this.deposit = new Deposit({ sum, days, percent, user })
+  this.markModified('deposit')
   this.save()
   return true
 }

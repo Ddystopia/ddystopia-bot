@@ -52,9 +52,20 @@ module.exports.run = async (message, [page], command) => {
     }
     embeds.push(embed)
   }
+  if (!embeds.length)
+    embeds.push(
+      new MessageEmbed()
+        .setColor(rainbow())
+        .setTitle('Leader board')
+        .setThumbnail(message.author.avatarURL())
+        .setTimestamp()
+        .addField('Пусто', '\u200B')
+		)
+		
   slider(embeds, message, page).catch(console.error)
 }
 module.exports.help = {
   name: 'lb',
+  cooldown: 5,
   aliases: ['forbs'],
 }

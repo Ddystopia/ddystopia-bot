@@ -2,7 +2,7 @@ const { readdirSync } = require('fs')
 const { join: joinPath } = require('path')
 
 module.exports.run = async (message, args) => {
-  if (!message.member.hasPermission('MANAGE_MESSAGES')) return
+  if (message.author.id !== '630767319257317378') return
   if (!args.length)
     return message.channel.send(
       `You didn't pass any command to reload, ${message.author}!`

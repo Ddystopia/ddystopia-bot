@@ -82,6 +82,7 @@ module.exports.run = async message => {
 
 module.exports.help = {
   name: 'rank',
+	cooldown: 15,
   aliases: ['ранг'],
 }
 

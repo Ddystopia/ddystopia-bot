@@ -9,7 +9,7 @@ module.exports.run = async (message, [newLevel]) => {
   user.xp = 0
   user.save()
 
-  message.reply('✅')
+  message.react('✅')
 }
 
 module.exports.help = {

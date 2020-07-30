@@ -45,6 +45,11 @@ module.exports.run = async (message, args = [], propCommand) => {
             inline: true,
           },
           {
+            name: 'Роль для новоприбывших',
+            value: guildDB.baseRole ? `<@&${guildDB.baseRole}>` : 'Отсутствует',
+            inline: true,
+          },
+          {
             name: 'Канал для приветствий',
             value: guildDB.greetingChannel
               ? `<#${guildDB.greetingChannel}>`
@@ -71,6 +76,11 @@ module.exports.run = async (message, args = [], propCommand) => {
               ? `<#${guildDB.wordsGameChannels.join('><#')}>`
               : 'Отсутствуют',
             inline: true,
+          },
+          {
+            name: 'Роль для банкротов',
+            value: guildDB.bancrotRole ? `<@&${guildDB.bancrotRole}>` : 'Отсутствует',
+            inline: true,
           }
         )
         .setImage(guild.bannerURL())
@@ -87,16 +97,18 @@ module.exports.run = async (message, args = [], propCommand) => {
       guildDB.save()
       break
     }
-    case 'logChannel':
     case 'baseRole':
-    case 'ideaChannel':
     case 'bancrotRole':
+      singleProp(message, args, command, guildDB, 'roles')
+      break
+    case 'logChannel':
+    case 'ideaChannel':
     case 'greetingChannel':
-      singleProp(message, args, command, guildDB)
+      singleProp(message, args, command, guildDB, 'channels')
       break
 
     case 'blacklist': //blacklist of members, not of channels
-      multipleProp(message, args, command, guildDB, false)
+      multipleProp(message, args, command, guildDB)
       break
 
     case 'wordsGameChannels': {
@@ -121,11 +133,12 @@ module.exports.run = async (message, args = [], propCommand) => {
   }
 }
 
-const singleProp = (message, [mode, string = ''], channel, guildDB) => {
+const singleProp = (message, [mode, string = ''], channel, guildDB, filter) => {
   if (mode === 'clear') return (guildDB[channel] = null)
 
   const [id] = string.match(/\d{15,}/) || []
-  if (!message.guild.channels.cache.has(id)) return message.reply('Что-то не правильно')
+  if (filter && !message.guild[filter].cache.has(id))
+    return message.reply('Что-то не правильно')
   message.react('✅')
   guildDB[channel] = id
   if (mode === 'set') guildDB[channel] = id
@@ -136,7 +149,7 @@ const multipleProp = (message, [mode, ...args], channel, guildDB, filter) => {
   const channelArray = args.join('|').match(/\d{15,}/g) || []
   if (
     !channelArray.length ||
-    channelArray.some(ch => filter && !message.guild.channels.cache.has(ch))
+    channelArray.some(ch => filter && !message.guild[filter].cache.has(ch))
   )
     return message.reply('Что-то не правильно')
   message.react('✅')

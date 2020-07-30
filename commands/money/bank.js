@@ -18,25 +18,23 @@ class ModerationCommands {
       ]
 
       if (timeToCredit && timeToCredit <= 60 * 60 * 1000) {
-        client.timeouts.push(
+        client.timeouts.get(guild.id).push(
           setTimeout(() => {
             bankMember.credit.badUser(bankMember, guild, bancrotRole, false)
-            bankMember.save()
           }, Math.max(timeToCredit, 0))
         )
       }
 
       if (timeToDeposit && timeToDeposit <= 60 * 60 * 1000) {
-        client.timeouts.push(
+        client.timeouts.get(guild.id).push(
           setTimeout(() => {
             bankMember.deposit.payDeposits(bankMember)
-            bankMember.save()
           }, Math.max(timeToDeposit, 0))
         )
       }
 
       if (timeToBancrot && timeToBancrot <= 60 * 60 * 1000) {
-        client.timeouts.push(
+        client.timeouts.get(guild.id).push(
           setTimeout(() => {
             bankMember.bancrot = null
             Guild.findOne({ id: guild.id }).then(guildDB => {
@@ -57,12 +55,17 @@ class ModerationCommands {
   static async calcPercents(guildId) {
     const bankMembers = await BankMember.find({ guildId })
     for (const bankMember of bankMembers) {
-      if (bankMember.credit)
+      if (bankMember.credit) {
         bankMember.credit.sum += (bankMember.credit.sum * bankMember.credit.percent) / 100
-      if (bankMember.deposit)
+        bankMember.markModified('credit')
+        bankMember.save()
+      }
+      if (bankMember.deposit) {
         bankMember.deposit.sum +=
           (bankMember.deposit.sum * bankMember.deposit.percent) / 100
-      if (bankMember.credit || bankMember.deposit) bankMember.save()
+        bankMember.markModified('deposit')
+        bankMember.save()
+      }
     }
   }
 
@@ -74,9 +77,11 @@ class ModerationCommands {
     switch (args[1]) {
       case 'credit':
         bankMember.credit = null
+        bankMember.markModified('credit')
         break
       case 'deposit':
         bankMember.deposit = null
+        bankMember.markModified('deposit')
         break
       case 'bancrot': {
         bankMember.bancrot = null
@@ -156,7 +161,7 @@ module.exports.run = async (message, args) => {
           `${
             user.credit
               ? `Сумма: ${user.credit.sum}
-Процент: ${+user.credit.percent.toFixed(3)}
+Процент: ${+user.credit.percent}
 Дедлайн: ${new Date(user.credit.deadline)}`
               : 'У вас нет кредита'
           }`
@@ -166,7 +171,7 @@ module.exports.run = async (message, args) => {
           `${
             user.deposit
               ? `Сумма: ${user.deposit.sum}
-Процент: ${+user.deposit.percent.toFixed(3)}
+Процент: ${+user.deposit.percent}
 Дедлайн: ${new Date(user.deposit.deadline)}`
               : 'У вас нет депозита'
           }`

@@ -1,4 +1,8 @@
+require('./utils/checkConfigs.js').checkAndExit()
 require('dotenv').config()
+require('./utils/checkTemps.js').start()
+require('./utils/mongoose.js').init()
+
 const { Client, Collection } = require('discord.js')
 const { Leveling } = require('./classes/Leveling.js')
 const { Guild } = require('./models/Guild.js')
@@ -9,8 +13,6 @@ const { User } = require('./models/User.js')
 const { clearInterval } = require('timers')
 const { RoleForShop } = require('./models/RoleForShop.js')
 const { RoleForLeveling } = require('./models/RoleForLeveling.js')
-require('./utils/checkTemps.js').start()
-require('./utils/mongoose.js').init()
 const MAX_GUILD_MEMBERS_COUNT_TO_IMMEDIATELY_DELETE_ON_LEAVE = 100
 const HOURS_TO_CALC_PERCENTS = 12
 
@@ -19,6 +21,8 @@ global.currency = '🌱' //если язык русский, то в родит�
 client.commands = new Collection()
 client.intervals = new Collection()
 client.timeouts = new Collection()
+
+const cooldowns = new Collection()
 
 const getDirs = p => readdirSync(p).filter(f => statSync(`${p}${f}`).isDirectory())
 getDirs('./commands/').forEach(dir => {
@@ -77,15 +81,30 @@ client.on('ready', async () => {
 })
 
 client.on('guildCreate', async guild => {
-  if (!client.intervals.has(guild.id)) client.intervals.set(guild.id, [])
-  if (!client.timeouts.has(guild.id)) client.timeouts.set(guild.id, [])
+  guild.roles
+    .create({
+      data: {
+        name: 'Банкрот',
+        color: '#4a412a',
+        position: guild.me.roles.highest.position,
+        mentionable: true,
+      },
+      reason: 'Роль для банкротов, удалите, если не хотите иметь команду `bank`',
+    })
+    .then(({ id }) => {
+      const guildDB = guild.getOrCreate(guild.id)
+      guildDB.bancrotRole = id
+      guildDB.save()
+    })
+  client.intervals.set(guild.id, [])
+  client.timeouts.set(guild.id, [])
   const admins = guild.members.cache.filter(m => m.hasPermission('ADMINISTRATOR'))
   admins.forEach(m => {
     m.user
       .send(
         `Здравствуйте! Извините, что беспокою, но не могли бы вы ознакомится с тем, как настроить меня для вашего чудесного сервера?
-Сделать вы это можете, введя комманду help у себя на сервере, и пролистав до последней страницы. Обычно, мой префикс "${process.env.PREFIX}", но вы можете его поменять в любую минуту!
-Спасибо вам, что пригласили меня на такой животрепещий сервер.`
+Сделать вы это можете, введя команду help у себя на сервере и пролистав до последней страницы. Обычно, мой префикс "${process.env.PREFIX}", но вы можете его поменять в любую минуту!
+Спасибо вам, что пригласили меня на ваш сервер.`
       )
       .catch(() => {})
   })
@@ -153,6 +172,7 @@ client.on('message', async message => {
 client.on('message', async message => {
   if (!message.guild) return
   const guildDB = await Guild.getOrCreate(message.guild.id)
+
   if (guildDB.noCommandsChannels.includes(message.channel.id)) return // do not listening commands from banned channels
   if (!message.content.startsWith(guildDB.prefix)) return // filter simple text
   if (guildDB.blacklist.includes(message.author.id) || message.author.bot) return
@@ -163,9 +183,31 @@ client.on('message', async message => {
     client.commands.find(({ help }) => help.aliases && help.aliases.includes(commandName))
 
   if (command) {
+    const { isLeft, timeLeft } = getCooldown(command, message.author.id)
+    if (!isLeft)
+      return message.reply(
+        `подождите пожалуста ${timeLeft.toFixed(2)} секунд (защита от спама)`
+      )
+
     command.run(message, args, commandName).catch(log)
   }
 })
+const getCooldown = (command, userId) => {
+  if (!cooldowns.has(command.name)) cooldowns.set(command.name, new Collection())
+  const now = Date.now()
+  const timestamps = cooldowns.get(command.name)
+  const cooldownAmount = (command.help.cooldown || 2) * 1000
+
+  if (!timestamps.has(userId)) timestamps.set(userId, now - cooldownAmount)
+
+  const expirationTime = timestamps.get(userId) + cooldownAmount
+
+  const timeLeft = (expirationTime - now) / 1000
+  const isLeft = expirationTime <= now
+
+  if (isLeft) timestamps.set(userId, now)
+  return { timeLeft, isLeft }
+}
 
 process.on('uncaughtException', (err, origin) => {
   const errContent = `Caught exception: ${err}\nException origin: ${origin}`

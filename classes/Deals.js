@@ -6,15 +6,9 @@ module.exports.latestCredits = latestCredits
 
 class Deal {
   constructor(sum, days, percent) {
-    this._sum = (+sum * percent) / 100 + +sum
+    this.sum = (+sum * percent) / 100 + +sum
     this.deadline = Date.now() + days * 24 * 3600 * 1000
     this.percent = percent
-  }
-  get sum() {
-    return Math.floor(this._sum)
-  }
-  set sum(value) {
-    this._sum = Math.floor(value)
   }
 }
 
@@ -35,6 +29,7 @@ class Deposit extends Deal {
     this.sum += +sum
 
     user.save()
+    bankMember.markModified('deposit')
     bankMember.save()
     return true
   }
@@ -43,6 +38,7 @@ class Deposit extends Deal {
     user.coins += Math.floor(+this.sum)
     bankMember.deposit = null
     user.save()
+    bankMember.markModified('deposit')
     bankMember.save()
   }
 }
@@ -67,6 +63,7 @@ class Credit extends Deal {
     this.sum -= +sum
     if (this.sum <= 0) bankMember.credit = null
     user.save()
+    bankMember.markModified('credit')
     bankMember.save()
     return true
   }
@@ -84,6 +81,8 @@ class Credit extends Deal {
       user.level = Math.max(0, user.level - 10)
       bankMember.credit = null
       bankMember.deposit = null
+      bankMember.markModified('credit')
+      bankMember.markModified('deposit')
     }
 
     bankMember.save()
