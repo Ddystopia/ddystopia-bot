@@ -4,5 +4,4 @@ module.exports.init = () => {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  mongoose.Promise = global.Promise
 }

@@ -4,7 +4,7 @@ const { BankMember } = require('../../models/BankMember')
 const { Credit } = require('../../classes/Deals')
 
 class ModerationCommands {
-  static async closeDeals(guild, bancrotRoleId) {
+  static async closeDeals(client, guild, bancrotRoleId) {
     const bankMembers = await BankMember.find({ guildId: guild.id })
     for (const bankMember of bankMembers) {
       const member = guild.member(bankMember.id)
@@ -18,25 +18,36 @@ class ModerationCommands {
       ]
 
       if (timeToCredit && timeToCredit <= 60 * 60 * 1000) {
-        setTimeout(() => {
-          bankMember.credit.badUser(bankMember, guild, bancrotRole, false)
-          bankMember.save()
-        }, Math.max(timeToCredit, 0))
+        client.timeouts.push(
+          setTimeout(() => {
+            bankMember.credit.badUser(bankMember, guild, bancrotRole, false)
+            bankMember.save()
+          }, Math.max(timeToCredit, 0))
+        )
       }
 
       if (timeToDeposit && timeToDeposit <= 60 * 60 * 1000) {
-        setTimeout(() => {
-          bankMember.deposit.payDeposits(bankMember)
-          bankMember.save()
-        }, Math.max(timeToDeposit, 0))
+        client.timeouts.push(
+          setTimeout(() => {
+            bankMember.deposit.payDeposits(bankMember)
+            bankMember.save()
+          }, Math.max(timeToDeposit, 0))
+        )
       }
 
       if (timeToBancrot && timeToBancrot <= 60 * 60 * 1000) {
-        setTimeout(() => {
-          bankMember.bancrot = null
-          member.roles.remove(bancrotRole)
-          bankMember.save()
-        }, Math.max(timeToBancrot, 0))
+        client.timeouts.push(
+          setTimeout(() => {
+            bankMember.bancrot = null
+            Guild.findOne({ id: guild.id }).then(guildDB => {
+              guildDB.blacklist = guildDB.blacklist.filter(id => id !== bankMember.id)
+              guildDB.markModified('blacklist')
+              guildDB.save()
+            })
+            member.roles.remove(bancrotRole)
+            bankMember.save()
+          }, Math.max(timeToBancrot, 0))
+        )
       } else if (bankMember.bancrot && !member.roles.cache.has(bancrotRole.id)) {
         Credit.prototype.badUser(bankMember, guild, bancrotRole, true)
       }
@@ -55,7 +66,7 @@ class ModerationCommands {
     }
   }
 
-  static async remove(message, args, bancrotRoleId) {
+  static async remove(message, args, bancrotRole) {
     if (!message.member.hasPermission('MANAGE_MESSAGES')) return
     const user = message.mentions.users.first()
     if (!user) return "I don't know who is it"
@@ -69,7 +80,7 @@ class ModerationCommands {
         break
       case 'bancrot': {
         bankMember.bancrot = null
-        const role = message.guild.roles.cache.get(bancrotRoleId)
+        const role = message.guild.roles.cache.get(bancrotRole)
         message.guild.member(user).roles.remove(role)
         break
       }
@@ -82,12 +93,15 @@ class ModerationCommands {
 }
 
 module.exports.run = async (message, args) => {
-  const { bancrotRoleId } = await Guild.getOrCreate(message.guild.id)
-  if (!bancrotRoleId) return
+  const { bancrotRole } = await Guild.getOrCreate(message.guild.id)
+  if (!bancrotRole)
+    return message.reply(
+      'Попросите Администратора добавить банкротскую роль, без неё банк не работает'
+    )
 
   if (args === 'calcPercents') return ModerationCommands.calcPercents(message.guild.id) //inclusion
   if (args === 'closeDeals')
-    return ModerationCommands.closeDeals(message.guild, bancrotRoleId) //inclusion
+    return ModerationCommands.closeDeals(message.client, message.guild, bancrotRole) //inclusion
   const bankMember = await BankMember.getOrCreate(message.author.id, message.guild.id)
 
   let response
@@ -118,7 +132,7 @@ module.exports.run = async (message, args) => {
 
     case 'remove':
     case 'delete':
-      response = await ModerationCommands.remove(message, args, bancrotRoleId)
+      response = await ModerationCommands.remove(message, args, bancrotRole)
       if (typeof response === 'string') message.reply(response)
       else if (response) message.react('✅')
       else message.react('❌')

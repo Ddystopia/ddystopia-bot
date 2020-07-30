@@ -6,6 +6,9 @@ const { Temp, TempTypes } = require('./models/Temp.js')
 const { readdirSync, statSync, writeSync } = require('fs')
 const { log } = require('./utils/log.js')
 const { User } = require('./models/User.js')
+const { clearInterval } = require('timers')
+const { RoleForShop } = require('./models/RoleForShop.js')
+const { RoleForLeveling } = require('./models/RoleForLeveling.js')
 require('./utils/checkTemps.js').start()
 require('./utils/mongoose.js').init()
 const MAX_GUILD_MEMBERS_COUNT_TO_IMMEDIATELY_DELETE_ON_LEAVE = 100
@@ -14,6 +17,8 @@ const HOURS_TO_CALC_PERCENTS = 12
 const client = new Client()
 global.currency = '🌱' //если язык русский, то в родительском падеже(кого? чего?)
 client.commands = new Collection()
+client.intervals = new Collection()
+client.timeouts = new Collection()
 
 const getDirs = p => readdirSync(p).filter(f => statSync(`${p}${f}`).isDirectory())
 getDirs('./commands/').forEach(dir => {
@@ -33,41 +38,77 @@ client.on('ready', async () => {
   console.log(`Запустился бот ${client.user.username}`)
   const guilds = await Guild.find({})
 
-  guilds.forEach(guildDB => {
+  guilds.forEach(async guildDB => {
     const guild = client.guilds.cache.get(guildDB.id)
-    if (!guild) return Guild.deleteOne({ id: guildDB.id })
+    if (!guild) return await Guild.deleteOne({ id: guildDB.id })
 
     Leveling.voiceLeveling(guild.channels)
 
     guildDB.wordsGameChannels.forEach(async id => {
       const channel = guild.channels.cache.get(id)
-      client.commands.get('cities').run({ channel, onReady: true }, ['start'])
+      client.commands
+        .get('cities')
+        .run({ channel, onReady: true, guild: { id: guildDB.id } }, ['start'])
     })
 
-    setInterval(() => {
-      if (new Date().getHours() === HOURS_TO_CALC_PERCENTS - 1)
-        setTimeout(() => {
-          client.commands.get('bank').run({ guild }, 'calcPercents')
-        }, new Date().setHours(HOURS_TO_CALC_PERCENTS, 0, 0, 0) - Date.now())
+    let intervals = client.intervals.get(guild.id)
+    let timeouts = client.timeouts.get(guild.id)
+    if (!intervals) {
+      intervals = []
+      client.intervals.set(guild.id, intervals)
+    }
+    if (!timeouts) {
+      timeouts = []
+      client.timeouts.set(guild.id, timeouts)
+    }
+    intervals.push(
+      setInterval(() => {
+        if (new Date().getHours() === HOURS_TO_CALC_PERCENTS - 1)
+          timeouts.push(
+            setTimeout(() => {
+              client.commands.get('bank').run({ guild }, 'calcPercents')
+            }, new Date().setHours(HOURS_TO_CALC_PERCENTS, 0, 0, 0) - Date.now())
+          )
 
-      client.commands.get('bank').run({ guild }, 'closeDeals')
-    }, 3600 * 1000)
+        client.commands.get('bank').run({ guild }, 'closeDeals')
+      }, 3600 * 1000)
+    )
+  })
+})
+
+client.on('guildCreate', async guild => {
+  if (!client.intervals.has(guild.id)) client.intervals.set(guild.id, [])
+  if (!client.timeouts.has(guild.id)) client.timeouts.set(guild.id, [])
+  const admins = guild.members.cache.filter(m => m.hasPermission('ADMINISTRATOR'))
+  admins.forEach(m => {
+    m.user
+      .send(
+        `Здравствуйте! Извините, что беспокою, но не могли бы вы ознакомится с тем, как настроить меня для вашего чудесного сервера?
+Сделать вы это можете, введя комманду help у себя на сервере, и пролистав до последней страницы. Обычно, мой префикс "${process.env.PREFIX}", но вы можете его поменять в любую минуту!
+Спасибо вам, что пригласили меня на такой животрепещий сервер.`
+      )
+      .catch(() => {})
   })
 })
 
 client.on('guildDelete', async guild => {
+  const timeouts = client.timeouts.get(guild.id) || []
+  const intervals = client.intervals.get(guild.id) || []
+  timeouts.forEach(clearTimeout)
+  intervals.forEach(clearInterval)
+
   if (guild.memberCount < MAX_GUILD_MEMBERS_COUNT_TO_IMMEDIATELY_DELETE_ON_LEAVE) {
-    User.deleteMany({ guildId: guild.id })
-    return Guild.deleteOne({ id: guild.id })
+    await Guild.deleteOne({ id: guild.id })
+    return await User.deleteMany({ guildId: guild.id })
   }
   new Temp({ type: TempTypes.GUILD_DELETE, options: { id: guild.id } }).save()
 })
 
 client.on('guildMemberAdd', async member => {
-  const { greetingChannel, baseRoleId } = await Guild.getOrCreate(member.guild.id)
+  const { greetingChannel, baseRole } = await Guild.getOrCreate(member.guild.id)
   if (!greetingChannel || member.user.bot) return
-  const role = member.guild.roles.cache.get(baseRoleId)
-  if (!member || !role) return 
+  const role = member.guild.roles.cache.get(baseRole)
+  if (!member || !role) return
   member.roles.add(role)
   client.commands.get('greeting').run({ member }, [greetingChannel])
 })
@@ -78,26 +119,39 @@ client.on('guildMemberRemove', async member => {
     options: { id: member.id, guildId: member.guild.id, deadline: 5 * 24 * 3600 * 1000 },
   }).save()
 })
+const onDelete = async item => {
+  const guildDB = await Guild.getOrCreate(item.guild.id)
 
-client.on('roleDelete', async role => {
-  const guildDB = await Guild.getOrCreate(role.guild.id)
   for (const prop in guildDB) {
-    if (guildDB[prop] === role.id) guildDB[prop] = null
-    if (Array.isArray(guildDB[prop]))
-      guildDB[prop] = guildDB[prop].filter(el => el !== role.id)
+    if (guildDB[prop] === item.id) {
+      guildDB[prop] = null
+      guildDB.markModified(prop)
+    }
+    if (Array.isArray(guildDB[prop]) && guildDB[prop].includes(item.id)) {
+      guildDB[prop] = guildDB[prop].filter(el => el !== item.id)
+      guildDB.markModified(prop)
+    }
   }
   guildDB.save()
+}
+client.on('roleDelete', async role => {
+  await RoleForShop.deleteMany({ id: role.id })
+  await RoleForLeveling.deleteMany({ id: role.id })
+  onDelete(role)
 })
+client.on('channelDelete', onDelete)
 
 client.on('message', message => {
-  !message.author.bot && Leveling.textLeveling(message.member)
+  if (!message.author.bot && message.guild) Leveling.textLeveling(message.member)
 })
 client.on('message', async message => {
+  if (!message.guild) return
   const { imageChannels } = await Guild.getOrCreate(message.guild.id)
   if (imageChannels.includes(message.channel.id) && !message.author.bot)
     client.commands.get('increaseMoneyForImage'.toLowerCase()).run(message)
 })
 client.on('message', async message => {
+  if (!message.guild) return
   const guildDB = await Guild.getOrCreate(message.guild.id)
   if (guildDB.noCommandsChannels.includes(message.channel.id)) return // do not listening commands from banned channels
   if (!message.content.startsWith(guildDB.prefix)) return // filter simple text

@@ -1,5 +1,6 @@
 const { User } = require('../models/User')
 const { RoleForShop } = require('../models/RoleForShop.js')
+const { Guild } = require('discord.js')
 const latestCredits = new Map()
 module.exports.latestCredits = latestCredits
 
@@ -98,6 +99,11 @@ class Credit extends Deal {
         const role = member.guild.roles.cache.get(roleData.id)
         if (member.roles.cache.has(role.id)) member.roles.remove(role)
       }
+      Guild.findOne({ id: guild.id }).then(guildDB => {
+        guildDB.blacklist.push(member.id)
+        guildDB.markModified('blacklist')
+        guildDB.save()
+      })
     }
   }
 }

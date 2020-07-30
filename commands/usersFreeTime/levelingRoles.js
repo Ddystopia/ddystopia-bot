@@ -27,52 +27,50 @@ class RolesBoard {
     return message.reply(shopList)
   }
   static async shopList(message) {
-    const roles = await RoleForLeveling.find({ guildId: message.guild.id })
-    const rolesEntries = Object.entries(sortAndClean(roles))
+    const roles = await RoleForLeveling.find({ guildId: message.guild.id }).sort({
+      level: 'desc',
+    })
     const embeds = []
-    if (rolesEntries.length === 0)
+    if (roles.length === 0)
       embeds.push(
         new EmbedInstance(message.author.avatarURL()).addField(`Пусто`, '\u200B')
       )
-    for (let i = 0; i < Math.ceil(rolesEntries.length / MAX_FIELDS); i++) {
-      const rolesChunk = rolesEntries.slice(i * MAX_FIELDS, (i + 1) * MAX_FIELDS)
+    for (let i = 0; i < Math.ceil(roles.length / MAX_FIELDS); i++) {
+      const rolesChunk = roles.slice(i * MAX_FIELDS, (i + 1) * MAX_FIELDS)
       const shopList = new EmbedInstance(message.author.avatarURL())
-      for (let j = 1; j <= rolesChunk.length; j++) {
-        const role = message.member.guild.roles.cache.get(rolesChunk[j][0])
-        const level = rolesChunk[j][1]
-        shopList.addField(++j, `${role} - ${level}`)
+      for (let j = 0; j < rolesChunk.length; j++) {
+        const { id, level } = rolesChunk[j]
+        shopList.addField(j + 1, `<@&${id}> - ${level}`)
       }
       embeds.push(shopList)
     }
     slider(embeds, message)
   }
-  static add(message, args) {
+  static async add(message, [, , level]) {
     if (!message.member.hasPermission('MANAGE_MESSAGES')) return
-    if (isNaN(+args[args.length - 1])) return
-    const roleNameMath = message.content.match(/(?<=\[)(.+?)(?=])/)
+    if (isNaN(+level)) return message.reply('Пропустили уровень')
+    const [roleName] = message.content.match(/(?<=\[)(.+?)(?=])/)
     const role = message.guild.roles.cache.find(
-      r => roleNameMath && r.name.toLowerCase() === roleNameMath[1].toLowerCase()
+      r => r.name.toLowerCase() === roleName.toLowerCase()
     )
     if (!role) return
-    new RoleForLeveling({
+    await RoleForLeveling.deleteOne({ id: role.id, guildId: message.guild.id })
+    await new RoleForLeveling({
       id: role.id,
-      level: +args[args.length - 1],
+      level: +level,
       guildId: message.guild.id,
     }).save()
 
     RolesBoard.shopList(message)
   }
-  static remove(message) {
+  static async remove(message) {
     if (!message.member.hasPermission('MANAGE_MESSAGES')) return
-    const roleNameMath = message.content.match(/(?<=\[)(.+?)(?=])/)
+    const [roleName] = message.content.match(/(?<=\[)(.+?)(?=])/)
     const role = message.guild.roles.cache.find(
-      r => roleNameMath && r.name.toLowerCase() === roleNameMath[1].toLowerCase()
+      r => r.name.toLowerCase() === roleName.toLowerCase()
     )
     if (!role) return
-    RoleForLeveling.deleteOne({
-      id: role.id,
-      guildId: message.guild.id,
-    })
+    await RoleForLeveling.deleteOne({ id: role.id, guildId: message.guild.id })
 
     RolesBoard.shopList(message)
   }
@@ -110,4 +108,5 @@ function sortAndClean(roles) {
 
 module.exports.help = {
   name: 'levelingRoles',
+  aliases: ['lr'],
 }

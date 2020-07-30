@@ -18,7 +18,10 @@ class Leveling {
       xp = this.calcXp(user.level) // xp for up
     }
     RolesLeveling.roleControls(member, user)
-    user.save()
+    user.save().catch(err => {
+      console.error(err)
+      user.save()
+    })
   }
 
   static textLeveling(member) {

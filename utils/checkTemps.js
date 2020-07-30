@@ -10,14 +10,14 @@ module.exports.start = async () => {
       if (timeToDeadline > 3600 * 1000) return
       switch (item.type) {
         case TempTypes.GUILD_DELETE:
-          setTimeout(() => {
-            Guild.deleteOne({ id: item.options.id })
-            User.deleteMany({ guildId: item.options.id })
+          setTimeout(async () => {
+            await Guild.deleteOne({ id: item.options.id })
+            await User.deleteMany({ guildId: item.options.id })
           }, Math.max(0, timeToDeadline))
           break
         case TempTypes.USER_DELETE:
-          setTimeout(() => {
-            User.deleteOne({ id: item.options.id, guildId: item.options.guildId })
+          setTimeout(async () => {
+            await User.deleteOne({ id: item.options.id, guildId: item.options.guildId })
           }, Math.max(0, timeToDeadline))
           break
       }

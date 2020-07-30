@@ -11,7 +11,7 @@ module.exports.run = async message => {
 	})()`
 
   eval(code).catch(error => {
-    message.channel.send(error.message, { code: 'bash' })
+    message.channel.send(error.message, { code: 'bash', split: true })
   })
 }
 

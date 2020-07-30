@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const { performance } = require('perf_hooks')
 
 const CitiesGameWord = mongoose.model(
   'CitiesGameWord',
@@ -7,7 +8,7 @@ const CitiesGameWord = mongoose.model(
     channelId: String,
     date: {
       type: Number,
-      default: () => global.performance.timeOrigin + global.performance.now(),
+      default: () => performance.timeOrigin + performance.now(),
     },
   })
 )

@@ -60,10 +60,10 @@ class TicTacToe {
   }
   reloadTimeout(callback) {
     clearTimeout(this._timeout)
-    this._timeout = setTimeout(callback, 30000)
+    this._timeout = setTimeout(() => callback().catch(() => {}), 30000)
   }
   createCallBackToStopGame(stepCollector, channel, members) {
-    return () => {
+    return async () => {
       this.winner = this.xIsNext ? this.firstPlayer : this.secondPlayer
       this.stop(stepCollector)
       channel.send(
