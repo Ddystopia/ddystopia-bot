@@ -7,7 +7,7 @@ const commands = [
   'logChannel',
   'baseRole',
   'ideaChannel',
-  'bancrotRole',
+  'bankruptRole',
   'greetingChannel',
   'blacklist',
   'imageChannels',
@@ -79,7 +79,7 @@ module.exports.run = async (message, args = [], propCommand) => {
           },
           {
             name: 'Роль для банкротов',
-            value: guildDB.bancrotRole ? `<@&${guildDB.bancrotRole}>` : 'Отсутствует',
+            value: guildDB.bankruptRole ? `<@&${guildDB.bankruptRole}>` : 'Отсутствует',
             inline: true,
           }
         )
@@ -98,7 +98,7 @@ module.exports.run = async (message, args = [], propCommand) => {
       break
     }
     case 'baseRole':
-    case 'bancrotRole':
+    case 'bankruptRole':
       singleProp(message, args, command, guildDB, 'roles')
       break
     case 'logChannel':
@@ -139,6 +139,12 @@ const singleProp = (message, [mode, string = ''], channel, guildDB, filter) => {
   const [id] = string.match(/\d{15,}/) || []
   if (filter && !message.guild[filter].cache.has(id))
     return message.reply('Что-то не правильно')
+  if (
+    filter === 'roles' &&
+    message.guild.roles.cache.get(id).position >= message.guild.me.roles.highest.position
+  )
+    return message.reply('Извините, но эта роль слишком крута для простых смертных.')
+
   message.react('✅')
   guildDB[channel] = id
   if (mode === 'set') guildDB[channel] = id

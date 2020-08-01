@@ -9,7 +9,7 @@ module.exports.run = async message => {
   const user = await User.getOrCreate(userId, message.guild.id)
 
   const embed = new MessageEmbed()
-    .setColor(0x0099ff)
+    .setColor('#0099ff')
     .addField('Расчёт', `На счету ${Math.floor(user.coins)} ${global.currency}`)
   message.reply(embed)
 }

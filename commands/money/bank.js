@@ -1,26 +1,28 @@
 const { MessageEmbed } = require('discord.js')
 const { Guild } = require('../../models/Guild')
 const { BankMember } = require('../../models/BankMember')
-const { Credit } = require('../../classes/Deals')
+const { Credit, Deposit } = require('../../classes/Deals')
 
 class ModerationCommands {
-  static async closeDeals(client, guild, bancrotRoleId) {
+  static async closeDeals(client, guild, bankruptRoleId) {
     const bankMembers = await BankMember.find({ guildId: guild.id })
     for (const bankMember of bankMembers) {
       const member = guild.member(bankMember.id)
       if (!member) continue
-      const bancrotRole = guild.roles.cache.get(bancrotRoleId)
+      Object.setPrototypeOf(bankMember.credit || {}, Credit.prototype)
+      Object.setPrototypeOf(bankMember.deposit || {}, Deposit.prototype)
+      const bankruptRole = guild.roles.cache.get(bankruptRoleId)
 
-      const [timeToCredit, timeToDeposit, timeToBancrot] = [
+      const [timeToCredit, timeToDeposit, timeToBankrupt] = [
         bankMember.credit && bankMember.credit.deadline - Date.now(),
         bankMember.deposit && bankMember.deposit.deadline - Date.now(),
-        bankMember.bancrot && bankMember.bancrot - Date.now(),
+        bankMember.bankrupt && bankMember.bankrupt - Date.now(),
       ]
 
       if (timeToCredit && timeToCredit <= 60 * 60 * 1000) {
         client.timeouts.get(guild.id).push(
           setTimeout(() => {
-            bankMember.credit.badUser(bankMember, guild, bancrotRole, false)
+            bankMember.credit.badUser(bankMember, guild, bankruptRole, false)
           }, Math.max(timeToCredit, 0))
         )
       }
@@ -33,21 +35,21 @@ class ModerationCommands {
         )
       }
 
-      if (timeToBancrot && timeToBancrot <= 60 * 60 * 1000) {
+      if (timeToBankrupt && timeToBankrupt <= 60 * 60 * 1000) {
         client.timeouts.get(guild.id).push(
           setTimeout(() => {
-            bankMember.bancrot = null
+            bankMember.bankrupt = null
             Guild.findOne({ id: guild.id }).then(guildDB => {
               guildDB.blacklist = guildDB.blacklist.filter(id => id !== bankMember.id)
               guildDB.markModified('blacklist')
               guildDB.save()
             })
-            member.roles.remove(bancrotRole)
+            member.roles.remove(bankruptRole)
             bankMember.save()
-          }, Math.max(timeToBancrot, 0))
+          }, Math.max(timeToBankrupt, 0))
         )
-      } else if (bankMember.bancrot && !member.roles.cache.has(bancrotRole.id)) {
-        Credit.prototype.badUser(bankMember, guild, bancrotRole, true)
+      } else if (bankMember.bankrupt && !member.roles.cache.has(bankruptRole.id)) {
+        Credit.prototype.badUser(bankMember, guild, bankruptRole, true)
       }
     }
   }
@@ -69,7 +71,7 @@ class ModerationCommands {
     }
   }
 
-  static async remove(message, args, bancrotRole) {
+  static async remove(message, args, bankruptRole) {
     if (!message.member.hasPermission('MANAGE_MESSAGES')) return
     const user = message.mentions.users.first()
     if (!user) return "I don't know who is it"
@@ -83,9 +85,9 @@ class ModerationCommands {
         bankMember.deposit = null
         bankMember.markModified('deposit')
         break
-      case 'bancrot': {
-        bankMember.bancrot = null
-        const role = message.guild.roles.cache.get(bancrotRole)
+      case 'bankrupt': {
+        bankMember.bankrupt = null
+        const role = message.guild.roles.cache.get(bankruptRole)
         message.guild.member(user).roles.remove(role)
         break
       }
@@ -98,15 +100,15 @@ class ModerationCommands {
 }
 
 module.exports.run = async (message, args) => {
-  const { bancrotRole } = await Guild.getOrCreate(message.guild.id)
-  if (!bancrotRole)
+  const { bankruptRole } = await Guild.getOrCreate(message.guild.id)
+  if (!bankruptRole)
     return message.reply(
       'Попросите Администратора добавить банкротскую роль, без неё банк не работает'
     )
 
   if (args === 'calcPercents') return ModerationCommands.calcPercents(message.guild.id) //inclusion
   if (args === 'closeDeals')
-    return ModerationCommands.closeDeals(message.client, message.guild, bancrotRole) //inclusion
+    return ModerationCommands.closeDeals(message.client, message.guild, bankruptRole) //inclusion
   const bankMember = await BankMember.getOrCreate(message.author.id, message.guild.id)
 
   let response
@@ -137,7 +139,7 @@ module.exports.run = async (message, args) => {
 
     case 'remove':
     case 'delete':
-      response = await ModerationCommands.remove(message, args, bancrotRole)
+      response = await ModerationCommands.remove(message, args, bankruptRole)
       if (typeof response === 'string') message.reply(response)
       else if (response) message.react('✅')
       else message.react('❌')
@@ -177,8 +179,8 @@ module.exports.run = async (message, args) => {
           }`
         )
         .setTimestamp()
-      if (user.bancrot)
-        embed.addField('Банкрот', `Банкрот снимется ${new Date(user.bancrot)}`)
+      if (user.bankrupt)
+        embed.addField('Банкрот', `Банкрот снимется ${new Date(user.bankrupt)}`)
       message.reply(embed)
       break
     }

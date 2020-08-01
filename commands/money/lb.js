@@ -60,8 +60,8 @@ module.exports.run = async (message, [page], command) => {
         .setThumbnail(message.author.avatarURL())
         .setTimestamp()
         .addField('Пусто', '\u200B')
-		)
-		
+    )
+
   slider(embeds, message, page).catch(console.error)
 }
 module.exports.help = {

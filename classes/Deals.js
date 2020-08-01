@@ -1,6 +1,6 @@
+const { Guild } = require('../models/Guild')
 const { User } = require('../models/User')
 const { RoleForShop } = require('../models/RoleForShop.js')
-const { Guild } = require('discord.js')
 const latestCredits = new Map()
 module.exports.latestCredits = latestCredits
 
@@ -67,15 +67,15 @@ class Credit extends Deal {
     bankMember.save()
     return true
   }
-  async badUser(bankMember, guild, bancrotRole, rec) {
+  async badUser(bankMember, guild, bankruptRole, rec) {
     const user = await User.getOrCreate(bankMember.id, bankMember.guildId)
     const member = guild.member(bankMember.id)
-    if (rec) makeBancrot(member, user)
+    if (rec) makeBankrupt(member, user)
     else {
       this.sum *= 1.5
       this.sum -= user.coins + (bankMember.deposit ? bankMember.deposit.sum : 0)
       if (user.coins > 0) user.coins = -5000
-      if (this.sum > 0) makeBancrot(member, user)
+      if (this.sum > 0) makeBankrupt(member, user)
 
       user.dailyLevel = 0
       user.level = Math.max(0, user.level - 10)
@@ -88,11 +88,11 @@ class Credit extends Deal {
     bankMember.save()
     user.save()
 
-    async function makeBancrot(member, user) {
+    async function makeBankrupt(member, user) {
       user.coins = 0
-      bankMember.bancrot = Date.now() + 20 * 24 * 3600 * 1000
+      bankMember.bankrupt = Date.now() + 20 * 24 * 3600 * 1000
       if (!member) return
-      member.roles.add(bancrotRole)
+      member.roles.add(bankruptRole)
       const roles = await RoleForShop.find({ guildId: guild.id })
       for (const roleData of roles) {
         const role = member.guild.roles.cache.get(roleData.id)

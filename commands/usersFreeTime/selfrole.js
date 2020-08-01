@@ -25,14 +25,14 @@ module.exports.run = async message => {
       message.member.roles.add(role)
       message.react('✅')
     })
-    .catch(()=>{
-			message.react('❌')
-			message.reply('Что-то пошло не так... Билет не вернём.')
-		})
+    .catch(() => {
+      message.react('❌')
+      message.reply('Что-то пошло не так... Билет не вернём.')
+    })
 }
 
 module.exports.help = {
-	name: 'selfrole',
-	cooldown: 5,
+  name: 'selfrole',
+  cooldown: 5,
   aliases: ['sr'],
 }

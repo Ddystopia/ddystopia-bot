@@ -48,12 +48,16 @@ class RolesBoard {
   }
   static async add(message, [, , level]) {
     if (!message.member.hasPermission('MANAGE_MESSAGES')) return
+
     if (isNaN(+level)) return message.reply('Пропустили уровень')
     const [roleName] = message.content.match(/(?<=\[)(.+?)(?=])/)
     const role = message.guild.roles.cache.find(
       r => r.name.toLowerCase() === roleName.toLowerCase()
     )
     if (!role) return
+    if (role.position >= message.guild.me.roles.highest.position)
+      return message.reply('Извините, но эта роль слишком крута для простых смертных.')
+
     await RoleForLeveling.deleteOne({ id: role.id, guildId: message.guild.id })
     await new RoleForLeveling({
       id: role.id,

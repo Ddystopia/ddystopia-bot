@@ -11,6 +11,8 @@ module.exports.run = async (message, args) => {
     r => r.name.toLowerCase() === nameFromArgs.toLowerCase()
   )
   if (!role) return message.reply(`Role ${nameFromArgs} is not found`)
+  if (role.position >= message.guild.me.roles.highest.position)
+    return message.reply('Извините, но эта роль слишком крута для простых смертных.')
 
   const members = await message.guild.members.fetch()
   if (!isBasic)
@@ -45,7 +47,7 @@ module.exports.run = async (message, args) => {
 }
 
 module.exports.help = {
-	name: 'setRoleEveryone',
-	cooldown: 60,
+  name: 'setRoleEveryone',
+  cooldown: 60,
   aliases: ['ste'],
 }

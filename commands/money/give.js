@@ -11,7 +11,7 @@ module.exports.run = async (message, [sum, memberString]) => {
   if (!tillId) return
   const profileFrom = await User.getOrCreate(fromId, message.guild.id)
   const profileTill = await User.getOrCreate(tillId, message.guild.id)
-  if (profileTill.bancrot) return
+  if (profileTill.bankrupt) return
 
   const transaction = sum === 'all' ? profileFrom.coins : +sum
 

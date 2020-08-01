@@ -6,7 +6,7 @@ const guildSchema = mongoose.Schema({
   logChannel: { type: String, default: '' },
   ideaChannel: { type: String, default: '' },
   baseRole: { type: String, default: '' },
-  bancrotRole: { type: String, default: '' },
+  bankruptRole: { type: String, default: '' },
   greetingChannel: { type: String, default: '' },
   blacklist: { type: [String], default: [] },
   imageChannels: { type: [String], default: [] },

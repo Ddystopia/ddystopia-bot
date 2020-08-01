@@ -36,10 +36,12 @@ class RolesBoard {
     if (!args[1]) return
     if (isNaN(+args[2])) return
     const [roleName] = message.content.match(/(?<=\[)(.+?)(?=])/) || []
-    const { id } = message.guild.roles.cache.find(
+    const { id, position } = message.guild.roles.cache.find(
       r => r.name.toLowerCase() === roleName.toLowerCase()
     )
     if (!id) return message.reply('Я не знаю такого')
+    if (position >= message.guild.me.roles.highest.position)
+      return message.reply('Извините, но эта роль слишком крута для простых смертных.')
 
     await RoleForShop.deleteOne({ id, guildId: message.guild.id })
     await new RoleForShop({ id, cost: args[2], guildId: message.guild.id }).save()

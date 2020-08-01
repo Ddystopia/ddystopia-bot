@@ -7,7 +7,7 @@ for (let i = 0, sinI = 0; i < COLOR_SIZE; i++, sinI += COLOR_STEP) {
   const blue = sin_to_hex(sinI, (1 * Math.PI * 2) / 3) // 120 deg
   const green = sin_to_hex(sinI, (2 * Math.PI * 2) / 3) // 240 deg
 
-  rainbow[i] = +`0x${red}${green}${blue}`
+  rainbow[i] = `#${red}${green}${blue}`
 }
 
 module.exports.rainbow = (() => {

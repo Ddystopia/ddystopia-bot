@@ -7,21 +7,21 @@ const bankMemberSchema = mongoose.Schema({
   guildId: String,
   credit: {
     type: {
-      sum: { type: Number, set: v => Math.floor(v) },
-      percent: { type: Number, set: v => +v.toFixed(2) },
+      sum: { type: Number, get: v => Math.floor(v) },
+      percent: { type: Number, get: v => +v.toFixed(2) },
       deadline: Number,
     },
     default: null,
   },
   deposit: {
     type: {
-      sum: { type: Number, set: v => Math.floor(v) },
-      percent: { type: Number, set: v => +v.toFixed(2) },
+      sum: { type: Number, get: v => Math.floor(v) },
+      percent: { type: Number, get: v => +v.toFixed(2) },
       deadline: Number,
     },
     default: null,
   },
-  bancrot: Number,
+  bankrupt: Number,
 })
 
 // not arrow func
