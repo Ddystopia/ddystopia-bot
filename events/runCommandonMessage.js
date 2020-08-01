@@ -33,7 +33,7 @@ const getCooldown = (command, userId) => {
   if (!cooldowns.has(command.name)) cooldowns.set(command.name, new Collection())
   const now = Date.now()
   const timestamps = cooldowns.get(command.name)
-  const cooldownAmount = (command.help.cooldown || 2) * 1000
+  const cooldownAmount = (command.help.cooldown || 1) * 1000
 
   if (!timestamps.has(userId)) timestamps.set(userId, now - cooldownAmount)
 

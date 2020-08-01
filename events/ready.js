@@ -20,20 +20,13 @@ module.exports.getCallback = client => async () => {
         .run({ channel, onReady: true, guild: { id: guildDB.id } }, ['start'])
     })
 
-    let intervals = client.intervals.get(guild.id)
-    let timeouts = client.timeouts.get(guild.id)
-    if (!intervals) {
-      intervals = []
-      client.intervals.set(guild.id, intervals)
-    }
-    if (!timeouts) {
-      timeouts = []
-      client.timeouts.set(guild.id, timeouts)
-    }
-    intervals.push(
+    client.intervals.set(guild.id, [])
+    client.timeouts.set(guild.id, [])
+
+    client.intervals.get(guild.id).push(
       setInterval(() => {
         if (new Date().getHours() === HOURS_TO_CALC_PERCENTS - 1)
-          timeouts.push(
+          client.timeouts.get(guild.id).push(
             setTimeout(() => {
               client.commands.get('bank').run({ guild }, 'calcPercents')
             }, new Date().setHours(HOURS_TO_CALC_PERCENTS, 0, 0, 0) - Date.now())
