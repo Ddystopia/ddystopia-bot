@@ -48,6 +48,7 @@ module.exports.run = async (message, args) => {
 
 module.exports.help = {
   name: 'setRoleEveryone',
-  cooldown: 60,
+  cooldown: 6000,
   aliases: ['ste'],
+  needAdminRights: true,
 }

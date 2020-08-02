@@ -35,4 +35,5 @@ module.exports.help = {
   name: 'selfrole',
   cooldown: 5,
   aliases: ['sr'],
+  needAdminRights: true,
 }

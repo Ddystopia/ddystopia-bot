@@ -6,11 +6,11 @@ const { useUserGames } = require('../../utils/useUserGames')
 const games = new Map()
 const lastGames = new Map()
 
-const SECONDS_COOLDOWN = 24 * 60 * 60
+const SECONDS_COOLDOWN = 16 * 60 * 60
 const MAX_DAILY_LOOT_COST = 5000
 
 module.exports.run = async (message, args, command) => {
-  const loot = await Loot.find({ guildId: message.guild.id })
+  const allLoot = await Loot.find({ guildId: message.guild.id })
   switch (command) {
     case 'loot': {
       const user = await User.getOrCreate(message.author.id, message.guild.id)
@@ -20,7 +20,7 @@ module.exports.run = async (message, args, command) => {
             SECONDS_COOLDOWN - (Date.now() - user.timers.loot) / 1000
           )}`
         )
-      const winnedLoot = calcLoot(loot, MAX_DAILY_LOOT_COST)
+      const winnedLoot = calcLoot(allLoot, MAX_DAILY_LOOT_COST)
       user.addLoot([winnedLoot])
 
       user.timers.loot = Date.now()
@@ -41,7 +41,7 @@ module.exports.run = async (message, args, command) => {
       if (args[1] === 'all')
         for (const ownLoot of userFrom.loot)
           for (let i = 0; i < ownLoot.number; i++) lootArray.push(ownLoot.loot)
-      else lootArray = userFrom.getLootArray(args.slice(1).join(''), loot)
+      else lootArray = userFrom.getLootArray(args.slice(1).join(''), allLoot)
 
       if (lootArray.length < 1) return message.reply('Не продаётся')
 
@@ -62,14 +62,15 @@ module.exports.run = async (message, args, command) => {
       let percent = randomInteger(0, 100)
       if (userGames > 20) percent -= ((userGames / 1.5) % 30) + 10
 
+      const maxLootCost = Math.max(...allLoot.map(r => r.cost))
       let maxCost = 0
-      if (percent === 100) maxCost = 2e4
-      else if (percent > 98) maxCost = 9e6
-      else if (percent > 93) maxCost = 1e6
+      if (percent === 100) maxCost = maxLootCost
+      else if (percent > 97) maxCost = .7 * maxLootCost
+      else if (percent > 93) maxCost = .2 * maxLootCost
       else if (percent > 70) maxCost = 2e4
       else maxCost = MAX_DAILY_LOOT_COST
 
-      const winnedLoot = calcLoot(loot, maxCost)
+      const winnedLoot = calcLoot(allLoot, maxCost)
       user.addLoot([winnedLoot])
       user.save()
       message.reply(`Вы получили ${winnedLoot}`)

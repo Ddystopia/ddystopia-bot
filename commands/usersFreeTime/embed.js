@@ -24,4 +24,6 @@ module.exports.run = async (message, args) => {
 
 module.exports.help = {
   name: 'embed',
+  aliases: ['message'],
+  needAdminRights: true,
 }

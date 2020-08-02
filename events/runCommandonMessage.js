@@ -17,6 +17,9 @@ module.exports.getCallback = client => async message => {
     client.commands.find(({ help }) => help.aliases && help.aliases.includes(commandName))
 
   if (command) {
+    if (command.help.needAdminRights && !message.guild.me.hasPermission('ADMINISTRATOR'))
+      return message.reply('Для этой команды мне необходимы права администратора...')
+
     const { isLeft, timeLeft } = getCooldown(command, message.author.id)
     if (!isLeft)
       return message.reply(

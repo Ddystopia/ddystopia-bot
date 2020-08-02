@@ -2,8 +2,8 @@ const { Guild } = require('../models/Guild')
 const { Loot } = require('../models/Loot')
 
 const defaultLoot = [
-  { loot: '🎟️', cost: 1e7 },
-  { loot: '🌑', cost: 5e6 },
+  { loot: '🎟️', cost: 5e6 },
+  { loot: '🌑', cost: 2e6 },
   { loot: '🧿', cost: 1e6 },
   { loot: '🎮', cost: 5e5 },
   { loot: '🛫', cost: 1e5 },

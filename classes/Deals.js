@@ -5,7 +5,7 @@ const latestCredits = new Map()
 module.exports.latestCredits = latestCredits
 
 class Deal {
-  constructor(sum, days, percent) {
+  constructor({ sum, days, percent }) {
     this.sum = (+sum * percent) / 100 + +sum
     this.deadline = Date.now() + days * 24 * 3600 * 1000
     this.percent = percent
@@ -13,10 +13,13 @@ class Deal {
 }
 
 class Deposit extends Deal {
-  constructor({ sum, days, percent, user }) {
-    super(sum, days, percent)
-    user.coins -= +sum
-    user.save()
+  constructor({ sum, days }) {
+    const percent = Math.max(
+      -((Math.E * 6) ** (sum / 1e4) - 55),
+      -(sum / 1e4 - 1) * 5 + 25,
+      15
+    )
+    super({ sum, days, percent })
   }
   async repay(sum, bankMember) {
     const user = await User.getOrCreate(bankMember.id, bankMember.guildId)
@@ -44,10 +47,10 @@ class Deposit extends Deal {
 }
 
 class Credit extends Deal {
-  constructor({ sum, days, percent, user }) {
-    super(sum, days, percent)
-    user.coins += +sum
-    user.save()
+  constructor({ sum, days }) {
+    const percent =
+      Math.min((Math.E ** 6) ** (days / 10) / 3, (days / 10 - 1) * 6.5 + 15, 20) / 2.75
+    super({ sum, days, percent })
   }
   async repay(sum, bankMember) {
     const user = await User.getOrCreate(bankMember.id, bankMember.guildId)
@@ -61,7 +64,8 @@ class Credit extends Deal {
     else user.coins -= +sum
 
     this.sum -= +sum
-    if (this.sum <= 0) bankMember.credit = null
+		if (this.sum <= 0) bankMember.credit = null
+		
     user.save()
     bankMember.markModified('credit')
     bankMember.save()
@@ -78,7 +82,8 @@ class Credit extends Deal {
       if (this.sum > 0) makeBankrupt(member, user)
 
       user.dailyLevel = 0
-      user.level = Math.max(0, user.level - 10)
+			user.level = Math.max(0, user.level - 10)
+			
       bankMember.credit = null
       bankMember.deposit = null
       bankMember.markModified('credit')
@@ -92,7 +97,8 @@ class Credit extends Deal {
       user.coins = 0
       bankMember.bankrupt = Date.now() + 20 * 24 * 3600 * 1000
       if (!member) return
-      member.roles.add(bankruptRole)
+			member.roles.add(bankruptRole)
+			
       const roles = await RoleForShop.find({ guildId: guild.id })
       for (const roleData of roles) {
         const role = member.guild.roles.cache.get(roleData.id)
