@@ -105,14 +105,18 @@ class ModerationCommands {
 }
 
 module.exports.run = async (message, args) => {
+  const { bankruptRole } = await Guild.getOrCreate(message.guild.id)
+  if (!bankruptRole)
+    return (
+      message.reply &&
+      message.reply(
+        'Попросите Администратора добавить банкротскую роль, без неё банк не работает'
+      )
+    )
+
   if (args === 'calcPercents') return ModerationCommands.calcPercents(message.guild.id) //inclusion
   if (args === 'closeDeals')
     return ModerationCommands.closeDeals(message.client, message.guild, bankruptRole) //inclusion
-  const { bankruptRole } = await Guild.getOrCreate(message.guild.id)
-  if (!bankruptRole)
-    return message.reply(
-      'Попросите Администратора добавить банкротскую роль, без неё банк не работает'
-    )
 
   const bankMember = await BankMember.getOrCreate(message.author.id, message.guild.id)
 
