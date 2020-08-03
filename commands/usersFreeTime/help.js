@@ -15,7 +15,6 @@ class EmbedInstance extends MessageEmbed {
 }
 
 const pages = [
-  { title: 'Введение', rows: [``] },
   {
     title: 'Команды профиля',
     rows: [
