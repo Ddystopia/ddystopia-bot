@@ -87,6 +87,11 @@ class ModerationCommands {
         break
       case 'bankrupt': {
         bankMember.bankrupt = null
+        Guild.findOne({ id: message.guild.id }).then(guildDB => {
+          guildDB.blacklist = guildDB.blacklist.filter(id => id !== bankMember.id)
+          guildDB.markModified('blacklist')
+          guildDB.save()
+        })
         const role = message.guild.roles.cache.get(bankruptRole)
         message.guild.member(user).roles.remove(role)
         break
