@@ -1,4 +1,4 @@
-const redditConfig = require('../redditConfig.json')
+const redditConfig = require('../../redditConfig.json')
 const { randomInteger } = require('./randomInteger')
 const { RandomReddit } = require('random-reddit')
 const generesControl = {

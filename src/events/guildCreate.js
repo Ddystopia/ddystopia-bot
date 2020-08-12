@@ -52,8 +52,8 @@ const defaultLoot = [
 
 module.exports.getCallback = client => async guild => {
   client.intervals.set(guild.id, [])
-	client.timeouts.set(guild.id, [])
-	
+  client.timeouts.set(guild.id, [])
+
   defaultLoot.forEach(lootRow => new Loot({ ...lootRow, guildId: guild.id }).save())
 
   guild.roles

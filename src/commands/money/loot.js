@@ -65,8 +65,8 @@ module.exports.run = async (message, args, command) => {
       const maxLootCost = Math.max(...allLoot.map(r => r.cost))
       let maxCost = 0
       if (percent === 100) maxCost = maxLootCost
-      else if (percent > 97) maxCost = .7 * maxLootCost
-      else if (percent > 93) maxCost = .2 * maxLootCost
+      else if (percent > 97) maxCost = 0.7 * maxLootCost
+      else if (percent > 93) maxCost = 0.2 * maxLootCost
       else if (percent > 70) maxCost = 2e4
       else maxCost = MAX_DAILY_LOOT_COST
 

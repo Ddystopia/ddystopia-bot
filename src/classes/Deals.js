@@ -64,8 +64,8 @@ class Credit extends Deal {
     else user.coins -= +sum
 
     this.sum -= +sum
-		if (this.sum <= 0) bankMember.credit = null
-		
+    if (this.sum <= 0) bankMember.credit = null
+
     user.save()
     bankMember.markModified('credit')
     bankMember.save()
@@ -82,8 +82,8 @@ class Credit extends Deal {
       if (this.sum > 0) makeBankrupt(member, user)
 
       user.dailyLevel = 0
-			user.level = Math.max(0, user.level - 10)
-			
+      user.level = Math.max(0, user.level - 10)
+
       bankMember.credit = null
       bankMember.deposit = null
       bankMember.markModified('credit')
@@ -97,8 +97,8 @@ class Credit extends Deal {
       user.coins = 0
       bankMember.bankrupt = Date.now() + 20 * 24 * 3600 * 1000
       if (!member) return
-			member.roles.add(bankruptRole)
-			
+      member.roles.add(bankruptRole)
+
       const roles = await RoleForShop.find({ guildId: guild.id })
       for (const roleData of roles) {
         const role = member.guild.roles.cache.get(roleData.id)
