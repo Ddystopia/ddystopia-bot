@@ -5,8 +5,9 @@ require('./utils/checkTemps.js').start()
 require('./utils/mongoose.js').init()
 
 const { Client, Collection } = require('discord.js')
-const { readdirSync, statSync, writeSync } = require('fs')
+const { readdirSync, writeSync } = require('fs')
 const { log } = require('./utils/log.js')
+const { resolve, join } = require('path')
 
 global.currency = '🌱' //если язык русский, то в родительском падеже(кого? чего?)
 const client = new Client()
@@ -14,9 +15,7 @@ client.commands = new Collection()
 client.intervals = new Collection()
 client.timeouts = new Collection()
 
-const getDirs = p => readdirSync(p).filter(f => statSync(`${p}${f}`).isDirectory())
-
-readdirSync('./events/')
+readdirSync(resolve(__dirname, './events/'))
   .filter(f => f.endsWith('.js'))
   .forEach((f, i, jsFiles) => {
     const { getCallback, event } = require(`./events/${f}`)
@@ -26,8 +25,10 @@ readdirSync('./events/')
       console.log(`${jsFiles.length} event listeners have been loaded`)
   })
 
-getDirs('./commands/').forEach(dir => {
-  const jsFiles = readdirSync(`./commands/${dir}`).filter(f => f.endsWith('.js'))
+readdirSync(resolve(__dirname, './commands/')).forEach(dir => {
+  const jsFiles = readdirSync(join(__dirname, './commands/', dir)).filter(f =>
+    f.endsWith('.js')
+  )
   jsFiles.forEach((f, i) => {
     const props = require(`./commands/${dir}/${f}`)
     if (props.help.aliases)
