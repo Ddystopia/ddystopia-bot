@@ -1,5 +1,5 @@
 /node_modules
 *.db
 *.log
-# .env
-# redditConfig.json
+.env
+redditConfig.json
