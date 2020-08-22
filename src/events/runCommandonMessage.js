@@ -10,7 +10,7 @@ module.exports.getCallback = client => async message => {
   if (guildDB.noCommandsChannels.includes(message.channel.id)) return // do not listening commands from banned channels
   if (!message.content.startsWith(guildDB.prefix)) return // filter simple text
   if (guildDB.blacklist.includes(message.author.id) || message.author.bot) return
-  const args = message.content.split(/\s+/g)
+  const args = message.content.split(/ +/g)
   const commandName = args.shift().toLowerCase().slice(guildDB.prefix.length)
   const command =
     client.commands.get(commandName) ||
@@ -32,11 +32,11 @@ module.exports.getCallback = client => async message => {
 
 module.exports.event = 'message'
 
-const getCooldown = (command, userId) => {
-  if (!cooldowns.has(command.name)) cooldowns.set(command.name, new Collection())
+const getCooldown = ({ help }, userId) => {
+  if (!cooldowns.has(help.name)) cooldowns.set(help.name, new Collection())
   const now = Date.now()
-  const timestamps = cooldowns.get(command.name)
-  const cooldownAmount = (command.help.cooldown || 1) * 1000
+  const timestamps = cooldowns.get(help.name)
+  const cooldownAmount = (help.cooldown || 1) * 1000
 
   if (!timestamps.has(userId)) timestamps.set(userId, now - cooldownAmount)
 
