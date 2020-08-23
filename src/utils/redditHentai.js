@@ -1,4 +1,10 @@
-const redditConfig = require('../../redditConfig.json')
+const redditConfig = {
+  username: process.env.REDDIT_USERNAME,
+  password: process.env.REDDIT_PASSWORD,
+  app_id: process.env.REDDIT_APP_ID,
+  api_secret: process.env.REDDIT_API_SECRET,
+  logs: false
+}
 const { randomInteger } = require('./randomInteger')
 const { RandomReddit } = require('random-reddit')
 const generesControl = {

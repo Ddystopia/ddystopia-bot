@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  ddystopia-bot:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
+    env_file: ./.env
+    environment:
+      - FROM_DOCKER_COMPOSE=true

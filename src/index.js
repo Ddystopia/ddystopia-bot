@@ -1,6 +1,4 @@
-require('./utils/checkConfigs.js').checkAndExit()
-
-require('dotenv').config()
+if (!process.env.FROM_DOCKER_COMPOSE) require('dotenv').config()
 require('./utils/checkTemps.js').start()
 require('./utils/mongoose.js').init()
 
