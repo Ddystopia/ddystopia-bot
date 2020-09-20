@@ -71,18 +71,6 @@ module.exports.getCallback = client => async guild => {
       guildDB.bankruptRole = id
       guildDB.save()
     })
-
-  guild.members.cache
-    .filter(m => m.hasPermission('ADMINISTRATOR'))
-    .forEach(m => {
-      m.user
-        .send(
-          `Здравствуйте! Извините, что беспокою, но не могли бы вы ознакомится с тем, как настроить меня для вашего чудесного сервера?
-Сделать вы это можете, введя команду help у себя на сервере и пролистав до последней страницы. Обычно, мой префикс "${process.env.PREFIX}", но вы можете его поменять в любую минуту!
-Спасибо вам, что пригласили меня на ваш сервер.`
-        )
-        .catch(() => {})
-    })
 }
 
 module.exports.event = 'guildCreate'
